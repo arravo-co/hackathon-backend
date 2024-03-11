@@ -1,0 +1,24 @@
+basePath: /api
+host: localhost:5000
+info:
+  contact:
+    email: appdev@arravo.co
+    name: API Support
+  description: This is the documentation website for all Arravo hackathons
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Hackathons API
+  version: "1.0"
+paths:
+  /participants:
+    post:
+      description: Update participant's information
+      produces:
+      - application/json
+      responses: {}
+      summary: Update participant's information
+      tags:
+      - Participants
+swagger: "2.0"
