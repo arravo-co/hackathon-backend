@@ -32,6 +32,7 @@ func StartAllRoutes(e *echo.Echo) {
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPost, http.MethodPut, http.MethodDelete},
 	}))
 
-	participantsRoutes = e.Group("/participants")
-	participantsRoutes.POST("/", RegisterParticipant)
+	api := e.Group("/api")
+	participantsRoutes = api.Group("/participants")
+	participantsRoutes.POST("", RegisterParticipant)
 }

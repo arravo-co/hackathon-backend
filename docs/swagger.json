@@ -18,7 +18,7 @@
     "basePath": "/api",
     "paths": {
         "/participants": {
-            "post": {
+            "put": {
                 "description": "Update participant's information",
                 "produces": [
                     "application/json"
@@ -28,6 +28,86 @@
                 ],
                 "summary": "Update participant's information",
                 "responses": {}
+            },
+            "post": {
+                "description": "Register new participant",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participants"
+                ],
+                "summary": "Register new participant",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/routes.RegisterParticipantSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/routes.RegisterParticipantFailResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "data.CreateParticipantAccountData": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "githubAddress": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "linkedInAddress": {
+                    "type": "string"
+                },
+                "passwordHash": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.RegisterParticipantFailResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.RegisterParticipantSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/data.CreateParticipantAccountData"
+                },
+                "message": {
+                    "type": "string"
+                }
             }
         }
     }

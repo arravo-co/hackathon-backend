@@ -1,4 +1,40 @@
 basePath: /api
+definitions:
+  data.CreateParticipantAccountData:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      githubAddress:
+        type: string
+      lastName:
+        type: string
+      linkedInAddress:
+        type: string
+      passwordHash:
+        type: string
+      state:
+        type: string
+    type: object
+  routes.RegisterParticipantFailResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  routes.RegisterParticipantSuccessResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/data.CreateParticipantAccountData'
+      message:
+        type: string
+    type: object
 host: localhost:5000
 info:
   contact:
@@ -14,6 +50,22 @@ info:
 paths:
   /participants:
     post:
+      description: Register new participant
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/routes.RegisterParticipantSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/routes.RegisterParticipantFailResponse'
+      summary: Register new participant
+      tags:
+      - Participants
+    put:
       description: Update participant's information
       produces:
       - application/json
