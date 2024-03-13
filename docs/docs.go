@@ -9,32 +9,39 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "email": "appdev@arravo.co"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/participants": {
-            "put": {
-                "description": "Update participant's information",
+        "/api/auth/login": {
+            "post": {
+                "description": "Log a user in",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Participants"
+                    "Auth"
                 ],
-                "summary": "Update participant's information",
-                "responses": {}
-            },
+                "summary": "Log a user in",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.BasicLoginSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/routes.BasicLoginFailureResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/participants": {
             "post": {
                 "description": "Register new participant",
                 "produces": [
@@ -58,6 +65,19 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/participants": {
+            "put": {
+                "description": "Update participant's information",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participants"
+                ],
+                "summary": "Update participant's information",
+                "responses": {}
             }
         }
     },
@@ -87,6 +107,39 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.BasicLoginFailureResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.BasicLoginSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/routes.BasicLoginSuccessResponseData"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.BasicLoginSuccessResponseData": {
+            "type": "object",
+            "properties": {
+                "access_token": {
                     "type": "string"
                 }
             }
@@ -121,12 +174,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:5000",
-	BasePath:         "/api",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Hackathons API",
-	Description:      "This is the documentation website for all Arravo hackathons",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

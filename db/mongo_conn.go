@@ -21,7 +21,7 @@ func init() {
 }
 
 func GetMongoConn() (*mongo.Client, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	clientOpts := options.Client().ApplyURI(
 		"mongodb://localhost:27017")

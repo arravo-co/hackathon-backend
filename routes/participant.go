@@ -25,7 +25,7 @@ type RegisterParticipantFailResponse struct {
 // @Produce		json
 // @Success		201							{object}	RegisterParticipantSuccessResponse
 // @Failure		400	                        {object}	RegisterParticipantFailResponse
-// @Router		/participants               [post]
+// @Router		/api/participants               [post]
 func RegisterParticipant(c echo.Context) error {
 	data := dtos.RegisterNewParticipantDTO{}
 	err := c.Bind(&data)

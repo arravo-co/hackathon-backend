@@ -9,9 +9,16 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "github.com/arravoco/hackathon_backend/docs"
+	othermiddleware "github.com/arravoco/hackathon_backend/other_middleware"
 )
 
+type ResponseData struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 var participantsRoutes *echo.Group
+var authRoutes *echo.Group
 var validate *validator.Validate
 
 // @title			Hackathons API
@@ -33,6 +40,12 @@ func StartAllRoutes(e *echo.Echo) {
 	}))
 
 	api := e.Group("/api")
-	participantsRoutes = api.Group("/participants")
+	setupAuthRoutes(api)
+	participantsRoutes = api.Group("/participants", othermiddleware.Auth())
 	participantsRoutes.POST("", RegisterParticipant)
+}
+
+func setupAuthRoutes(api *echo.Group) {
+	authRoutes = api.Group("/auth")
+	authRoutes.POST("/login", BasicLogin)
 }

@@ -19,6 +19,7 @@ type AccountDocument struct {
 	LinkedInAddress string `bson:"linkedIn_address"`
 	GithubAddress   string `bson:"github_address"`
 	State           string `bson:"state"`
+	Role            string `bson:"role"`
 }
 
 type CreateParticipantAccountData struct {

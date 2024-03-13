@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,7 +19,8 @@ func GenerateHashPassword(password string) (string, error) {
 func ComparePasswordAndHash(password, passwordHash string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))
 	if err != nil {
-		return false, err
+		fmt.Printf("%v\n", err)
+		return false, errors.New("authentication failed with identifier/password mismatch")
 	}
 	return true, nil
 }
