@@ -58,3 +58,14 @@ func SendWelcomeEmail(data *SendWelcomeEmailData) {
 		Subject: data.Subject,
 	})
 }
+
+func SendEmailVerificationEmail(data *SendWelcomeEmailData) {
+	body := &hermes.Body{
+		Name: strings.Join([]string{data.LastName, data.FirstName}, " "),
+	}
+	SendEmail(&SendEmailData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+}

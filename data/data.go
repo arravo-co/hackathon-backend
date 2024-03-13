@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/events"
@@ -11,6 +12,7 @@ import (
 )
 
 type AccountDocument struct {
+	Id              string `bson:"_id"`
 	Email           string `bson:"email"`
 	PasswordHash    string `bson:"password_hash"`
 	FirstName       string `bson:"first_name"`
@@ -31,6 +33,23 @@ type CreateParticipantAccountData struct {
 	LinkedInAddress string `bson:"linkedIn_address"`
 	GithubAddress   string `bson:"github_address"`
 	State           string `bson:"state"`
+}
+
+type TokenData struct {
+	Id             string    `bson:"_id"`
+	Token          string    `bson:"token"`
+	TokenType      string    `bson:"token_type"`
+	TokenTypeValue string    `bson:"token_type_value"`
+	TTL            time.Time `bson:"ttl"`
+	Status         string    `bson:"status"`
+}
+
+type CreateTokenData struct {
+	Token          string    `bson:"token"`
+	TokenType      string    `bson:"token_type"`
+	TokenTypeValue string    `bson:"token_type_value"`
+	TTL            time.Time `bson:"ttl"`
+	Status         string    `bson:"status"`
 }
 
 func GetParticipantByEmail(email string) (*AccountDocument, error) {
@@ -69,4 +88,23 @@ func CreateParticipantAccount(dataToSave *CreateParticipantAccountData) (*Create
 		EventData:        eventsdtos.EventData{EventName: "ParticipantAccountCreated"},
 	})
 	return dataToSave, err
+}
+
+func CreateToken(dataInput *CreateTokenData) (*TokenData, error) {
+	tokenCol, err := db.GetTokenCollection()
+	if err != nil {
+		return nil, err
+	}
+	result, err := tokenCol.InsertOne(context.TODO(), dataInput)
+	if err != nil {
+		return nil, err
+	}
+	tokenInfo := &TokenData{
+		Id:             result.InsertedID.(string),
+		Token:          dataInput.Token,
+		TokenType:      dataInput.TokenType,
+		TokenTypeValue: dataInput.TokenTypeValue,
+		TTL:            dataInput.TTL,
+	}
+	return tokenInfo, err
 }

@@ -39,6 +39,7 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.6 // indirect
+	github.com/jaevor/go-nanoid v1.3.0 // indirect
 	github.com/jaytaylor/html2text v0.0.0-20180606194806-57d518f124b0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect

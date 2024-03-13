@@ -66,3 +66,27 @@ func BasicLogin(c echo.Context) error {
 		},
 	})
 }
+
+type InitiateEmailVerificationFailureResponse struct {
+	ResponseData
+}
+type InitiateEmailVerificationSuccessResponse struct {
+	ResponseData
+	Data BasicLoginSuccessResponseData `json:"data"`
+}
+
+type InitiateEmailVerificationSuccessResponseData struct {
+	AccessToken string `json:"access_token"`
+}
+
+func InitiateEmailVerification(c echo.Context) error {
+	emailToVerify := c.QueryParam("email")
+	if emailToVerify == "" {
+		c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: "'email' query parameter is required",
+			},
+		})
+	}
+}

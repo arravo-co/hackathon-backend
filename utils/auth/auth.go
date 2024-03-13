@@ -11,6 +11,7 @@ import (
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jaevor/go-nanoid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
@@ -101,4 +102,22 @@ func GetJWTConfig() echojwt.Config {
 		SigningKey: []byte(config.GetSecretKey()),
 	}
 	return config
+}
+
+func InitiateEmailVerification(email string) (interface{}, error) {
+	_, err := data.GetParticipantByEmail(email)
+	if err != nil {
+		return nil, errors.New("email not found in record")
+	}
+	tokenFunc, _ := nanoid.Custom("1234567890", 6)
+	token := tokenFunc()
+	ttl := time.Now().Add(time.Minute * 15)
+	tokenData, err := data.CreateToken(&data.CreateTokenData{
+		Token:          token,
+		TokenType:      "EMAIL",
+		TokenTypeValue: email,
+		TTL:            ttl,
+		Status:         "PENDING",
+	})
+	return tokenData, err
 }
