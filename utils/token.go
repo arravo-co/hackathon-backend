@@ -1,5 +1,1 @@
 package utils
-
-func GenerateEmailVerificationToken() {
-
-}

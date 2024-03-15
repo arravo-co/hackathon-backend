@@ -39,6 +39,27 @@ definitions:
       access_token:
         type: string
     type: object
+  routes.InitiateEmailVerificationFailureResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  routes.InitiateEmailVerificationSuccessResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/routes.InitiateEmailVerificationSuccessResponseData'
+      message:
+        type: string
+    type: object
+  routes.InitiateEmailVerificationSuccessResponseData:
+    properties:
+      email:
+        type: string
+    type: object
   routes.RegisterParticipantFailResponse:
     properties:
       code:
@@ -75,6 +96,39 @@ paths:
       summary: Log a user in
       tags:
       - Auth
+  /api/auth/verification/email/initiation:
+    get:
+      consumes:
+      - application/json
+      description: Verify user email address
+      parameters:
+      - description: Email to verify
+        format: email
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.InitiateEmailVerificationSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/routes.InitiateEmailVerificationFailureResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/routes.InitiateEmailVerificationFailureResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/routes.InitiateEmailVerificationFailureResponse'
+      summary: Verify user email address
+      tags:
+      - auth
   /api/participants:
     post:
       description: Register new participant

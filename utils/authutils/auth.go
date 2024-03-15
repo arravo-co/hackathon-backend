@@ -1,4 +1,4 @@
-package auth
+package authutils
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/utils"
+	"github.com/arravoco/hackathon_backend/utils/email"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jaevor/go-nanoid"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -104,20 +105,72 @@ func GetJWTConfig() echojwt.Config {
 	return config
 }
 
-func InitiateEmailVerification(email string) (interface{}, error) {
-	_, err := data.GetParticipantByEmail(email)
+type ConfigTokenData struct {
+	Email string
+	TTL   time.Time
+}
+
+type VerifyTokenData struct {
+	Email string
+	Token string
+}
+
+func InitiateEmailVerification(dataInput *ConfigTokenData) error {
+	_, err := data.GetParticipantByEmail(dataInput.Email)
 	if err != nil {
-		return nil, errors.New("email not found in record")
+		return errors.New("email not found in record")
 	}
 	tokenFunc, _ := nanoid.Custom("1234567890", 6)
 	token := tokenFunc()
-	ttl := time.Now().Add(time.Minute * 15)
 	tokenData, err := data.CreateToken(&data.CreateTokenData{
 		Token:          token,
 		TokenType:      "EMAIL",
-		TokenTypeValue: email,
-		TTL:            ttl,
+		TokenTypeValue: dataInput.Email,
+		TTL:            dataInput.TTL,
 		Status:         "PENDING",
 	})
-	return tokenData, err
+	if err != nil {
+		utils.MySugarLogger.Error(err)
+		return errors.New("failed to generate token: ")
+	}
+	email.SendEmailVerificationEmail(&email.SendEmailVerificationEmailData{
+		Email:    dataInput.Email,
+		Token:    tokenData.Token,
+		TokenTTL: dataInput.TTL,
+		Subject:  "Email Verification",
+	})
+	return nil
+}
+
+func CompleteEmailVerification(dataInput *VerifyTokenData) error {
+	_, err := data.GetParticipantByEmail(dataInput.Email)
+	if err != nil {
+		return errors.New("email not found in record")
+	}
+	tokenFunc, _ := nanoid.Custom("1234567890", 6)
+	token := tokenFunc()
+	isVerified, err := data.VerifyToken(&data.VerifyTokenData{
+		Token:          token,
+		TokenType:      "EMAIL",
+		TokenTypeValue: dataInput.Email,
+	})
+	if isVerified == false {
+		utils.MySugarLogger.Error(err)
+		err := errors.New("unable to verify token")
+		return err
+	}
+	_, err = data.UpdateParticipantInfoByEmail(&data.UpdateAccountFilter{}, &data.UpdateAccountDocument{
+		IsEmailVerified:   true,
+		IsEmailVerifiedAt: time.Now(),
+	})
+	if err != nil {
+		utils.MySugarLogger.Error(err)
+		return errors.New("unable to complete token verification")
+	}
+
+	email.SendEmailVerificationEmail(&email.SendEmailVerificationEmailData{
+		Email:   dataInput.Email,
+		Subject: "Email Verification Success",
+	})
+	return nil
 }

@@ -30,6 +30,56 @@
                 }
             }
         },
+        "/api/auth/verification/email/initiation": {
+            "get": {
+                "description": "Verify user email address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify user email address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Email to verify",
+                        "name": "email",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.InitiateEmailVerificationSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/routes.InitiateEmailVerificationFailureResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/routes.InitiateEmailVerificationFailureResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/routes.InitiateEmailVerificationFailureResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/participants": {
             "post": {
                 "description": "Register new participant",
@@ -129,6 +179,39 @@
             "type": "object",
             "properties": {
                 "access_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.InitiateEmailVerificationFailureResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.InitiateEmailVerificationSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/routes.InitiateEmailVerificationSuccessResponseData"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.InitiateEmailVerificationSuccessResponseData": {
+            "type": "object",
+            "properties": {
+                "email": {
                     "type": "string"
                 }
             }

@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,16 +13,36 @@ import (
 )
 
 type AccountDocument struct {
-	Id              string `bson:"_id"`
-	Email           string `bson:"email"`
-	PasswordHash    string `bson:"password_hash"`
-	FirstName       string `bson:"first_name"`
-	LastName        string `bson:"last_name"`
-	Gender          string `bson:"gender"`
-	LinkedInAddress string `bson:"linkedIn_address"`
-	GithubAddress   string `bson:"github_address"`
-	State           string `bson:"state"`
-	Role            string `bson:"role"`
+	Id                string    `bson:"_id"`
+	Email             string    `bson:"email"`
+	PasswordHash      string    `bson:"password_hash"`
+	PhoneNumber       string    `bson:"phone_number"`
+	FirstName         string    `bson:"first_name"`
+	LastName          string    `bson:"last_name"`
+	Gender            string    `bson:"gender"`
+	LinkedInAddress   string    `bson:"linkedIn_address"`
+	GithubAddress     string    `bson:"github_address"`
+	State             string    `bson:"state"`
+	Role              string    `bson:"role"`
+	IsEmailVerified   bool      `bson:"is_email_verified"`
+	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at"`
+}
+
+type UpdateAccountFilter struct {
+	Email       string `bson:"email"`
+	PhoneNumber string `bson:"phone_number"`
+}
+
+type UpdateAccountDocument struct {
+	FirstName         string    `bson:"first_name"`
+	LastName          string    `bson:"last_name"`
+	Gender            string    `bson:"gender"`
+	LinkedInAddress   string    `bson:"linkedIn_address"`
+	GithubAddress     string    `bson:"github_address"`
+	State             string    `bson:"state"`
+	Role              string    `bson:"role"`
+	IsEmailVerified   bool      `bson:"is_email_verified"`
+	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at"`
 }
 
 type CreateParticipantAccountData struct {
@@ -36,12 +57,12 @@ type CreateParticipantAccountData struct {
 }
 
 type TokenData struct {
-	Id             string    `bson:"_id"`
-	Token          string    `bson:"token"`
-	TokenType      string    `bson:"token_type"`
-	TokenTypeValue string    `bson:"token_type_value"`
-	TTL            time.Time `bson:"ttl"`
-	Status         string    `bson:"status"`
+	Id             interface{} `bson:"_id"`
+	Token          string      `bson:"token"`
+	TokenType      string      `bson:"token_type"`
+	TokenTypeValue string      `bson:"token_type_value"`
+	TTL            time.Time   `bson:"ttl"`
+	Status         string      `bson:"status"`
 }
 
 type CreateTokenData struct {
@@ -50,6 +71,12 @@ type CreateTokenData struct {
 	TokenTypeValue string    `bson:"token_type_value"`
 	TTL            time.Time `bson:"ttl"`
 	Status         string    `bson:"status"`
+}
+
+type VerifyTokenData struct {
+	Token          string `bson:"token"`
+	TokenType      string `bson:"token_type"`
+	TokenTypeValue string `bson:"token_type_value"`
 }
 
 func GetParticipantByEmail(email string) (*AccountDocument, error) {
@@ -100,11 +127,47 @@ func CreateToken(dataInput *CreateTokenData) (*TokenData, error) {
 		return nil, err
 	}
 	tokenInfo := &TokenData{
-		Id:             result.InsertedID.(string),
+		Id:             result.InsertedID,
 		Token:          dataInput.Token,
 		TokenType:      dataInput.TokenType,
 		TokenTypeValue: dataInput.TokenTypeValue,
 		TTL:            dataInput.TTL,
 	}
 	return tokenInfo, err
+}
+
+func VerifyToken(dataInput *VerifyTokenData) (bool, error) {
+	var tokenInfo TokenData
+	tokenCol, err := db.GetTokenCollection()
+	if err != nil {
+		return false, err
+	}
+	result := tokenCol.FindOne(context.TODO(), dataInput)
+	err = result.Decode(&tokenInfo)
+	if err != nil {
+		return false, err
+	}
+	if tokenInfo.Token != "" {
+		return false, errors.New("token does not exist")
+	}
+	if tokenInfo.TTL.Before(time.Now()) {
+		return false, errors.New("token has expired")
+	}
+	if tokenInfo.Status == "VERIFIED" {
+		return false, errors.New("token has been used for verification of this entity in the past.")
+	}
+
+	return true, err
+}
+
+func UpdateParticipantInfoByEmail(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error) {
+	accountCol, err := db.GetAccountCollection()
+	accountDoc := AccountDocument{}
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	result := accountCol.FindOneAndUpdate(ctx, filter, &dataInput)
+	err = result.Decode(&accountDoc)
+	return &accountDoc, err
 }

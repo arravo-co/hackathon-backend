@@ -3,16 +3,18 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/utils"
-	"github.com/arravoco/hackathon_backend/utils/auth"
+	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/labstack/echo/v4"
 )
 
 type BasicLoginFailureResponse struct {
 	ResponseData
 }
+
 type BasicLoginSuccessResponse struct {
 	ResponseData
 	Data BasicLoginSuccessResponseData `json:"data"`
@@ -43,7 +45,7 @@ func BasicLogin(c echo.Context) error {
 		})
 	}
 
-	dataResponse, err := auth.BasicLogin(&auth.BasicLoginData{
+	dataResponse, err := authutils.BasicLogin(&authutils.BasicLoginData{
 		Identifier: data.Identifier,
 		Password:   data.Password,
 	})
@@ -72,21 +74,52 @@ type InitiateEmailVerificationFailureResponse struct {
 }
 type InitiateEmailVerificationSuccessResponse struct {
 	ResponseData
-	Data BasicLoginSuccessResponseData `json:"data"`
+	Data *InitiateEmailVerificationSuccessResponseData `json:"data"`
 }
 
 type InitiateEmailVerificationSuccessResponseData struct {
-	AccessToken string `json:"access_token"`
+	Email string `json:"email"`
 }
 
+// @Summary      Verify user email address
+// @Description  Verify user email address
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        email     query     string  false  "Email to verify"  Format(email)
+// @Success      200  	   {object}  InitiateEmailVerificationSuccessResponse
+// @Failure      400       {object}  InitiateEmailVerificationFailureResponse
+// @Failure      404       {object}  InitiateEmailVerificationFailureResponse
+// @Failure      500       {object}  InitiateEmailVerificationFailureResponse
+// @Router       /api/auth/verification/email/initiation [get]
 func InitiateEmailVerification(c echo.Context) error {
 	emailToVerify := c.QueryParam("email")
 	if emailToVerify == "" {
-		c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
+		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
 			ResponseData{
 				Code:    http.StatusBadRequest,
 				Message: "'email' query parameter is required",
 			},
 		})
 	}
+
+	ttl := time.Now().Add(time.Minute * 15)
+	err := authutils.InitiateEmailVerification(&authutils.ConfigTokenData{
+		TTL:   ttl,
+		Email: emailToVerify,
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
+		ResponseData{
+			Code:    200,
+			Message: "Verification email sent successfully",
+		}, &InitiateEmailVerificationSuccessResponseData{},
+	})
 }

@@ -48,4 +48,5 @@ func StartAllRoutes(e *echo.Echo) {
 func setupAuthRoutes(api *echo.Group) {
 	authRoutes = api.Group("/auth")
 	authRoutes.POST("/login", BasicLogin)
+	authRoutes.GET("/verification/email/initiation", InitiateEmailVerification)
 }
