@@ -19,8 +19,8 @@ type AuthUserInfoUpdateDTO struct {
 	FirstName string `validate:"min=2,omitempty" json:"first_name"`
 	LastName  string `validate:"min=2,omitempty" json:"last_name"`
 	Email     string `validate:"email,omitempty" json:"email"`
-	Gender    string `validate:"oneof=MALE FEMALE" json:"gender"`
-	State     string `json:"state"`
+	Gender    string `validate:"oneof=MALE FEMALE,omitempty" json:"gender"`
+	State     string `json:"state,omitempty"`
 }
 
 type AuthParticipantInfoUpdateDTO struct {

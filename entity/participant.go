@@ -60,7 +60,26 @@ func (p *Participant) GetParticipant(input string) error {
 	return err
 }
 
+func (p *Participant) ReconcileParticipantInfo(dataInput *data.AccountDocument) error {
+	_, err := data.UpdateParticipantInfoByEmail(&data.UpdateAccountFilter{Email: p.Email}, &data.UpdateAccountDocument{
+		FirstName:       dataInput.FirstName,
+		LastName:        dataInput.LastName,
+		Gender:          dataInput.Gender,
+		State:           dataInput.State,
+		GithubAddress:   dataInput.GithubAddress,
+		LinkedInAddress: dataInput.LinkedInAddress,
+	})
+	return err
+}
+
 func (p *Participant) UpdateParticipantInfo(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
-	data.UpdateParticipantInfoByEmail(&data.UpdateAccountFilter{Email: p.Email}, &data.UpdateAccountDocument{})
-	return nil
+	_, err := data.UpdateParticipantInfoByEmail(&data.UpdateAccountFilter{Email: p.Email}, &data.UpdateAccountDocument{
+		FirstName:       dataInput.FirstName,
+		LastName:        dataInput.LastName,
+		Gender:          dataInput.Gender,
+		State:           dataInput.State,
+		GithubAddress:   dataInput.GithubAddress,
+		LinkedInAddress: dataInput.LinkedInAddress,
+	})
+	return err
 }
