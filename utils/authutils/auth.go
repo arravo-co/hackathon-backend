@@ -116,7 +116,7 @@ type VerifyTokenData struct {
 }
 
 func InitiateEmailVerification(dataInput *ConfigTokenData) error {
-	_, err := data.GetParticipantByEmail(dataInput.Email)
+	_, err := data.GetAccountByEmail(dataInput.Email)
 	if err != nil {
 		return errors.New("email not found in record")
 	}
@@ -143,23 +143,22 @@ func InitiateEmailVerification(dataInput *ConfigTokenData) error {
 }
 
 func CompleteEmailVerification(dataInput *VerifyTokenData) error {
-	_, err := data.GetParticipantByEmail(dataInput.Email)
+	_, err := data.GetAccountByEmail(dataInput.Email)
 	if err != nil {
 		return errors.New("email not found in record")
 	}
-	tokenFunc, _ := nanoid.Custom("1234567890", 6)
-	token := tokenFunc()
 	isVerified, err := data.VerifyToken(&data.VerifyTokenData{
-		Token:          token,
+		Token:          dataInput.Token,
 		TokenType:      "EMAIL",
 		TokenTypeValue: dataInput.Email,
 	})
-	if isVerified == false {
+	if !isVerified {
 		utils.MySugarLogger.Error(err)
-		err := errors.New("unable to verify token")
 		return err
 	}
-	_, err = data.UpdateParticipantInfoByEmail(&data.UpdateAccountFilter{}, &data.UpdateAccountDocument{
+	_, err = data.UpdateParticipantInfoByEmail(&data.UpdateAccountFilter{
+		Email: dataInput.Email,
+	}, &data.UpdateAccountDocument{
 		IsEmailVerified:   true,
 		IsEmailVerifiedAt: time.Now(),
 	})
@@ -168,9 +167,34 @@ func CompleteEmailVerification(dataInput *VerifyTokenData) error {
 		return errors.New("unable to complete token verification")
 	}
 
-	email.SendEmailVerificationEmail(&email.SendEmailVerificationEmailData{
+	email.SendEmailVerificationCompleteEmail(&email.SendEmailVerificationCompleteEmailData{
 		Email:   dataInput.Email,
 		Subject: "Email Verification Success",
 	})
+	return nil
+}
+
+type ChangePasswordData struct {
+	Email       string
+	OldPassword string
+	NewPassword string
+}
+
+func ChangePassword(dataInput *ChangePasswordData) error {
+	accountDoc, err := data.GetAccountByEmail(dataInput.Email)
+	if err != nil {
+		return errors.New("user info not found in record")
+	}
+	_, err = utils.ComparePasswordAndHash(dataInput.OldPassword, accountDoc.PasswordHash)
+	if err != nil {
+		return err
+	}
+	hash, err := utils.GenerateHashPassword(dataInput.NewPassword)
+	if err != nil {
+		return err
+	}
+	accountDoc, err = data.UpdatePasswordByEmail(&data.UpdateAccountFilter{Email: dataInput.Email}, hash)
+
+	// emit an emit here
 	return nil
 }

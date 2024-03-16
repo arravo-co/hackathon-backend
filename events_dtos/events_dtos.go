@@ -10,4 +10,13 @@ type ParticipantAccountCreatedEventData struct {
 	ParticipantEmail string
 }
 
-type ParticipantAccountCreatedEventHandler func(*ParticipantAccountCreatedEventData)
+type ParticipantAccountCreatedEventHandler func(data *ParticipantAccountCreatedEventData, otherParams ...interface{})
+
+type JudgeAccountCreatedEventData struct {
+	EventData
+	FirstName  string
+	LastName   string
+	JudgeEmail string
+}
+
+type JudgeAccountCreatedEventHandler func(*JudgeAccountCreatedEventData)

@@ -9,45 +9,45 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type RegisterParticipantSuccessResponse struct {
-	Code    int                               `json:"code"`
-	Message string                            `json:"message"`
-	Data    data.CreateParticipantAccountData `data:"data"`
+type RegisterJudgeSuccessResponse struct {
+	Code    int                         `json:"code"`
+	Message string                      `json:"message"`
+	Data    data.CreateJudgeAccountData `data:"data"`
 }
-type RegisterParticipantFailResponse struct {
+type RegisterJudgeFailResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
 // @Description	Register new participant
 // @Summary		Register new participant
-// @Tags			Participants
+// @Tags			Judges
 // @Produce		json
 // @Success		201	{object}	RegisterParticipantSuccessResponse
 // @Failure		400	{object}	RegisterParticipantFailResponse
-// @Router			/api/participants               [post]
-func RegisterParticipant(c echo.Context) error {
-	data := dtos.RegisterNewParticipantDTO{}
+// @Router			/api/judges               [post]
+func RegisterJudge(c echo.Context) error {
+	data := dtos.RegisterNewJudgeDTO{}
 	err := c.Bind(&data)
 	if err != nil {
 		return err
 	}
-	newParticipant := entity.Participant{}
+	newJudge := entity.Judge{}
 	err = validate.Struct(data)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
+		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
 			Code:    echo.ErrBadRequest.Code,
 			Message: err.Error(),
 		})
 	}
-	responseData, err := newParticipant.Register(data)
+	responseData, err := newJudge.Register(data)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
+		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
 			Code:    echo.ErrBadRequest.Code,
 			Message: err.Error(),
 		})
 	}
-	return c.JSON(http.StatusCreated, &RegisterParticipantSuccessResponse{
+	return c.JSON(http.StatusCreated, &RegisterJudgeSuccessResponse{
 		Code: http.StatusCreated,
 		Data: *responseData,
 	})

@@ -7,15 +7,15 @@ import (
 )
 
 type Participant struct {
-	FirstName       string
-	LastName        string
-	Email           string
-	PasswordHash    string
-	Gender          string
-	State           string
-	GithubAddress   string
-	LinkedInAddress string
-	Role            string
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	Email           string `json:"email"`
+	passwordHash    string
+	Gender          string `json:"gender"`
+	State           string `json:"state"`
+	GithubAddress   string `json:"github_address"`
+	LinkedInAddress string `json:"linkedIn_address"`
+	Role            string `json:"role"`
 }
 
 func (p *Participant) Register(input dtos.RegisterNewParticipantDTO) (*data.CreateParticipantAccountData, error) {
@@ -23,18 +23,44 @@ func (p *Participant) Register(input dtos.RegisterNewParticipantDTO) (*data.Crea
 	if err != nil {
 		return nil, err
 	}
-	dataInput := &data.CreateParticipantAccountData{
-		Email:           input.Email,
-		PasswordHash:    passwordHash,
-		FirstName:       input.FirstName,
-		LastName:        input.LastName,
-		Gender:          input.Gender,
-		GithubAddress:   input.GithubAddress,
-		LinkedInAddress: input.LinkedInAddress,
-		State:           input.State,
-	}
+	dataInput := &data.CreateParticipantAccountData{}
+	dataInput.CreateUserAccountData =
+		data.CreateUserAccountData{
+			Email:        input.Email,
+			PasswordHash: passwordHash,
+			FirstName:    input.FirstName,
+			LastName:     input.LastName,
+			Gender:       input.Gender,
+			State:        input.State, Role: "PARTICIPANT"}
+	dataInput.GithubAddress = input.GithubAddress
+	dataInput.LinkedInAddress = input.LinkedInAddress
 	dataResponse, err := data.CreateParticipantAccount(dataInput)
 	// emit created event
 
 	return dataResponse, err
+}
+
+func (p *Participant) GetParticipant(input string) error {
+	accountData, err := data.GetAccountByEmail(input)
+	if err != nil {
+		return err
+	}
+
+	p.Email = accountData.Email
+	p.passwordHash = accountData.PasswordHash
+	p.FirstName = accountData.FirstName
+	p.LastName = accountData.LastName
+	p.Gender = accountData.Gender
+	p.State = accountData.State
+	p.Role = accountData.Role
+	p.GithubAddress = accountData.GithubAddress
+	p.LinkedInAddress = accountData.LinkedInAddress
+	// emit created event
+
+	return err
+}
+
+func (p *Participant) UpdateParticipantInfo(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
+	data.UpdateParticipantInfoByEmail(&data.UpdateAccountFilter{Email: p.Email}, &data.UpdateAccountDocument{})
+	return nil
 }

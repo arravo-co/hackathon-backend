@@ -1,14 +1,16 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	_ "github.com/arravoco/hackathon_backend/docs"
+	//_ "github.com/arravoco/hackathon_backend/docs"
 	othermiddleware "github.com/arravoco/hackathon_backend/other_middleware"
 )
 
@@ -19,21 +21,23 @@ type ResponseData struct {
 
 var participantsRoutes *echo.Group
 var authRoutes *echo.Group
+var judgesRoutes *echo.Group
 var validate *validator.Validate
 
-// @title			Hackathons API
-// @version		1.0
-// @description	This is the documentation website for all Arravo hackathons
-// @termsOfService	http://swagger.io/terms/
-// @contact.name	API Support
-// @contact.email	appdev@arravo.co
-// @license.name	Apache 2.0
-// @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-// @host			localhost:5000
-// @BasePath		/api
 func StartAllRoutes(e *echo.Echo) {
 	validate = validator.New()
-	e.GET("/api/docs/*", echoSwagger.WrapHandler) // default
+	e.Renderer = t
+	e.GET("/hello", Hello)
+	e.GET("/api/docs/*", echoSwagger.WrapHandler, func(next echo.HandlerFunc) echo.HandlerFunc {
+
+		return func(c echo.Context) error {
+			var re = regexp.MustCompile(`^(.*/)([^?].*)?[?|.]*$`)
+			matches := re.FindStringSubmatch(c.Request().RequestURI)
+			path := matches[2]
+			fmt.Printf("%+v\n", path)
+			return next(c)
+		}
+	}) // default
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPost, http.MethodPut, http.MethodDelete},
@@ -41,12 +45,25 @@ func StartAllRoutes(e *echo.Echo) {
 
 	api := e.Group("/api")
 	setupAuthRoutes(api)
+	setupJudgesRoutes(api)
+	setupParticipantsRoutes(api)
+}
+
+func setupParticipantsRoutes(api *echo.Group) {
 	participantsRoutes = api.Group("/participants", othermiddleware.Auth())
 	participantsRoutes.POST("", RegisterParticipant)
+}
+
+func setupJudgesRoutes(api *echo.Group) {
+	judgesRoutes = api.Group("/judges")
+	judgesRoutes.POST("", RegisterJudge)
 }
 
 func setupAuthRoutes(api *echo.Group) {
 	authRoutes = api.Group("/auth")
 	authRoutes.POST("/login", BasicLogin)
 	authRoutes.GET("/verification/email/initiation", InitiateEmailVerification)
+	authRoutes.POST("/verification/email/completion", CompleteEmailVerification)
+	authRoutes.POST("/password/change", ChangePassword)
+	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
 }
