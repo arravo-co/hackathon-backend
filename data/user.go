@@ -33,12 +33,14 @@ type UpdateAccountFilter struct {
 }
 
 type UpdateAccountDocument struct {
-	FirstName       string `bson:"first_name,omitempty"`
-	LastName        string `bson:"last_name,omitempty"`
-	Gender          string `bson:"gender,omitempty"`
-	LinkedInAddress string `bson:"linkedIn_address,omitempty"`
-	GithubAddress   string `bson:"github_address,omitempty"`
-	State           string `bson:"state,omitempty"`
+	FirstName         string    `bson:"first_name,omitempty"`
+	LastName          string    `bson:"last_name,omitempty"`
+	Gender            string    `bson:"gender,omitempty"`
+	LinkedInAddress   string    `bson:"linkedIn_address,omitempty"`
+	GithubAddress     string    `bson:"github_address,omitempty"`
+	State             string    `bson:"state,omitempty"`
+	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
+	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 }
 
 type CreateUserAccountData struct {

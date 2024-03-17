@@ -50,7 +50,7 @@ func StartAllRoutes(e *echo.Echo) {
 }
 
 func setupParticipantsRoutes(api *echo.Group) {
-	participantsRoutes = api.Group("/participants", othermiddleware.Auth())
+	participantsRoutes = api.Group("/participants")
 	participantsRoutes.POST("", RegisterParticipant)
 }
 
@@ -64,6 +64,9 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.POST("/login", BasicLogin)
 	authRoutes.GET("/verification/email/initiation", InitiateEmailVerification)
 	authRoutes.POST("/verification/email/completion", CompleteEmailVerification)
-	authRoutes.POST("/password/change", ChangePassword)
+	authRoutes.POST("/password/change", ChangePassword, othermiddleware.Auth())
+	authRoutes.POST("/password/recovery/initiation", InitiatePasswordRecovery)
+	authRoutes.POST("/password/recovery/completion", ChangePassword)
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
+	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
 }

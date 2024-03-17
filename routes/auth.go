@@ -169,7 +169,7 @@ func CompleteEmailVerification(c echo.Context) error {
 		})
 	}
 
-	err = authutils.CompleteEmailVerification(&authutils.VerifyTokenData{
+	err = authutils.CompleteEmailVerification(&authutils.CompleteEmailVerificationData{
 		Token: dataDto.Token,
 		Email: dataDto.Email,
 	})
@@ -296,9 +296,7 @@ func GetAuthUserInfo(c echo.Context) error {
 // @Summary		Get auth user information
 // @Description	Get auth user information
 // @Tags			Auth
-// @in				header
-// @name			Authorization
-// @description	"Type 'Bearer TOKEN' to correctly set the Bearer token"
+// @Param			updateMyInfoJSON	body		dtos.AuthParticipantInfoUpdateDTO	true	"the required info"
 // @Produce		json
 // @Security AuthorizationHeader read write
 // @SecurityScheme AuthorizationHeader http bearer Input your token
@@ -340,5 +338,115 @@ func UpdateAuthUserInfo(c echo.Context) error {
 			Code:    200,
 			Message: "Password change completed successfully",
 		}, &PasswordChangeSuccessResponseData{},
+	})
+}
+
+// @Summary		recover password
+// @Description	recover password
+// @Tags			Auth
+// @Accept			json
+// @Produce		json
+// @Param			email	query		string	false	"Email to verify"	Format(email)
+// @Success		200		{object}	InitiateEmailVerificationSuccessResponse
+// @Failure		400		{object}	InitiateEmailVerificationFailureResponse
+// @Failure		404		{object}	InitiateEmailVerificationFailureResponse
+// @Failure		500		{object}	InitiateEmailVerificationFailureResponse
+// @Router		/api/auth/password/recovery/initiation [get]
+func InitiatePasswordRecovery(c echo.Context) error {
+	emailToVerify := c.QueryParam("email")
+	if emailToVerify == "" {
+		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: "'email' query parameter is required",
+			},
+		})
+	}
+
+	ttl := time.Now().Add(time.Minute * 15)
+	err := authutils.InitiateEmailVerification(&authutils.ConfigTokenData{
+		TTL:   ttl,
+		Email: emailToVerify,
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
+		ResponseData{
+			Code:    200,
+			Message: "Verification of email sent successfully",
+		}, &InitiateEmailVerificationSuccessResponseData{},
+	})
+}
+
+type CompletePasswordRecoveryFailureResponse struct {
+	ResponseData
+}
+type CompletePasswordRecoverySuccessResponse struct {
+	ResponseData
+	Data *CompleteEmailVerificationSuccessResponseData `json:"data"`
+}
+
+type CompletePasswordRecoverySuccessResponseData struct {
+	Email string `json:"email"`
+}
+
+// @Summary		Verify user email address
+// @Description	Verify user email address
+// @Tags			Auth
+// @Accept			json
+// @Produce		json
+// @Param			completeToken	body		dtos.CompletePasswordRecoveryDTO	true	"the required info"
+// @Success		200				{object}	CompletePasswordRecoverySuccessResponse
+// @Failure		400				{object}	CompletePasswordRecoveryFailureResponse
+// @Failure		404				{object}	CompletePasswordRecoveryFailureResponse
+// @Failure		500				{object}	CompletePasswordRecoveryFailureResponse
+// @Router			/api/auth/password/recovery/completion [post]
+func CompletePasswordRecovery(c echo.Context) error {
+	dataDto := dtos.CompletePasswordRecoveryDTO{}
+	err := c.Bind(&dataDto)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	err = validate.Struct(dataDto)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+
+	err = authutils.CompletePasswordRecovery(&authutils.CompletePasswordRecoveryData{
+		Token:       dataDto.Token,
+		Email:       dataDto.Email,
+		NewPassword: dataDto.NewPassword,
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &CompletePasswordRecoveryFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	return c.JSON(200, &CompletePasswordRecoverySuccessResponse{
+		ResponseData{
+			Code:    200,
+			Message: "Password recovery completed successfully",
+		}, &CompleteEmailVerificationSuccessResponseData{
+			Email: dataDto.Email,
+		},
 	})
 }

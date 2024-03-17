@@ -28,3 +28,9 @@ type AuthParticipantInfoUpdateDTO struct {
 	GithubAddress   string `validate:"url,omitempty" json:"github_address"`
 	LinkedInAddress string `validate:"url,omitempty" json:"linkedIn_address"`
 }
+
+type CompletePasswordRecoveryDTO struct {
+	Email       string ` validate:"required,email" json:"email"`
+	Token       string ` validate:"required" json:"token"`
+	NewPassword string ` validate:"required" json:"new_password"`
+}

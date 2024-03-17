@@ -18,18 +18,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type BasicLoginData struct {
-	Identifier string
-	Password   string
-	Role       string
-}
-
-type BasicLoginSuccessData struct {
-	AccessToken  string
-	RefreshToken string
-	Exp          time.Time
-}
-
 func BasicLogin(dataInput *BasicLoginData) (*BasicLoginSuccessData, error) {
 	accountCol, err := db.GetAccountCollection()
 	if err != nil {
@@ -65,21 +53,6 @@ func BasicLogin(dataInput *BasicLoginData) (*BasicLoginSuccessData, error) {
 	}, err
 }
 
-type jwtCustomClaims struct {
-	Email     string `json:"email"`
-	LastName  string `json:"last_name"`
-	FirstName string `json:"first_name"`
-	Role      string `json:"role"`
-	jwt.RegisteredClaims
-}
-
-type Payload struct {
-	Email     string
-	LastName  string
-	FirstName string
-	Role      string
-}
-
 func GenerateAccessToken(payload *Payload) (string, error) {
 	claims := &jwtCustomClaims{
 		payload.Email,
@@ -105,14 +78,22 @@ func GetJWTConfig() echojwt.Config {
 	return config
 }
 
-type ConfigTokenData struct {
-	Email string
-	TTL   time.Time
-}
-
-type VerifyTokenData struct {
-	Email string
-	Token string
+func VerifyToken(dataInput *VerifyTokenData) error {
+	_, err := data.GetAccountByEmail(dataInput.Email)
+	if err != nil {
+		return errors.New("email not found in record")
+	}
+	err = data.VerifyToken(&data.VerifyTokenData{
+		Token:          dataInput.Token,
+		TokenType:      dataInput.TokenType,
+		TokenTypeValue: dataInput.TokenTypeValue,
+		Scope:          dataInput.Scope,
+	})
+	if err != nil {
+		utils.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
 }
 
 func InitiateEmailVerification(dataInput *ConfigTokenData) error {
@@ -128,6 +109,7 @@ func InitiateEmailVerification(dataInput *ConfigTokenData) error {
 		TokenTypeValue: dataInput.Email,
 		TTL:            dataInput.TTL,
 		Status:         "PENDING",
+		Scope:          "EMAIL_VERIFICATION",
 	})
 	if err != nil {
 		utils.MySugarLogger.Error(err)
@@ -142,17 +124,14 @@ func InitiateEmailVerification(dataInput *ConfigTokenData) error {
 	return nil
 }
 
-func CompleteEmailVerification(dataInput *VerifyTokenData) error {
-	_, err := data.GetAccountByEmail(dataInput.Email)
-	if err != nil {
-		return errors.New("email not found in record")
-	}
-	isVerified, err := data.VerifyToken(&data.VerifyTokenData{
+func CompleteEmailVerification(dataInput *CompleteEmailVerificationData) error {
+	err := VerifyToken(&VerifyTokenData{
 		Token:          dataInput.Token,
 		TokenType:      "EMAIL",
 		TokenTypeValue: dataInput.Email,
+		Scope:          "EMAIL_VERIFICATION",
 	})
-	if !isVerified {
+	if err != nil {
 		utils.MySugarLogger.Error(err)
 		return err
 	}
@@ -174,12 +153,6 @@ func CompleteEmailVerification(dataInput *VerifyTokenData) error {
 	return nil
 }
 
-type ChangePasswordData struct {
-	Email       string
-	OldPassword string
-	NewPassword string
-}
-
 func ChangePassword(dataInput *ChangePasswordData) error {
 	accountDoc, err := data.GetAccountByEmail(dataInput.Email)
 	if err != nil {
@@ -196,5 +169,63 @@ func ChangePassword(dataInput *ChangePasswordData) error {
 	accountDoc, err = data.UpdatePasswordByEmail(&data.UpdateAccountFilter{Email: dataInput.Email}, hash)
 
 	// emit an emit here
+	return nil
+}
+
+func InitiatePasswordRecovery(dataInput *ConfigTokenData) error {
+	_, err := data.GetAccountByEmail(dataInput.Email)
+	if err != nil {
+		return errors.New("email not found in record")
+	}
+	tokenFunc, _ := nanoid.Custom("1234567890", 6)
+	token := tokenFunc()
+	tokenData, err := data.CreateToken(&data.CreateTokenData{
+		Token:          token,
+		TokenType:      "EMAIL",
+		TokenTypeValue: dataInput.Email,
+		TTL:            dataInput.TTL,
+		Status:         "PENDING",
+		Scope:          "PASSWORD_RECOVERY",
+	})
+	if err != nil {
+		utils.MySugarLogger.Error(err)
+		return errors.New("failed to generate token: ")
+	}
+	email.SendPasswordRecoveryEmail(&email.SendPasswordRecoveryEmailData{
+		Email:    dataInput.Email,
+		Token:    tokenData.Token,
+		TokenTTL: dataInput.TTL,
+		Subject:  "Password Recovery",
+	})
+	return nil
+}
+
+func CompletePasswordRecovery(dataInput *CompletePasswordRecoveryData) error {
+	err := VerifyToken(&VerifyTokenData{
+		Token:          dataInput.Token,
+		TokenType:      "EMAIL",
+		TokenTypeValue: dataInput.Email,
+		Scope:          "PASSWORD_RECOVERY",
+	})
+	if err != nil {
+		utils.MySugarLogger.Error(err)
+		return err
+	}
+	newPasswordHash, err := utils.GenerateHashPassword(dataInput.NewPassword)
+	if err != nil {
+		utils.MySugarLogger.Error(err)
+		return err
+	}
+	_, err = data.UpdatePasswordByEmail(&data.UpdateAccountFilter{Email: dataInput.Email}, newPasswordHash)
+
+	if err != nil {
+		utils.MySugarLogger.Error(err)
+		return errors.New("unable to complete password recovery")
+	}
+
+	email.SendPasswordRecoveryCompleteEmail(&email.SendPasswordRecoveryCompleteEmailData{
+		Email:   dataInput.Email,
+		Subject: "Password Recovery Success",
+	})
 	return nil
 }

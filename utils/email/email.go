@@ -130,3 +130,74 @@ func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationComplete
 		Subject: dataInput.Subject,
 	})
 }
+
+type SendPasswordRecoveryEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+	Token     string
+	TokenTTL  time.Time
+}
+
+func SendPasswordRecoveryEmail(dataInput *SendPasswordRecoveryEmailData) {
+
+	body := hermes.Body{
+		Name: strings.Join([]string{dataInput.FirstName, dataInput.LastName}, " "),
+		Intros: []string{
+			"Welcome to Arravo Hackathon!",
+			"Please verify your email to complete the registration process.",
+		},
+		Actions: []hermes.Action{
+			{
+				Instructions: "To recover your password, click the button below:",
+				Button: hermes.Button{
+					Color: "#22BC66",
+					Text:  "Verify Email",
+					Link:  "https://arravo.com/verify-email",
+				},
+			},
+			{
+				Instructions: "Alternatively, you can use the following token to recover your password:",
+				InviteCode:   fmt.Sprintf("Token: %s", dataInput.Token),
+			},
+		},
+		Outros: []string{
+			"If you have any questions, feel free to contact us at support@arravo.co",
+			"Thank you for joining Arravo Hackathon!",
+		},
+	}
+
+	SendEmail(&SendEmailData{
+		Email:   dataInput.Email,
+		Message: &body,
+		Subject: dataInput.Subject,
+	})
+}
+
+type SendPasswordRecoveryCompleteEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+}
+
+func SendPasswordRecoveryCompleteEmail(dataInput *SendPasswordRecoveryCompleteEmailData) {
+	body := hermes.Body{
+		Name: strings.Join([]string{}, " "),
+		Intros: []string{
+			"Welcome to Arravo Hackathon!",
+			"Your password has been successfully recovered.",
+		},
+		Outros: []string{
+			"If you have any questions, feel free to contact us at support@arravo.co",
+			"Thank you for joining Arravo Hackathon!",
+		},
+	}
+
+	SendEmail(&SendEmailData{
+		Email:   dataInput.Email,
+		Message: &body,
+		Subject: dataInput.Subject,
+	})
+}

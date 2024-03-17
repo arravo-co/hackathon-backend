@@ -8,6 +8,8 @@ import (
 
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/utils"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type TokenData struct {
@@ -15,6 +17,7 @@ type TokenData struct {
 	Token          string      `bson:"token"`
 	TokenType      string      `bson:"token_type"`
 	TokenTypeValue string      `bson:"token_type_value"`
+	Scope          string      `bson:"scope"`
 	TTL            time.Time   `bson:"ttl"`
 	Status         string      `bson:"status"`
 }
@@ -23,6 +26,7 @@ type CreateTokenData struct {
 	Token          string    `bson:"token"`
 	TokenType      string    `bson:"token_type"`
 	TokenTypeValue string    `bson:"token_type_value"`
+	Scope          string    `bson:"scope"`
 	TTL            time.Time `bson:"ttl"`
 	Status         string    `bson:"status"`
 }
@@ -31,49 +35,49 @@ type VerifyTokenData struct {
 	Token          string `bson:"token"`
 	TokenType      string `bson:"token_type"`
 	TokenTypeValue string `bson:"token_type_value"`
+	Scope          string `bson:"scope"`
 }
 
 func CreateToken(dataInput *CreateTokenData) (*TokenData, error) {
 	tokenCol, err := db.GetTokenCollection()
+	tokenInfo := &TokenData{}
 	if err != nil {
 		return nil, err
 	}
-	result, err := tokenCol.InsertOne(context.TODO(), dataInput)
-	if err != nil {
-		return nil, err
-	}
-	tokenInfo := &TokenData{
-		Id:             result.InsertedID,
-		Token:          dataInput.Token,
-		TokenType:      dataInput.TokenType,
-		TokenTypeValue: dataInput.TokenTypeValue,
-		TTL:            dataInput.TTL,
-	}
+	filter := struct {
+		Token string
+	}{}
+	var upsert bool = true
+	updateDoc := bson.M{"$set": dataInput}
+	result := tokenCol.FindOneAndUpdate(context.TODO(), filter, updateDoc, &options.FindOneAndUpdateOptions{
+		Upsert: &upsert,
+	})
+	err = result.Decode(tokenInfo)
 	return tokenInfo, err
 }
 
-func VerifyToken(dataInput *VerifyTokenData) (bool, error) {
+func VerifyToken(dataInput *VerifyTokenData) error {
 	fmt.Printf("\n%+v\n", dataInput)
 	var tokenInfo TokenData
 	tokenCol, err := db.GetTokenCollection()
 	if err != nil {
-		return false, err
+		return err
 	}
 	result := tokenCol.FindOne(context.TODO(), dataInput)
 	err = result.Decode(&tokenInfo)
 	if err != nil {
 		utils.MySugarLogger.Error(err)
-		return false, errors.New("unable to verify token")
+		return errors.New("unable to verify token")
 	}
 	if tokenInfo.Token == "" {
-		return false, errors.New("token does not exist")
+		return errors.New("token does not exist")
 	}
 	if tokenInfo.TTL.Before(time.Now()) {
-		return false, errors.New("token has expired")
+		return errors.New("token has expired")
 	}
 	if tokenInfo.Status == "VERIFIED" {
-		return false, errors.New("token has been used for verification of this entity in the past")
+		return errors.New("token has been used for verification of this entity in the past")
 	}
 
-	return true, err
+	return nil
 }
