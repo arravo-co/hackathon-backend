@@ -21,7 +21,7 @@ func init() {
 }
 
 func GetMongoConn() (*mongo.Client, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	clientOpts := options.Client().ApplyURI(
 		"mongodb://localhost:27017")
@@ -51,19 +51,34 @@ func GetDB(dbName string) (*mongo.Database, error) {
 	return db, nil
 }
 
-func GetAccountCollection() (*mongo.Collection, error) {
+func GetCollection(colName string) (*mongo.Collection, error) {
 	db, err := GetDefaultDB()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 		return nil, err
 	}
-	col := db.Collection("accounts")
+	col := db.Collection(colName)
 	err = CreateIndexes()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 		return nil, err
 	}
 	return col, nil
+}
+
+func GetAccountCollection() (*mongo.Collection, error) {
+	col, err := GetCollection("accounts")
+	err = CreateIndexes()
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+		return nil, err
+	}
+	return col, nil
+}
+
+func GetTokenCollection() (*mongo.Collection, error) {
+	col, err := GetCollection("tokens")
+	return col, err
 }
 
 func CreateIndexes() error {
@@ -76,6 +91,14 @@ func CreateIndexes() error {
 		Options: options.Index().SetUnique(true),
 	}
 	indexName, err := db.Collection("accounts").Indexes().CreateOne(context.TODO(), indexModel)
+	if err != nil {
+		return err
+	}
+	indexModel = mongo.IndexModel{
+		Keys:    bson.D{{"token", -1}, {"token_type", 1}, {"token_type_value", 1}},
+		Options: options.Index().SetUnique(true),
+	}
+	indexName, err = db.Collection("tokens").Indexes().CreateOne(context.TODO(), indexModel)
 	if err != nil {
 		return err
 	}

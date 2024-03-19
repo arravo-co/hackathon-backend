@@ -20,6 +20,10 @@ func GetResendFromEmail() string {
 	return os.Getenv("RESEND_FROM_EMAIL")
 }
 
+func GetSecretKey() string {
+	return os.Getenv("SECRET_KEY")
+}
+
 func GetPort() (int, error) {
 	portString := os.Getenv("PORT")
 	if portString == "" {

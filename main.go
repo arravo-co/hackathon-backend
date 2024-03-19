@@ -10,6 +10,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @Version 1.0.0
+// @Title Hackathon Backend API
+// @Description API usually works as expected. But sometimes its not true.
+// @ContactName David Alabi
+// @ContactEmail appdev@arravo.co
+// @ContactURL http://arravo.co/contact
+// @TermsOfServiceUrl http://arravo.co/contact
+// @LicenseName MIT
+// @LicenseURL https://en.wikipedia.org/wiki/MIT_License
+// @Server localhost:5000 Localhost
+// @Server http://www.fake2.com Main
 func main() {
 	e := echo.New()
 	port, err := config.GetPort()

@@ -24,24 +24,24 @@ func ValidateGender(fl validator.FieldLevel) bool {
 }
 
 type RegisterNewParticipantDTO struct {
-	FirstName       string `validate:"min=2" json:"first_name"`
-	LastName        string `validate:"min=2" json:"last_name"`
-	Email           string `validate:"email" json:"email"`
-	Password        string `validate:"min=7" json:"password"`
-	ConfirmPassword string `validate:"eqfield=Password" json:"confirm_password"`
-	Gender          string `validate:"oneof=MALE FEMALE" json:"gender"`
-	GithubAddress   string `validate:"url" json:"github_address"`
-	LinkedInAddress string `json:"linkedIn_address"`
-	State           string `json:"state"`
+	FirstName       string `validate:"min=2,omitempty" json:"first_name"`
+	LastName        string `validate:"min=2,omitempty" json:"last_name"`
+	Email           string `validate:"email,omitempty" json:"email"`
+	Password        string `validate:"min=7,omitempty" json:"password"`
+	ConfirmPassword string `validate:"eqfield=Password,omitempty" json:"confirm_password"`
+	Gender          string `validate:"oneof=MALE FEMALE,omitempty" json:"gender"`
+	GithubAddress   string `validate:"url,omitempty" json:"github_address"`
+	LinkedInAddress string `json:"linkedIn_address,omitempty"`
+	State           string `json:"state,omitempty"`
 }
 
 type ParticipantAddResponseDTO struct {
-	FirstName       string `json:"first_name"`
-	LastName        string `json:"last_name"`
-	Email           string `json:"email"`
-	Gender          string `json:"gender"`
-	State           string `json:"state"`
-	GithubAddress   string `json:"github_address"`
-	LinkedInAddress string `json:"LinkedIn_address"`
-	Role            string `json:"role"`
+	FirstName       string `json:"first_name,omitempty"`
+	LastName        string `json:"last_name,omitempty"`
+	Email           string `json:"email,omitempty"`
+	Gender          string `json:"gender,omitempty"`
+	State           string `json:"state,omitempty"`
+	GithubAddress   string `json:"github_address,omitempty"`
+	LinkedInAddress string `json:"LinkedIn_address,omitempty"`
+	Role            string `json:"role,omitempty"`
 }
