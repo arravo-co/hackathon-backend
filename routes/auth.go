@@ -13,24 +13,33 @@ import (
 )
 
 type BasicLoginFailureResponse struct {
-	ResponseData
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 type BasicLoginSuccessResponse struct {
-	ResponseData
-	Data BasicLoginSuccessResponseData `json:"data"`
+	Code    int                           `json:"code"`
+	Message string                        `json:"message"`
+	Data    BasicLoginSuccessResponseData `json:"data"`
 }
 
 type BasicLoginSuccessResponseData struct {
 	AccessToken string `json:"access_token"`
 }
 
+type BasicLoginDTO struct {
+	Identifier string ` validate:"required" json:"identifier"`
+	Password   string ` validate:"required" json:"password"`
+}
+
 // @Description	Log a user in
 // @Summary		Log a user in
 // @Tags			Auth
 // @Produce		json
-// @Success		200	{object}	BasicLoginSuccessResponse
-// @Failure		400	{object}	BasicLoginFailureResponse
+// @Param       loginJSON   body BasicLoginDTO    true                   "login Request JSON"
+// @Success		200	  object 	BasicLoginSuccessResponse "Users Responses JSON"
+// @Resource users
+// @Failure		400	object	BasicLoginFailureResponse "hhhh"
 // @Router			/api/auth/login             [post]
 func BasicLogin(c echo.Context) error {
 	data := dtos.BasicLoginDTO{}
@@ -39,10 +48,9 @@ func BasicLogin(c echo.Context) error {
 	if err != nil {
 		utils.MySugarLogger.Error(err)
 		return c.JSON(http.StatusBadRequest, &BasicLoginFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: err.Error(),
-			},
+
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 
@@ -52,30 +60,28 @@ func BasicLogin(c echo.Context) error {
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &BasicLoginFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: err.Error(),
-			},
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 	fmt.Printf("%#v", dataResponse)
 	return c.JSON(200, &BasicLoginSuccessResponse{
-		ResponseData{
-			Code:    200,
-			Message: "Successfully logged in",
-		},
-		BasicLoginSuccessResponseData{
+		Code:    200,
+		Message: "Successfully logged in",
+		Data: BasicLoginSuccessResponseData{
 			AccessToken: dataResponse.AccessToken,
 		},
 	})
 }
 
 type InitiateEmailVerificationFailureResponse struct {
-	ResponseData
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 type InitiateEmailVerificationSuccessResponse struct {
-	ResponseData
-	Data *InitiateEmailVerificationSuccessResponseData `json:"data"`
+	Code    int                                           `json:"code"`
+	Message string                                        `json:"message"`
+	Data    *InitiateEmailVerificationSuccessResponseData `json:"data"`
 }
 
 type InitiateEmailVerificationSuccessResponseData struct {
@@ -88,19 +94,18 @@ type InitiateEmailVerificationSuccessResponseData struct {
 // @Accept			json
 // @Produce		json
 // @Param			email	query		string	false	"Email to verify"	Format(email)
-// @Success		200		{object}	InitiateEmailVerificationSuccessResponse
-// @Failure		400		{object}	InitiateEmailVerificationFailureResponse
-// @Failure		404		{object}	InitiateEmailVerificationFailureResponse
-// @Failure		500		{object}	InitiateEmailVerificationFailureResponse
+// @Success		200		object	InitiateEmailVerificationSuccessResponse "Verification succeeded"
+// @Failure		400		object	InitiateEmailVerificationFailureResponse "Verification failed"
+// @Failure		404		object	InitiateEmailVerificationFailureResponse "Verification failed"
+// @Failure		500		object	InitiateEmailVerificationFailureResponse "Verification failed"
 // @Router			/api/auth/verification/email/initiation [get]
 func InitiateEmailVerification(c echo.Context) error {
 	emailToVerify := c.QueryParam("email")
 	if emailToVerify == "" {
 		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: "'email' query parameter is required",
-			},
+
+			Code:    http.StatusBadRequest,
+			Message: "'email' query parameter is required",
 		})
 	}
 
@@ -111,17 +116,14 @@ func InitiateEmailVerification(c echo.Context) error {
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: err.Error(),
-			},
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
-		ResponseData{
-			Code:    200,
-			Message: "Verification email sent successfully",
-		}, &InitiateEmailVerificationSuccessResponseData{},
+		Code:    200,
+		Message: "Verification email sent successfully",
+		Data:    &InitiateEmailVerificationSuccessResponseData{},
 	})
 }
 
@@ -142,11 +144,11 @@ type CompleteEmailVerificationSuccessResponseData struct {
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Param			completeToken	body		dtos.CompleteEmailVerificationDTO	true	"the required info"
-// @Success		200				{object}	CompleteEmailVerificationSuccessResponse
-// @Failure		400				{object}	CompleteEmailVerificationFailureResponse
-// @Failure		404				{object}	CompleteEmailVerificationFailureResponse
-// @Failure		500				{object}	CompleteEmailVerificationFailureResponse
+// @Param			completeToken	body dtos.CompleteEmailVerificationDTO	true	"the required info"
+// @Success		200				object	CompleteEmailVerificationSuccessResponse "Email verification successful"
+// @Failure		400				object	CompleteEmailVerificationFailureResponse "Email verification failed"
+// @Failure		404				object	CompleteEmailVerificationFailureResponse "Email verification failed"
+// @Failure		500				object	CompleteEmailVerificationFailureResponse "Email verification failed"
 // @Router			/api/auth/verification/email/completion [post]
 func CompleteEmailVerification(c echo.Context) error {
 	dataDto := dtos.CompleteEmailVerificationDTO{}
@@ -208,10 +210,10 @@ type PasswordChangeSuccessResponseData struct {
 // @Accept			json
 // @Produce		json
 // @Param			changePasswordJSON	body		dtos.ChangePasswordDTO	true	"the required info"
-// @Success		200					{object}	PasswordChangeSuccessResponse
-// @Failure		400					{object}	PasswordChangeFailureResponse
-// @Failure		404					{object}	PasswordChangeFailureResponse
-// @Failure		500					{object}	PasswordChangeFailureResponse
+// @Success		200				object	PasswordChangeSuccessResponse ""
+// @Failure		400					object	PasswordChangeFailureResponse ""
+// @Failure		404					object	PasswordChangeFailureResponse ""
+// @Failure		500					object	PasswordChangeFailureResponse ""
 // @Router			/api/auth/password/change [post]
 func ChangePassword(c echo.Context) error {
 	dataDto := dtos.ChangePasswordDTO{}
@@ -264,10 +266,10 @@ type AuthUserInfoFetchSuccessResponseData struct {
 // @Produce		json
 // @Security AuthorizationHeader read write
 // @SecurityScheme AuthorizationHeader http bearer Input your token
-// @Success		200	{object}	AuthUserInfoFetchSuccessResponse
-// @Failure		400	{object}	AuthUserInfoFetchFailureResponse
-// @Failure		404	{object}	AuthUserInfoFetchFailureResponse
-// @Failure		500	{object}	AuthUserInfoFetchFailureResponse
+// @Success		200	object	AuthUserInfoFetchSuccessResponse "UserInfo fetched successfully"
+// @Failure		400	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
+// @Failure		404	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
+// @Failure		500	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
 // @Router			/api/auth/me [get]
 func GetAuthUserInfo(c echo.Context) error {
 	tokenData := c.Get("user").(authutils.Payload)
@@ -347,19 +349,18 @@ func UpdateAuthUserInfo(c echo.Context) error {
 // @Accept			json
 // @Produce		json
 // @Param			email	query		string	false	"Email to verify"	Format(email)
-// @Success		200		{object}	InitiateEmailVerificationSuccessResponse
-// @Failure		400		{object}	InitiateEmailVerificationFailureResponse
-// @Failure		404		{object}	InitiateEmailVerificationFailureResponse
-// @Failure		500		{object}	InitiateEmailVerificationFailureResponse
+// @Success		200		object	InitiateEmailVerificationSuccessResponse
+// @Failure		400		object	InitiateEmailVerificationFailureResponse
+// @Failure		404		object	InitiateEmailVerificationFailureResponse
+// @Failure		500		object	InitiateEmailVerificationFailureResponse
 // @Router		/api/auth/password/recovery/initiation [get]
 func InitiatePasswordRecovery(c echo.Context) error {
 	emailToVerify := c.QueryParam("email")
 	if emailToVerify == "" {
 		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: "'email' query parameter is required",
-			},
+
+			Code:    http.StatusBadRequest,
+			Message: "'email' query parameter is required",
 		})
 	}
 
@@ -370,17 +371,16 @@ func InitiatePasswordRecovery(c echo.Context) error {
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: err.Error(),
-			},
+
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
 		})
 	}
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
-		ResponseData{
-			Code:    200,
-			Message: "Verification of email sent successfully",
-		}, &InitiateEmailVerificationSuccessResponseData{},
+
+		Code:    200,
+		Message: "Verification of email sent successfully",
+		Data:    &InitiateEmailVerificationSuccessResponseData{},
 	})
 }
 

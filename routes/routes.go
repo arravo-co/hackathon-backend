@@ -1,14 +1,11 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
-	"regexp"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
 
 	//_ "github.com/arravoco/hackathon_backend/docs"
 	othermiddleware "github.com/arravoco/hackathon_backend/other_middleware"
@@ -28,16 +25,7 @@ func StartAllRoutes(e *echo.Echo) {
 	validate = validator.New()
 	e.Renderer = t
 	e.GET("/hello", Hello)
-	e.GET("/api/docs/*", echoSwagger.WrapHandler, func(next echo.HandlerFunc) echo.HandlerFunc {
-
-		return func(c echo.Context) error {
-			var re = regexp.MustCompile(`^(.*/)([^?].*)?[?|.]*$`)
-			matches := re.FindStringSubmatch(c.Request().RequestURI)
-			path := matches[2]
-			fmt.Printf("%+v\n", path)
-			return next(c)
-		}
-	}) // default
+	e.Static("/api/docs", "static/docs")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPost, http.MethodPut, http.MethodDelete},

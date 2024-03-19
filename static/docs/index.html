@@ -1,0 +1,1288 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Hackathon Backend API</title>
+    <style type="text/css">
+      body {
+	font-family: Trebuchet MS, sans-serif;
+	font-size: 15px;
+	color: #444;
+	margin-right: 24px;
+}
+
+h1	{
+	font-size: 25px;
+}
+h2	{
+	font-size: 20px;
+}
+h3	{
+	font-size: 16px;
+	font-weight: bold;
+}
+hr	{
+	height: 1px;
+	border: 0;
+	color: #ddd;
+	background-color: #ddd;
+}
+
+.app-desc {
+  clear: both;
+  margin-left: 20px;
+}
+.param-name {
+  width: 100%;
+}
+.license-info {
+  margin-left: 20px;
+}
+
+.license-url {
+  margin-left: 20px;
+}
+
+.model {
+  margin: 0 0 0px 20px;
+}
+
+.method {
+  margin-left: 20px;
+}
+
+.method-notes	{
+	margin: 10px 0 20px 0;
+	font-size: 90%;
+	color: #555;
+}
+
+pre {
+  padding: 10px;
+  margin-bottom: 2px;
+}
+
+.http-method {
+ text-transform: uppercase;
+}
+
+pre.get {
+  background-color: #0f6ab4;
+}
+
+pre.post {
+  background-color: #10a54a;
+}
+
+pre.put {
+  background-color: #c5862b;
+}
+
+pre.delete {
+  background-color: #a41e22;
+}
+
+.huge	{
+	color: #fff;
+}
+
+pre.example {
+  background-color: #f3f3f3;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+code {
+  white-space: pre;
+}
+
+.nickname {
+  font-weight: bold;
+}
+
+.method-path {
+  font-size: 1.5em;
+  background-color: #0f6ab4;
+}
+
+.up {
+  float:right;
+}
+
+.parameter {
+  width: 500px;
+}
+
+.param {
+  width: 500px;
+  padding: 10px 0 0 20px;
+  font-weight: bold;
+}
+
+.param-desc {
+  width: 700px;
+  padding: 0 0 0 20px;
+  color: #777;
+}
+
+.param-type {
+  font-style: italic;
+}
+
+.param-enum-header {
+width: 700px;
+padding: 0 0 0 60px;
+color: #777;
+font-weight: bold;
+}
+
+.param-enum {
+width: 700px;
+padding: 0 0 0 80px;
+color: #777;
+font-style: italic;
+}
+
+.field-label {
+  padding: 0;
+  margin: 0;
+  clear: both;
+}
+
+.field-items	{
+	padding: 0 0 15px 0;
+	margin-bottom: 15px;
+}
+
+.return-type {
+  clear: both;
+  padding-bottom: 10px;
+}
+
+.param-header {
+  font-weight: bold;
+}
+
+.method-tags {
+  text-align: right;
+}
+
+.method-tag {
+  background: none repeat scroll 0% 0% #24A600;
+  border-radius: 3px;
+  padding: 2px 10px;
+  margin: 2px;
+  color: #FFF;
+  display: inline-block;
+  text-decoration: none;
+}
+
+    </style>
+  </head>
+  <body>
+  <h1>Hackathon Backend API</h1>
+    <div class="app-desc">API usually works as expected. But sometimes its not true.</div>
+    <div class="app-desc">More information: <a href="https://openapi-generator.tech">https://openapi-generator.tech</a></div>
+    <div class="app-desc">Contact Info: <a href="appdev@arravo.co">appdev@arravo.co</a></div>
+    <div class="app-desc">Version: 1.0.0</div>
+    <div class="app-desc">BasePath:</div>
+    <div class="license-info">MIT</div>
+    <div class="license-url">https://en.wikipedia.org/wiki/MIT_License</div>
+  <h2>Access</h2>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Default">Default</a></h4>
+  <ul>
+  <li><a href="#apiAuthMeGet"><code><span class="http-method">get</span> /api/auth/me</code></a></li>
+  <li><a href="#apiAuthMePut"><code><span class="http-method">put</span> /api/auth/me</code></a></li>
+  <li><a href="#apiAuthPasswordChangePost"><code><span class="http-method">post</span> /api/auth/password/change</code></a></li>
+  <li><a href="#apiAuthPasswordRecoveryCompletionPost"><code><span class="http-method">post</span> /api/auth/password/recovery/completion</code></a></li>
+  <li><a href="#apiAuthPasswordRecoveryInitiationGet"><code><span class="http-method">get</span> /api/auth/password/recovery/initiation</code></a></li>
+  <li><a href="#apiAuthVerificationEmailCompletionPost"><code><span class="http-method">post</span> /api/auth/verification/email/completion</code></a></li>
+  <li><a href="#apiAuthVerificationEmailInitiationGet"><code><span class="http-method">get</span> /api/auth/verification/email/initiation</code></a></li>
+  <li><a href="#apiJudgesPost"><code><span class="http-method">post</span> /api/judges</code></a></li>
+  <li><a href="#apiParticipantsPost"><code><span class="http-method">post</span> /api/participants</code></a></li>
+  </ul>
+  <h4><a href="#Users">Users</a></h4>
+  <ul>
+  <li><a href="#apiAuthLoginPost"><code><span class="http-method">post</span> /api/auth/login</code></a></li>
+  </ul>
+
+  <h1><a name="Default">Default</a></h1>
+  <div class="method"><a name="apiAuthMeGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/auth/me</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthMeGet</span>)</div>
+    <div class="method-notes">Get auth user information &quot;Type 'Bearer TOKEN' to correctly set the Bearer token&quot;</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : {
+    "github_address" : "github_address",
+    "role" : "role",
+    "gender" : "gender",
+    "linkedIn_address" : "linkedIn_address",
+    "last_name" : "last_name",
+    "state" : "state",
+    "first_name" : "first_name",
+    "email" : "email",
+    "passwordHash" : "passwordHash"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    UserInfo fetched successfully
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    UserInfo fetch failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</a>
+    <h4 class="field-label">404</h4>
+    UserInfo fetch failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</a>
+    <h4 class="field-label">500</h4>
+    UserInfo fetch failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiAuthMePut"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /api/auth/me</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthMePut</span>)</div>
+    <div class="method-notes">Get auth user information</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO <a href="#github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO">github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : {
+    "github_address" : "github_address",
+    "role" : "role",
+    "gender" : "gender",
+    "linkedIn_address" : "linkedIn_address",
+    "last_name" : "last_name",
+    "state" : "state",
+    "first_name" : "first_name",
+    "email" : "email",
+    "passwordHash" : "passwordHash"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</a>
+    <h4 class="field-label">404</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</a>
+    <h4 class="field-label">500</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiAuthPasswordChangePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/auth/password/change</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthPasswordChangePost</span>)</div>
+    <div class="method-notes">Verify user email address</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO <a href="#github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO">github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse">github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : "{}",
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse">github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse">github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse</a>
+    <h4 class="field-label">404</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse">github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse</a>
+    <h4 class="field-label">500</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse">github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiAuthPasswordRecoveryCompletionPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/auth/password/recovery/completion</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthPasswordRecoveryCompletionPost</span>)</div>
+    <div class="method-notes">Verify user email address</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO <a href="#github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO">github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse">github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : {
+    "email" : "email"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse">github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse">github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse</a>
+    <h4 class="field-label">404</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse">github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse</a>
+    <h4 class="field-label">500</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse">github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiAuthPasswordRecoveryInitiationGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/auth/password/recovery/initiation</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthPasswordRecoveryInitiationGet</span>)</div>
+    <div class="method-notes">recover password</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">email (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Email to verify default: null format: string</div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : {
+    "email" : "email"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</a>
+    <h4 class="field-label">404</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</a>
+    <h4 class="field-label">500</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiAuthVerificationEmailCompletionPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/auth/verification/email/completion</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthVerificationEmailCompletionPost</span>)</div>
+    <div class="method-notes">Verify user email address</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO <a href="#github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO">github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse">github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : {
+    "email" : "email"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Email verification successful
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse">github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    Email verification failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse</a>
+    <h4 class="field-label">404</h4>
+    Email verification failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse</a>
+    <h4 class="field-label">500</h4>
+    Email verification failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiAuthVerificationEmailInitiationGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/auth/verification/email/initiation</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthVerificationEmailInitiationGet</span>)</div>
+    <div class="method-notes">Verify user email address</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">email (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Email to verify default: null format: string</div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : {
+    "email" : "email"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Verification succeeded
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    Verification failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</a>
+    <h4 class="field-label">404</h4>
+    Verification failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</a>
+    <h4 class="field-label">500</h4>
+    Verification failed
+        <a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiJudgesPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/judges</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiJudgesPost</span>)</div>
+    <div class="method-notes">Register new participant</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse">github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "Data" : {
+    "Role" : "Role",
+    "Email" : "Email",
+    "GithubAddress" : "GithubAddress",
+    "FirstName" : "FirstName",
+    "State" : "State",
+    "Gender" : "Gender",
+    "LastName" : "LastName",
+    "PasswordHash" : "PasswordHash",
+    "LinkedInAddress" : "LinkedInAddress"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse">github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse">github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="apiParticipantsPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/participants</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiParticipantsPost</span>)</div>
+    <div class="method-notes">Register new participant</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse">github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "Data" : {
+    "Role" : "Role",
+    "Email" : "Email",
+    "GithubAddress" : "GithubAddress",
+    "FirstName" : "FirstName",
+    "State" : "State",
+    "Gender" : "Gender",
+    "LastName" : "LastName",
+    "PasswordHash" : "PasswordHash",
+    "LinkedInAddress" : "LinkedInAddress"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse">github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    
+        <a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse">github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Users">Users</a></h1>
+  <div class="method"><a name="apiAuthLoginPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/auth/login</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">apiAuthLoginPost</span>)</div>
+    <div class="method-notes">Log a user in</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">github.com.arravoco.hackathon_backend.routes.BasicLoginDTO <a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginDTO">github.com.arravoco.hackathon_backend.routes.BasicLoginDTO</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse">github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 0,
+  "data" : {
+    "access_token" : "access_token"
+  },
+  "message" : "message"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 6,
+  "message" : "message"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Users Responses JSON
+        <a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse">github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse</a>
+    <h4 class="field-label">400</h4>
+    hhhh
+        <a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse">github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse</a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#github.com.arravoco.hackathon_backend.data.CreateParticipantAccountData"><code>github.com.arravoco.hackathon_backend.data.CreateParticipantAccountData</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.data.CreateUserAccountData"><code>github.com.arravoco.hackathon_backend.data.CreateUserAccountData</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO"><code>github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.dtos.AuthUserInfoUpdateDTO"><code>github.com.arravoco.hackathon_backend.dtos.AuthUserInfoUpdateDTO</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO"><code>github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO"><code>github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO"><code>github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.entity.Judge"><code>github.com.arravoco.hackathon_backend.entity.Judge</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.entity.Participant"><code>github.com.arravoco.hackathon_backend.entity.Participant</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponseData</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginDTO"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginDTO</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponseData</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse"><code>github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse</code> - </a></li>
+    <li><a href="#github.com.arravoco.hackathon_backend.routes.ResponseData"><code>github.com.arravoco.hackathon_backend.routes.ResponseData</code> - </a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.data.CreateParticipantAccountData"><code>github.com.arravoco.hackathon_backend.data.CreateParticipantAccountData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">Email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">FirstName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">Gender (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">GithubAddress (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">LastName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">LinkedInAddress (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">PasswordHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">Role (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">State (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.data.CreateUserAccountData"><code>github.com.arravoco.hackathon_backend.data.CreateUserAccountData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">Email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">FirstName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">Gender (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">LastName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">PasswordHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">Role (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">State (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO"><code>github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">first_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">gender (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">github_address (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">last_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">linkedIn_address (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.dtos.AuthUserInfoUpdateDTO"><code>github.com.arravoco.hackathon_backend.dtos.AuthUserInfoUpdateDTO</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">first_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">gender (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">last_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO"><code>github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">new_password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">old_password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO"><code>github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">token (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO"><code>github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">new_password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">token (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.entity.Judge"><code>github.com.arravoco.hackathon_backend.entity.Judge</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">first_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">gender (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">last_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">passwordHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">role (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.entity.Participant"><code>github.com.arravoco.hackathon_backend.entity.Participant</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">first_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">gender (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">github_address (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">last_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">linkedIn_address (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">passwordHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">role (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#">github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponseData</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponseData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">first_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">gender (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">github_address (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">last_name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">linkedIn_address (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">passwordHash (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">role (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.BasicLoginDTO"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginDTO</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">identifier (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData">github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">access_token (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData">github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#">github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#">github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponseData</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponseData"><code>github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponseData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse"><code>github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse"><code>github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse"><code>github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">Data (optional)</div><div class="param-desc"><span class="param-type"><a href="#">github.com.arravoco.hackathon_backend.data.CreateParticipantAccountData</a></span>  </div>
+<div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="github.com.arravoco.hackathon_backend.routes.ResponseData"><code>github.com.arravoco.hackathon_backend.routes.ResponseData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  </body>
+</html>
