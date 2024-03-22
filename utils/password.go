@@ -4,8 +4,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func GeneratePassword() string {
+	passwordHash := password.MustGenerate(10, 2, 1, false, false)
+	return passwordHash
+}
 
 func GenerateHashPassword(password string) (string, error) {
 	passwordHashByte, err := bcrypt.GenerateFromPassword([]byte(password), 10)

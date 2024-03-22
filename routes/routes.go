@@ -39,7 +39,7 @@ func StartAllRoutes(e *echo.Echo) {
 
 func setupParticipantsRoutes(api *echo.Group) {
 	participantsRoutes = api.Group("/participants")
-	participantsRoutes.POST("", RegisterParticipant)
+	participantsRoutes.POST("", RegisterIndividualParticipant)
 }
 
 func setupJudgesRoutes(api *echo.Group) {

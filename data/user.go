@@ -14,17 +14,30 @@ import (
 type AccountDocument struct {
 	Id                string    `bson:"_id"`
 	Email             string    `bson:"email,omitempty"`
-	PasswordHash      string    `bson:"password_hash,omitempty"`
-	PhoneNumber       string    `bson:"phone_number,omitempty"`
 	FirstName         string    `bson:"first_name,omitempty"`
 	LastName          string    `bson:"last_name,omitempty"`
 	Gender            string    `bson:"gender,omitempty"`
 	LinkedInAddress   string    `bson:"linkedIn_address,omitempty"`
-	GithubAddress     string    `bson:"github_address,omitempty"`
+	PasswordHash      string    `bson:"password_hash,omitempty"`
+	PhoneNumber       string    `bson:"phone_number,omitempty"`
+	ParticipantId     string    `bson:"participant_id,omitempty"`
+	HackathonId       string    `bson:"hackathon_id"`
 	State             string    `bson:"state,omitempty"`
 	Role              string    `bson:"role,omitempty"`
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
+}
+
+type ParticipantDocument struct {
+	Id                  string   `bson:"_id"`
+	ParticipantId       string   `bson:"participant_id"`
+	HackathonId         string   `bson:"hackathon_id"`
+	Type                string   `bson:"type,omitempty"`
+	TeamLeadEmail       string   `bson:"team_lead_email,omitempty"`
+	TeamName            string   `bson:"team_lead_email,omitempty"`
+	CoParticipantEmails []string `bson:"co_participant_emails,omitempty"`
+	ParticipantEmail    string   `bson:"participant_email,omitempty"`
+	GithubAddress       string   `bson:"github_address,omitempty"`
 }
 
 type UpdateAccountFilter struct {
@@ -43,7 +56,7 @@ type UpdateAccountDocument struct {
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 }
 
-type CreateUserAccountData struct {
+type CreateAccountData struct {
 	Email        string `bson:"email"`
 	PasswordHash string `bson:"password_hash"`
 	FirstName    string `bson:"first_name"`
@@ -53,14 +66,40 @@ type CreateUserAccountData struct {
 	Role         string `bson:"role"`
 }
 
-type CreateParticipantAccountData struct {
-	CreateUserAccountData
+type CreateIndividualParticipantAccountData struct {
+	CreateAccountData
 	LinkedInAddress string `bson:"linkedIn_address"`
 	GithubAddress   string `bson:"github_address"`
 }
 
+type CreateTeamParticipantAccountData struct {
+	Email               string   `bson:"email"`
+	PasswordHash        string   `bson:"password_hash"`
+	FirstName           string   `bson:"first_name"`
+	LastName            string   `bson:"last_name"`
+	Gender              string   `bson:"gender"`
+	State               string   `bson:"state"`
+	Role                string   `bson:"role"`
+	HackathonId         string   `bson:"hackathon_id"`
+	Type                string   `bson:"type,omitempty"`
+	TeamLeadEmail       string   `bson:"team_lead_email,omitempty"`
+	TeamName            string   `bson:"team_lead_email,omitempty"`
+	CoParticipantEmails []string `bson:"co_participant_emails,omitempty"`
+	ParticipantEmail    string   `bson:"participant_email,omitempty"`
+	GithubAddress       string   `bson:"github_address,omitempty"`
+}
+
+type CreateTeamParticipantRecordData struct {
+	HackathonId         string   `bson:"hackathon_id"`
+	Type                string   `bson:"type,omitempty"`
+	TeamLeadEmail       string   `bson:"team_lead_email,omitempty"`
+	TeamName            string   `bson:"team_lead_email,omitempty"`
+	CoParticipantEmails []string `bson:"co_participant_emails,omitempty"`
+	GithubAddress       string   `bson:"github_address,omitempty"`
+}
+
 type CreateJudgeAccountData struct {
-	CreateUserAccountData
+	CreateAccountData
 }
 
 func GetAccountByEmail(email string) (*AccountDocument, error) {
@@ -78,7 +117,60 @@ func GetAccountByEmail(email string) (*AccountDocument, error) {
 	return &accountDoc, err
 }
 
-func CreateParticipantAccount(dataToSave *CreateParticipantAccountData) (*CreateParticipantAccountData, error) {
+func CreateTeamParticipantRecord(dataToSave *CreateTeamParticipantRecordData) (interface{}, error) {
+	participantCol, err := db.GetParticipantCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	result, err := participantCol.InsertOne(ctx, dataToSave)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Printf("%#v", result.InsertedID)
+	return result.InsertedID, err
+}
+
+func CreateTeamParticipantAccount(dataToSave *CreateTeamParticipantAccountData) (*CreateTeamParticipantAccountData, error) {
+	accountCol, err := db.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("Account\n")
+	fmt.Printf("%#v\n", dataToSave)
+	result, err := accountCol.InsertOne(ctx, dataToSave)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Printf("%#v", result.InsertedID)
+	events.EmitParticipantAccountCreated(&eventsdtos.ParticipantAccountCreatedEventData{
+		ParticipantEmail: dataToSave.Email,
+		LastName:         dataToSave.LastName,
+		FirstName:        dataToSave.FirstName,
+		EventData:        eventsdtos.EventData{EventName: "ParticipantAccountCreated"},
+	})
+	return dataToSave, err
+}
+
+func CreateAccount(dataToSave *CreateAccountData) (interface{}, error) {
+	accountCol, err := db.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	result, err := accountCol.InsertOne(ctx, dataToSave)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Printf("%#v", result.InsertedID)
+	return dataToSave, nil
+}
+
+func CreateIndividualParticipantAccount(dataToSave *CreateIndividualParticipantAccountData) (*CreateIndividualParticipantAccountData, error) {
 	accountCol, err := db.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
@@ -107,8 +199,6 @@ func CreateJudgeAccount(dataToSave *CreateJudgeAccountData) (*CreateJudgeAccount
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Account\n")
-	fmt.Printf("%#v\n", dataToSave)
 	result, err := accountCol.InsertOne(ctx, dataToSave)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())

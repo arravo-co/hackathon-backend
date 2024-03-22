@@ -22,7 +22,7 @@ func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*data.CreateJudgeAccou
 		return nil, err
 	}
 	dataInput := &data.CreateJudgeAccountData{
-		CreateUserAccountData: data.CreateUserAccountData{
+		CreateAccountData: data.CreateAccountData{
 			Email:        input.Email,
 			PasswordHash: passwordHash,
 			FirstName:    input.FirstName,

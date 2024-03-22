@@ -76,6 +76,11 @@ func GetAccountCollection() (*mongo.Collection, error) {
 	return col, nil
 }
 
+func GetParticipantCollection() (*mongo.Collection, error) {
+	col, err := GetCollection("participants")
+	return col, err
+}
+
 func GetTokenCollection() (*mongo.Collection, error) {
 	col, err := GetCollection("tokens")
 	return col, err
