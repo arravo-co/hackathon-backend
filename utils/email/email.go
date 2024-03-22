@@ -2,6 +2,7 @@ package email
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,14 +43,54 @@ func SendEmail(data *SendEmailData) error {
 	return nil
 }
 
-type SendWelcomeEmailData struct {
+type SendIndividualWelcomeEmailData struct {
 	LastName  string
 	FirstName string
 	Email     string
 	Subject   string
+	TTL       time.Time
+	Token     string
 }
 
-func SendWelcomeEmail(data *SendWelcomeEmailData) {
+func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData) {
+	body := &hermes.Body{
+		Name: "John",
+		Intros: []string{
+			"Welcome to Your Product!",
+		},
+		Dictionary: []hermes.Entry{
+			hermes.Entry{Key: "FirstName", Value: data.FirstName},
+			hermes.Entry{Key: "LastName", Value: data.FirstName},
+			hermes.Entry{Key: "Token", Value: data.Token},
+			hermes.Entry{Key: "Expiry", Value: strconv.Itoa(data.TTL.Minute())},
+		},
+		Actions: []hermes.Action{
+			{
+				Instructions: "Please verify your email by clicking the button below:",
+				Button: hermes.Button{
+					Color: "#22BC66",
+					Text:  "Verify Email",
+					Link:  "https://yourproduct.com/verify?token=your_verification_token",
+				},
+			},
+			{
+				Instructions: "Alternatively, you can copy and paste the following token in the verification page:",
+				InviteCode:   "your_verification_token",
+			},
+		},
+		Outros: []string{
+			"If you have any questions, feel free to reach out to us at support@yourproduct.com.",
+			"Thank you for choosing Your Product!",
+		},
+	}
+	SendEmail(&SendEmailData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+}
+
+func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {
 	body := &hermes.Body{
 		Name: strings.Join([]string{data.LastName, data.FirstName}, " "),
 	}

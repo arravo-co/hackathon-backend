@@ -1,10 +1,20 @@
 package entity
 
 import (
+	"errors"
+	"fmt"
+	"sync"
+
+	"github.com/arravoco/hackathon_backend/cache"
 	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/dtos"
+	"github.com/arravoco/hackathon_backend/events"
+	eventsdtos "github.com/arravoco/hackathon_backend/events_dtos"
 	"github.com/arravoco/hackathon_backend/utils"
 )
+
+var wg sync.WaitGroup
+var hackathon_id string = "hackathonID"
 
 type Participant struct {
 	FirstName       string `json:"first_name"`
@@ -35,45 +45,72 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewIndividualPartici
 	dataInput.GithubAddress = input.GithubAddress
 	dataInput.LinkedInAddress = input.LinkedInAddress
 	dataResponse, err := data.CreateIndividualParticipantAccount(dataInput)
+	events.EmitParticipantAccountCreated(&eventsdtos.ParticipantAccountCreatedEventData{
+		ParticipantEmail: dataResponse.Email,
+		LastName:         dataResponse.LastName,
+		FirstName:        dataResponse.FirstName,
+		EventData:        eventsdtos.EventData{EventName: "ParticipantAccountCreated"},
+		ParticipantType:  "INDIVIDUAL",
+	})
 	// emit created event
 
 	return dataResponse, err
 }
 
 func (p *Participant) RegisterTeam(input dtos.RegisterNewTeamParticipantDTO) (interface{}, error) {
-
+	teamMembers := []eventsdtos.TeamParticipantInfo{}
 	dataInput := &data.CreateTeamParticipantRecordData{
 		TeamLeadEmail:       input.TeamLeadEmail,
-		HackathonId:         "",
+		HackathonId:         hackathon_id,
 		TeamName:            input.TeamName,
 		CoParticipantEmails: input.CoParticipantEmails,
 	}
-	data.CreateTeamParticipantRecord(dataInput)
-
-	for _, v := range input.CoParticipantEmails {
-		p.CreateCoParticipantAccount(v)
-	}
-
-	password := utils.GeneratePassword()
-	passwordHash, err := utils.GenerateHashPassword(password)
+	insertId, err := data.CreateTeamParticipantRecord(dataInput)
 	if err != nil {
 		return nil, err
 	}
-
-	// create account of team lead
-	createDataInput :=
-		&data.CreateAccountData{
-			Email:        input.TeamLeadEmail,
-			PasswordHash: passwordHash,
-			Role:         "PARTICIPANT"}
-	dataResponse, err := data.CreateAccount(createDataInput)
-
+	fmt.Printf("%v\n", insertId)
+	for _, v := range append(input.CoParticipantEmails, input.TeamLeadEmail) {
+		wg.Add(1)
+		v := v
+		go func() {
+			member, err := p.CreateCoParticipantAccount(v)
+			if err != nil {
+				wg.Done()
+				return
+			}
+			teamMembers = append(teamMembers, eventsdtos.TeamParticipantInfo{
+				Email:    member.Email,
+				Password: member.Password,
+			})
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 	// emit created event
 
-	return dataResponse, err
+	events.EmitParticipantAccountCreated(&eventsdtos.ParticipantAccountCreatedEventData{
+		TeamParticipants: teamMembers,
+		TeamLeadEmail:    input.TeamLeadEmail,
+		EventData:        eventsdtos.EventData{EventName: "ParticipantAccountCreated"},
+		TeamName:         input.TeamName,
+		ParticipantType:  "TEAM",
+	})
+
+	return dataInput, err
 }
 
-func (p *Participant) CreateCoParticipantAccount(email string) {
+type CoParticipantCreatedData struct {
+	Email    string
+	Password string
+}
+
+func (p *Participant) CreateCoParticipantAccount(email string) (*CoParticipantCreatedData, error) {
+	isFound := cache.FindEmailInCache(email)
+	if isFound == true {
+		utils.MySugarLogger.Error("Email already exists")
+		return nil, errors.New("email already exists")
+	}
 	password := utils.GeneratePassword()
 	passwordHash, _ := utils.GenerateHashPassword(password)
 	createDataInput :=
@@ -81,7 +118,15 @@ func (p *Participant) CreateCoParticipantAccount(email string) {
 			Email:        email,
 			PasswordHash: passwordHash,
 			Role:         "PARTICIPANT"}
-	_, err = data.CreateAccount(createDataInput)
+	_, err := data.CreateAccount(createDataInput)
+	if err != nil {
+		return nil, err
+	}
+	cache.AddEmailToCache(email)
+	return &CoParticipantCreatedData{
+		Email:    createDataInput.Email,
+		Password: password,
+	}, nil
 }
 
 func (p *Participant) GetParticipant(input string) error {

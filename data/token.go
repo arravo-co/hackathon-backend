@@ -7,40 +7,15 @@ import (
 	"time"
 
 	"github.com/arravoco/hackathon_backend/db"
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type TokenData struct {
-	Id             interface{} `bson:"_id"`
-	Token          string      `bson:"token"`
-	TokenType      string      `bson:"token_type"`
-	TokenTypeValue string      `bson:"token_type_value"`
-	Scope          string      `bson:"scope"`
-	TTL            time.Time   `bson:"ttl"`
-	Status         string      `bson:"status"`
-}
-
-type CreateTokenData struct {
-	Token          string    `bson:"token"`
-	TokenType      string    `bson:"token_type"`
-	TokenTypeValue string    `bson:"token_type_value"`
-	Scope          string    `bson:"scope"`
-	TTL            time.Time `bson:"ttl"`
-	Status         string    `bson:"status"`
-}
-
-type VerifyTokenData struct {
-	Token          string `bson:"token"`
-	TokenType      string `bson:"token_type"`
-	TokenTypeValue string `bson:"token_type_value"`
-	Scope          string `bson:"scope"`
-}
-
-func CreateToken(dataInput *CreateTokenData) (*TokenData, error) {
+func CreateToken(dataInput *exports.CreateTokenData) (*exports.TokenData, error) {
 	tokenCol, err := db.GetTokenCollection()
-	tokenInfo := &TokenData{}
+	tokenInfo := &exports.TokenData{}
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +31,9 @@ func CreateToken(dataInput *CreateTokenData) (*TokenData, error) {
 	return tokenInfo, err
 }
 
-func VerifyToken(dataInput *VerifyTokenData) error {
+func VerifyToken(dataInput *exports.VerifyTokenData) error {
 	fmt.Printf("\n%+v\n", dataInput)
-	var tokenInfo TokenData
+	var tokenInfo exports.TokenData
 	tokenCol, err := db.GetTokenCollection()
 	if err != nil {
 		return err

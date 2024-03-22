@@ -12,6 +12,7 @@ require (
 	github.com/matcornic/hermes/v2 v2.1.0
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/resend/resend-go/v2 v2.6.0
+	github.com/sethvargo/go-password v0.2.0
 	github.com/vansante/go-event-emitter v1.0.2
 	go.mongodb.org/mongo-driver v1.14.0
 	go.uber.org/zap v1.27.0
@@ -45,7 +46,6 @@ require (
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/olekukonko/tablewriter v0.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
-	github.com/sethvargo/go-password v0.2.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/stretchr/testify v1.9.0 // indirect

@@ -184,12 +184,6 @@ func CreateIndividualParticipantAccount(dataToSave *CreateIndividualParticipantA
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	events.EmitParticipantAccountCreated(&eventsdtos.ParticipantAccountCreatedEventData{
-		ParticipantEmail: dataToSave.Email,
-		LastName:         dataToSave.LastName,
-		FirstName:        dataToSave.FirstName,
-		EventData:        eventsdtos.EventData{EventName: "ParticipantAccountCreated"},
-	})
 	return dataToSave, err
 }
 

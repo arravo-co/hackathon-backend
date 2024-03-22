@@ -7,8 +7,10 @@ import (
 
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
+	"github.com/arravoco/hackathon_backend/utils/email"
 	"github.com/labstack/echo/v4"
 )
 
@@ -30,6 +32,69 @@ type BasicLoginSuccessResponseData struct {
 type BasicLoginDTO struct {
 	Identifier string ` validate:"required" json:"identifier"`
 	Password   string ` validate:"required" json:"password"`
+}
+
+type InitiateEmailVerificationFailureResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+type InitiateEmailVerificationSuccessResponse struct {
+	Code    int                                           `json:"code"`
+	Message string                                        `json:"message"`
+	Data    *InitiateEmailVerificationSuccessResponseData `json:"data"`
+}
+
+type InitiateEmailVerificationSuccessResponseData struct {
+	Email string `json:"email"`
+}
+
+type CompleteEmailVerificationFailureResponse struct {
+	ResponseData
+}
+type CompleteEmailVerificationSuccessResponse struct {
+	ResponseData
+	Data *CompleteEmailVerificationSuccessResponseData `json:"data"`
+}
+
+type CompleteEmailVerificationSuccessResponseData struct {
+	Email string `json:"email"`
+}
+
+type PasswordChangeFailureResponse struct {
+	ResponseData
+}
+type PasswordChangeSuccessResponse struct {
+	ResponseData
+	Data *PasswordChangeSuccessResponseData `json:"data"`
+}
+
+type PasswordChangeSuccessResponseData struct {
+}
+
+type AuthUserInfoFetchFailureResponse struct {
+	ResponseData
+}
+
+type AuthUserInfoFetchSuccessResponse struct {
+	ResponseData
+	Data *AuthUserInfoFetchSuccessResponseData `json:"data"`
+}
+
+type AuthUserInfoFetchSuccessResponseData struct {
+	entity.Participant
+	entity.Judge
+}
+
+type CompletePasswordRecoveryFailureResponse struct {
+	ResponseData
+}
+type CompletePasswordRecoverySuccessResponse struct {
+	ResponseData
+	Data *CompleteEmailVerificationSuccessResponseData `json:"data"`
+}
+
+type CompletePasswordRecoverySuccessResponseData struct {
+	Email string `json:"email"`
 }
 
 // @Description	Log a user in
@@ -54,7 +119,7 @@ func BasicLogin(c echo.Context) error {
 		})
 	}
 
-	dataResponse, err := authutils.BasicLogin(&authutils.BasicLoginData{
+	dataResponse, err := authutils.BasicLogin(&exports.AuthUtilsBasicLoginData{
 		Identifier: data.Identifier,
 		Password:   data.Password,
 	})
@@ -72,20 +137,6 @@ func BasicLogin(c echo.Context) error {
 			AccessToken: dataResponse.AccessToken,
 		},
 	})
-}
-
-type InitiateEmailVerificationFailureResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-type InitiateEmailVerificationSuccessResponse struct {
-	Code    int                                           `json:"code"`
-	Message string                                        `json:"message"`
-	Data    *InitiateEmailVerificationSuccessResponseData `json:"data"`
-}
-
-type InitiateEmailVerificationSuccessResponseData struct {
-	Email string `json:"email"`
 }
 
 // @Summary		Verify user email address
@@ -110,7 +161,7 @@ func InitiateEmailVerification(c echo.Context) error {
 	}
 
 	ttl := time.Now().Add(time.Minute * 15)
-	err := authutils.InitiateEmailVerification(&authutils.ConfigTokenData{
+	tokenData, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		TTL:   ttl,
 		Email: emailToVerify,
 	})
@@ -120,23 +171,18 @@ func InitiateEmailVerification(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+
+	email.SendEmailVerificationEmail(&email.SendEmailVerificationEmailData{
+		Email:    emailToVerify,
+		Token:    tokenData.Token,
+		TokenTTL: tokenData.TTL,
+		Subject:  "Email Verification",
+	})
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
 		Code:    200,
 		Message: "Verification email sent successfully",
 		Data:    &InitiateEmailVerificationSuccessResponseData{},
 	})
-}
-
-type CompleteEmailVerificationFailureResponse struct {
-	ResponseData
-}
-type CompleteEmailVerificationSuccessResponse struct {
-	ResponseData
-	Data *CompleteEmailVerificationSuccessResponseData `json:"data"`
-}
-
-type CompleteEmailVerificationSuccessResponseData struct {
-	Email string `json:"email"`
 }
 
 // @Summary		Verify user email address
@@ -171,7 +217,7 @@ func CompleteEmailVerification(c echo.Context) error {
 		})
 	}
 
-	err = authutils.CompleteEmailVerification(&authutils.CompleteEmailVerificationData{
+	err = authutils.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
 		Token: dataDto.Token,
 		Email: dataDto.Email,
 	})
@@ -183,6 +229,10 @@ func CompleteEmailVerification(c echo.Context) error {
 			},
 		})
 	}
+	email.SendEmailVerificationCompleteEmail(&email.SendEmailVerificationCompleteEmailData{
+		Email:   dataDto.Email,
+		Subject: "Email Verification Success",
+	})
 	return c.JSON(200, &CompleteEmailVerificationSuccessResponse{
 		ResponseData{
 			Code:    200,
@@ -191,17 +241,6 @@ func CompleteEmailVerification(c echo.Context) error {
 			Email: dataDto.Email,
 		},
 	})
-}
-
-type PasswordChangeFailureResponse struct {
-	ResponseData
-}
-type PasswordChangeSuccessResponse struct {
-	ResponseData
-	Data *PasswordChangeSuccessResponseData `json:"data"`
-}
-
-type PasswordChangeSuccessResponseData struct {
 }
 
 // @Summary		Verify user email address
@@ -241,20 +280,6 @@ func ChangePassword(c echo.Context) error {
 			Message: "Password change completed successfully",
 		}, &PasswordChangeSuccessResponseData{},
 	})
-}
-
-type AuthUserInfoFetchFailureResponse struct {
-	ResponseData
-}
-
-type AuthUserInfoFetchSuccessResponse struct {
-	ResponseData
-	Data *AuthUserInfoFetchSuccessResponseData `json:"data"`
-}
-
-type AuthUserInfoFetchSuccessResponseData struct {
-	entity.Participant
-	entity.Judge
 }
 
 // @Summary		Get auth user information
@@ -365,7 +390,7 @@ func InitiatePasswordRecovery(c echo.Context) error {
 	}
 
 	ttl := time.Now().Add(time.Minute * 15)
-	err := authutils.InitiateEmailVerification(&authutils.ConfigTokenData{
+	dataResult, err := authutils.InitiatePasswordRecovery(&exports.AuthUtilsConfigTokenData{
 		TTL:   ttl,
 		Email: emailToVerify,
 	})
@@ -376,24 +401,19 @@ func InitiatePasswordRecovery(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+
+	email.SendPasswordRecoveryEmail(&email.SendPasswordRecoveryEmailData{
+		Email:    dataResult.TokenTypeValue,
+		Token:    dataResult.Token,
+		TokenTTL: dataResult.TTL,
+		Subject:  "Password Recovery",
+	})
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
 
 		Code:    200,
 		Message: "Verification of email sent successfully",
 		Data:    &InitiateEmailVerificationSuccessResponseData{},
 	})
-}
-
-type CompletePasswordRecoveryFailureResponse struct {
-	ResponseData
-}
-type CompletePasswordRecoverySuccessResponse struct {
-	ResponseData
-	Data *CompleteEmailVerificationSuccessResponseData `json:"data"`
-}
-
-type CompletePasswordRecoverySuccessResponseData struct {
-	Email string `json:"email"`
 }
 
 // @Summary		Verify user email address
@@ -428,7 +448,7 @@ func CompletePasswordRecovery(c echo.Context) error {
 		})
 	}
 
-	err = authutils.CompletePasswordRecovery(&authutils.CompletePasswordRecoveryData{
+	_, err = authutils.CompletePasswordRecovery(&exports.AuthUtilsCompletePasswordRecoveryData{
 		Token:       dataDto.Token,
 		Email:       dataDto.Email,
 		NewPassword: dataDto.NewPassword,
@@ -441,6 +461,11 @@ func CompletePasswordRecovery(c echo.Context) error {
 			},
 		})
 	}
+
+	email.SendPasswordRecoveryCompleteEmail(&email.SendPasswordRecoveryCompleteEmailData{
+		Email:   "",
+		Subject: "Password Recovery Success",
+	})
 	return c.JSON(200, &CompletePasswordRecoverySuccessResponse{
 		ResponseData{
 			Code:    200,
