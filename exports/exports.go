@@ -4,8 +4,20 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 )
 
+type AuthUtilsInterface interface {
+	BasicLogin(dataInput *AuthUtilsBasicLoginData) (*AuthUtilsBasicLoginSuccessData, error)
+	GenerateAccessToken(payload *AuthUtilsPayload) (string, error)
+	GetJWTConfig() echojwt.Config
+	VerifyToken(dataInput *AuthUtilsVerifyTokenData) error
+	InitiateEmailVerification(dataInput *AuthUtilsConfigTokenData) (*TokenData, error)
+	CompleteEmailVerification(dataInput *AuthUtilsCompleteEmailVerificationData) error
+	ChangePassword(dataInput *AuthUtilsChangePasswordData) error
+	InitiatePasswordRecovery(dataInput *AuthUtilsConfigTokenData) (*TokenData, error)
+	CompletePasswordRecovery(dataInput *AuthUtilsCompletePasswordRecoveryData) (interface{}, error)
+}
 type AuthUtilsBasicLoginData struct {
 	Identifier string
 	Password   string

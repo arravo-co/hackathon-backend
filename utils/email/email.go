@@ -1,12 +1,14 @@
 package email
 
 import (
+	"bytes"
 	"fmt"
-	"strconv"
+	"html/template"
 	"strings"
 	"time"
 
 	"github.com/arravoco/hackathon_backend/config"
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/matcornic/hermes/v2"
 	"github.com/resend/resend-go/v2"
 )
@@ -15,6 +17,33 @@ type SendEmailData struct {
 	Email   string
 	Subject string
 	Message *hermes.Body
+}
+
+type SendEmailHtmlData struct {
+	Email   string
+	Subject string
+	Message string
+}
+
+func SendEmailHtml(data *SendEmailHtmlData) error {
+	apiKey := config.GetResendAPIKey()
+
+	client := resend.NewClient(apiKey)
+
+	params := &resend.SendEmailRequest{
+		From:    config.GetResendFromEmail(),
+		To:      []string{data.Email},
+		Subject: data.Subject,
+		Html:    data.Message,
+	}
+
+	sent, err := client.Emails.Send(params)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+		return err
+	}
+	fmt.Printf("%#v", sent)
+	return nil
 }
 
 func SendEmail(data *SendEmailData) error {
@@ -48,46 +77,26 @@ type SendIndividualWelcomeEmailData struct {
 	FirstName string
 	Email     string
 	Subject   string
-	TTL       time.Time
+	TTL       int
 	Token     string
 }
 
 func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData) {
-	body := &hermes.Body{
-		Name: "John",
-		Intros: []string{
-			"Welcome to Your Product!",
-		},
-		Dictionary: []hermes.Entry{
-			hermes.Entry{Key: "FirstName", Value: data.FirstName},
-			hermes.Entry{Key: "LastName", Value: data.FirstName},
-			hermes.Entry{Key: "Token", Value: data.Token},
-			hermes.Entry{Key: "Expiry", Value: strconv.Itoa(data.TTL.Minute())},
-		},
-		Actions: []hermes.Action{
-			{
-				Instructions: "Please verify your email by clicking the button below:",
-				Button: hermes.Button{
-					Color: "#22BC66",
-					Text:  "Verify Email",
-					Link:  "https://yourproduct.com/verify?token=your_verification_token",
-				},
-			},
-			{
-				Instructions: "Alternatively, you can copy and paste the following token in the verification page:",
-				InviteCode:   "your_verification_token",
-			},
-		},
-		Outros: []string{
-			"If you have any questions, feel free to reach out to us at support@yourproduct.com.",
-			"Thank you for choosing Your Product!",
-		},
+	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
 	}
-	SendEmail(&SendEmailData{
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
 		Email:   data.Email,
 		Message: body,
 		Subject: data.Subject,
 	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+	}
 }
 
 func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {

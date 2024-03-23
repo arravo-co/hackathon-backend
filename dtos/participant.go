@@ -36,13 +36,9 @@ type RegisterNewIndividualParticipantDTO struct {
 }
 
 type RegisterNewTeamParticipantDTO struct {
-	FirstName           string   `validate:"min=2,omitempty" json:"first_name"`
 	TeamName            string   `validate:"min=2" json:"team_name"`
 	TeamLeadEmail       string   `validate:"email,omitempty" json:"team_lead_email"`
-	CoParticipantEmails []string `validate:"max=8,unique,notblank,dive,email," json:"co_participant_emails"`
-	Password            string   `validate:"min=7,omitempty" json:"password"`
-	ConfirmPassword     string   `validate:"eqfield=Password,omitempty" json:"confirm_password"`
-	GithubAddress       string   `validate:"url,omitempty" json:"github_address"`
+	CoParticipantEmails []string `validate:"max=8,min=1,unique,required,dive,email" json:"co_participant_emails"`
 }
 
 type IndividualParticipantCreatedResponseDTO struct {

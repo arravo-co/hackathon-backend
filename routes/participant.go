@@ -3,16 +3,16 @@ package routes
 import (
 	"net/http"
 
-	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/labstack/echo/v4"
 )
 
 type RegisterIndividualParticipantSuccessResponse struct {
-	Code    int                                         `json:"code"`
-	Message string                                      `json:"message"`
-	Data    data.CreateIndividualParticipantAccountData `data:"data"`
+	Code    int                                            `json:"code"`
+	Message string                                         `json:"message"`
+	Data    exports.CreateIndividualParticipantAccountData `data:"data"`
 }
 type RegisterIndividualParticipantFailResponse struct {
 	Code    int    `json:"code"`
@@ -23,8 +23,8 @@ type RegisterIndividualParticipantFailResponse struct {
 // @Summary		Register new participant
 // @Tags			Participants
 // @Produce		json
-// @Success		201	{object}	RegisterParticipantSuccessResponse
-// @Failure		400	{object}	RegisterParticipantFailResponse
+// @Success		201	{object}	RegisterIndividualParticipantSuccessResponse
+// @Failure		400	{object}	RegisterIndividualParticipantFailResponse
 // @Router			/api/participants/individual               [post]
 func RegisterIndividualParticipant(c echo.Context) error {
 	data := dtos.RegisterNewIndividualParticipantDTO{}
@@ -54,9 +54,9 @@ func RegisterIndividualParticipant(c echo.Context) error {
 }
 
 type RegisterTeamParticipantSuccessResponse struct {
-	Code    int                                   `json:"code"`
-	Message string                                `json:"message"`
-	Data    data.CreateTeamParticipantAccountData `data:"data"`
+	Code    int                                      `json:"code"`
+	Message string                                   `json:"message"`
+	Data    exports.CreateTeamParticipantAccountData `data:"data"`
 }
 type RegisterTeamParticipantFailResponse struct {
 	Code    int    `json:"code"`
@@ -71,7 +71,7 @@ type RegisterTeamParticipantFailResponse struct {
 // @Failure		400	{object}	RegisterTeamParticipantFailResponse
 // @Router			/api/participants/team               [post]
 func RegisterTeamParticipant(c echo.Context) error {
-	data := dtos.RegisterNewIndividualParticipantDTO{}
+	data := dtos.RegisterNewTeamParticipantDTO{}
 	err := c.Bind(&data)
 	if err != nil {
 		return err
@@ -80,11 +80,11 @@ func RegisterTeamParticipant(c echo.Context) error {
 	err = validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
-			Code:    echo.ErrBadRequest.Code,
+			Code:    http.StatusBadRequest,
 			Message: err.Error(),
 		})
 	}
-	_, err = newParticipant.RegisterIndividual(data)
+	resData, err := newParticipant.RegisterTeam(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
 			Code:    echo.ErrBadRequest.Code,
@@ -93,6 +93,15 @@ func RegisterTeamParticipant(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, &RegisterTeamParticipantSuccessResponse{
 		Code: http.StatusCreated,
-		//Data: *responseData,
+		Data: exports.CreateTeamParticipantAccountData{
+			TeamLeadEmail:       resData.TeamLeadEmail,
+			CoParticipantEmails: resData.CoParticipantEmails,
+			TeamName:            resData.TeamName,
+			HackathonId:         resData.HackathonId,
+			ParticipantId:       resData.ParticipantId,
+			Type:                resData.ParticipantId,
+			GithubAddress:       resData.GithubAddress,
+			Role:                resData.Role,
+		},
 	})
 }

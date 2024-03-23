@@ -2,10 +2,8 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -34,19 +32,9 @@ func GetPort() (int, error) {
 	return strconv.Atoi(portString)
 }
 
-func GetRedisURL() (string, error) {
-	port, _ := GetRedisPort()
-	host, _ := GetRedisHost()
-	password, _ := GetRedisPassword()
-	username, _ := GetRedisUsername()
-	portStr := strconv.Itoa(port)
-	start := "redis://"
-	cred := strings.Join([]string{username, password}, ":")
-	cred_host := strings.Join([]string{cred, host}, "@")
-	cred_host_port := strings.Join([]string{cred_host, portStr}, ":")
-	url := strings.Join([]string{start, cred_host_port}, "")
-	fmt.Printf("%s\n", url)
-	return url, nil
+func GetRedisURL() string {
+	url := os.Getenv("REDIS_URL")
+	return url
 }
 
 func GetRedisPort() (int, error) {

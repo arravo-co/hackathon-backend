@@ -4,14 +4,11 @@ import (
 	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
 )
 
-type AuthUtil interface {
-	InitiateEmailVerification(dataInput *exports.AuthUtilsConfigTokenData) (*exports.TokenData, error)
-}
-
-func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreatedEventData, authutils AuthUtil, otherParams ...interface{}) {
+func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreatedEventData, otherParams ...interface{}) {
 	participantType := eventDTOData.ParticipantType
 	switch participantType {
 	case "TEAM":
@@ -23,14 +20,16 @@ func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreat
 			TTL:   ttl,
 		})
 		if err != nil {
-
+			exports.MySugarLogger.Error(err)
+			return
 		}
 		email.SendIndividualParticipantWelcomeEmail(&email.SendIndividualWelcomeEmailData{
 			Email:     eventDTOData.ParticipantEmail,
 			LastName:  eventDTOData.LastName,
 			FirstName: eventDTOData.FirstName,
-			Subject:   "Welcome onboard",
+			Subject:   " Welcome to Arravo's Hackathon - Confirm Your Email Address",
 			Token:     dataToken.Token,
+			TTL:       dataToken.TTL.Minute(),
 		})
 
 	}

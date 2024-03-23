@@ -20,6 +20,9 @@ func init() {
 	MongoClient = client
 }
 
+type Mongo struct {
+}
+
 func GetMongoConn() (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -66,24 +69,55 @@ func GetCollection(colName string) (*mongo.Collection, error) {
 	return col, nil
 }
 
-func GetAccountCollection() (*mongo.Collection, error) {
+func (m Mongo) GetAccountCollection() (*mongo.Collection, error) {
 	col, err := GetCollection("accounts")
+	if err != nil {
+		fmt.Printf("\n%s\n", err.Error())
+		return nil, err
+	}
 	err = CreateIndexes()
 	if err != nil {
-		fmt.Printf("%s", err.Error())
+		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
 	}
 	return col, nil
 }
 
-func GetParticipantCollection() (*mongo.Collection, error) {
+func (m Mongo) GetParticipantCollection() (*mongo.Collection, error) {
 	col, err := GetCollection("participants")
+
+	if err != nil {
+		fmt.Printf("\n%s\n", err.Error())
+		return nil, err
+	}
+	err = CreateParticipantColIndexes()
+	if err != nil {
+		fmt.Printf("\n%s\n", err.Error())
+		return nil, err
+	}
 	return col, err
 }
 
-func GetTokenCollection() (*mongo.Collection, error) {
+func (m Mongo) GetTokenCollection() (*mongo.Collection, error) {
 	col, err := GetCollection("tokens")
 	return col, err
+}
+
+func CreateParticipantColIndexes() error {
+	db, err := GetDefaultDB()
+	if err != nil {
+		return err
+	}
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{"participant_id", -1}},
+		Options: options.Index().SetUnique(true),
+	}
+	indexName, err := db.Collection("participants").Indexes().CreateOne(context.TODO(), indexModel)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("\n%s\n", indexName)
+	return nil
 }
 
 func CreateIndexes() error {
