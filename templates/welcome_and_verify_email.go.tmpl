@@ -1,0 +1,34 @@
+<div>
+<p>
+Dear {{.FirstName}} {{.LastName}},
+</p>
+
+<p>
+Welcome to Arravo's 2024 Hackathon! We are thrilled to have you join our hackathon.
+</p>
+
+<p>
+To get started, we need to confirm your email address. Please click the button below to verify your email:
+</p>
+
+<p style="text-align:center;" >
+<a style="background-color:powderblue;display:inline-block;padding:10px;">Verify</a>
+</p>
+<p>
+ If the button doesn't work, you can also copy and paste the following link into your browser:
+ </p>
+<p style="text-align:center;">
+ <strong>{{.Token}}</strong>
+</p>
+
+Please note that this link will expire in {{.TTL}} minutes for security reasons.
+
+<p>
+    If you have any questions or need assistance, feel free to reply to this email. We're here to help!
+</p>
+
+Thank you,
+<h3>Eunice King</h3>
+<h4>VP, Digital Innovation</h4>
+<h4>Arravo</h4> 
+</div>

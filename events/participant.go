@@ -1,17 +1,17 @@
 package events
 
 import (
-	eventsdtos "github.com/arravoco/hackathon_backend/events_dtos"
+	"github.com/arravoco/hackathon_backend/exports"
 )
 
-func EmitParticipantAccountCreated(input *eventsdtos.ParticipantAccountCreatedEventData) {
+func EmitParticipantAccountCreated(input *exports.ParticipantAccountCreatedEventData) {
 	EventEmitter.EmitEvent(ParticipantAccountCreatedEvent, input)
 }
 
-func RegisterParticipantCreatedEvent(fn eventsdtos.ParticipantAccountCreatedEventHandler) {
+func RegisterParticipantCreatedEvent(fn exports.ParticipantAccountCreatedEventHandler) {
 	EventEmitter.AddListener(ParticipantAccountCreatedEvent, func(arguments ...interface{}) {
-		arg := arguments[0].(*eventsdtos.ParticipantAccountCreatedEventData)
+		arg0 := arguments[0].(*exports.ParticipantAccountCreatedEventData)
 		args := arguments[1:]
-		fn(arg, args)
+		fn(arg0, args)
 	})
 }

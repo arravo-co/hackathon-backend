@@ -1,4 +1,4 @@
-package eventsdtos
+package exports
 
 type EventData struct {
 	EventName string

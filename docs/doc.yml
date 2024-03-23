@@ -1,43 +1,5 @@
 components:
   schemas:
-    github.com.arravoco.hackathon_backend.data.CreateParticipantAccountData:
-      properties:
-        Email:
-          type: string
-        FirstName:
-          type: string
-        Gender:
-          type: string
-        GithubAddress:
-          type: string
-        LastName:
-          type: string
-        LinkedInAddress:
-          type: string
-        PasswordHash:
-          type: string
-        Role:
-          type: string
-        State:
-          type: string
-      type: object
-    github.com.arravoco.hackathon_backend.data.CreateUserAccountData:
-      properties:
-        Email:
-          type: string
-        FirstName:
-          type: string
-        Gender:
-          type: string
-        LastName:
-          type: string
-        PasswordHash:
-          type: string
-        Role:
-          type: string
-        State:
-          type: string
-      type: object
     github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO:
       properties:
         email:
@@ -129,6 +91,98 @@ components:
         state:
           type: string
       type: object
+    github.com.arravoco.hackathon_backend.exports.CreateAccountData:
+      properties:
+        Email:
+          type: string
+        FirstName:
+          type: string
+        Gender:
+          type: string
+        LastName:
+          type: string
+        PasswordHash:
+          type: string
+        PhoneNumber:
+          type: string
+        Role:
+          type: string
+        State:
+          type: string
+      type: object
+    github.com.arravoco.hackathon_backend.exports.CreateIndividualParticipantAccountData:
+      properties:
+        Email:
+          type: string
+        FirstName:
+          type: string
+        Gender:
+          type: string
+        LastName:
+          type: string
+        LinkedInAddress:
+          type: string
+        PasswordHash:
+          type: string
+        PhoneNumber:
+          type: string
+        Role:
+          type: string
+        State:
+          type: string
+      type: object
+    github.com.arravoco.hackathon_backend.exports.CreateJudgeAccountData:
+      properties:
+        Email:
+          type: string
+        FirstName:
+          type: string
+        Gender:
+          type: string
+        LastName:
+          type: string
+        PasswordHash:
+          type: string
+        PhoneNumber:
+          type: string
+        Role:
+          type: string
+        State:
+          type: string
+      type: object
+    github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData:
+      properties:
+        CoParticipantEmails:
+          items:
+            type: string
+          type: array
+        Email:
+          type: string
+        FirstName:
+          type: string
+        Gender:
+          type: string
+        GithubAddress:
+          type: string
+        HackathonId:
+          type: string
+        LastName:
+          type: string
+        ParticipantEmail:
+          type: string
+        PasswordHash:
+          type: string
+        Role:
+          type: string
+        State:
+          type: string
+        TeamLeadEmail:
+          type: string
+        TeamName:
+          type: string
+        Type:
+          type: string
+      type: object
     github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse:
       properties:
         code:
@@ -187,6 +241,7 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData'
+          type: object
         message:
           type: string
       type: object
@@ -208,6 +263,7 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData'
+          type: object
         message:
           type: string
       type: object
@@ -274,17 +330,51 @@ components:
       type: object
     github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponseData:
       type: object
-    github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse:
+    github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantFailResponse:
       properties:
         code:
           type: integer
         message:
           type: string
       type: object
-    github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse:
+    github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantSuccessResponse:
       properties:
         Data:
-          $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.data.CreateParticipantAccountData'
+          $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateIndividualParticipantAccountData'
+          type: object
+        code:
+          type: integer
+        message:
+          type: string
+      type: object
+    github.com.arravoco.hackathon_backend.routes.RegisterJudgeFailResponse:
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      type: object
+    github.com.arravoco.hackathon_backend.routes.RegisterJudgeSuccessResponse:
+      properties:
+        Data:
+          $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateJudgeAccountData'
+          type: object
+        code:
+          type: integer
+        message:
+          type: string
+      type: object
+    github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse:
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      type: object
+    github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse:
+      properties:
+        Data:
+          $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData'
           type: object
         code:
           type: integer
@@ -309,7 +399,7 @@ info:
   termsOfService: http://arravo.co/contact
   title: Hackathon Backend API
   version: 1.0.0
-openapi: 3.0.0
+openapi: 3.1.0
 paths:
   /api/auth/login:
     post:
@@ -579,15 +669,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse'
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterJudgeSuccessResponse'
           description: ""
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse'
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterJudgeFailResponse'
           description: ""
-  /api/participants:
+  /api/participants/individual:
     post:
       description: ' Register new participant'
       responses:
@@ -595,13 +685,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse'
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantSuccessResponse'
           description: ""
         "400":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse'
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantFailResponse'
+          description: ""
+  /api/participants/team:
+    post:
+      description: ' Register new participant'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse'
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse'
           description: ""
 servers:
 - description: ' Localhost'
