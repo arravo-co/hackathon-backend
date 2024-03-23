@@ -23,7 +23,7 @@ func ValidateGender(fl validator.FieldLevel) bool {
 	return fl.Field().String() != ""
 }
 
-type RegisterNewParticipantDTO struct {
+type RegisterNewIndividualParticipantDTO struct {
 	FirstName       string `validate:"min=2,omitempty" json:"first_name"`
 	LastName        string `validate:"min=2,omitempty" json:"last_name"`
 	Email           string `validate:"email,omitempty" json:"email"`
@@ -35,7 +35,13 @@ type RegisterNewParticipantDTO struct {
 	State           string `json:"state,omitempty"`
 }
 
-type ParticipantAddResponseDTO struct {
+type RegisterNewTeamParticipantDTO struct {
+	TeamName            string   `validate:"min=2" json:"team_name"`
+	TeamLeadEmail       string   `validate:"email,omitempty" json:"team_lead_email"`
+	CoParticipantEmails []string `validate:"max=8,min=1,unique,required,dive,email" json:"co_participant_emails"`
+}
+
+type IndividualParticipantCreatedResponseDTO struct {
 	FirstName       string `json:"first_name,omitempty"`
 	LastName        string `json:"last_name,omitempty"`
 	Email           string `json:"email,omitempty"`

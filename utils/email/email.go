@@ -1,11 +1,14 @@
 package email
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"strings"
 	"time"
 
 	"github.com/arravoco/hackathon_backend/config"
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/matcornic/hermes/v2"
 	"github.com/resend/resend-go/v2"
 )
@@ -14,6 +17,33 @@ type SendEmailData struct {
 	Email   string
 	Subject string
 	Message *hermes.Body
+}
+
+type SendEmailHtmlData struct {
+	Email   string
+	Subject string
+	Message string
+}
+
+func SendEmailHtml(data *SendEmailHtmlData) error {
+	apiKey := config.GetResendAPIKey()
+
+	client := resend.NewClient(apiKey)
+
+	params := &resend.SendEmailRequest{
+		From:    config.GetResendFromEmail(),
+		To:      []string{data.Email},
+		Subject: data.Subject,
+		Html:    data.Message,
+	}
+
+	sent, err := client.Emails.Send(params)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+		return err
+	}
+	fmt.Printf("%#v", sent)
+	return nil
 }
 
 func SendEmail(data *SendEmailData) error {
@@ -42,14 +72,34 @@ func SendEmail(data *SendEmailData) error {
 	return nil
 }
 
-type SendWelcomeEmailData struct {
+type SendIndividualWelcomeEmailData struct {
 	LastName  string
 	FirstName string
 	Email     string
 	Subject   string
+	TTL       int
+	Token     string
 }
 
-func SendWelcomeEmail(data *SendWelcomeEmailData) {
+func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData) {
+	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+	}
+}
+
+func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {
 	body := &hermes.Body{
 		Name: strings.Join([]string{data.LastName, data.FirstName}, " "),
 	}

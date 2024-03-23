@@ -6,67 +6,44 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/arravoco/hackathon_backend/db"
-	"github.com/arravoco/hackathon_backend/utils"
+	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type TokenData struct {
-	Id             interface{} `bson:"_id"`
-	Token          string      `bson:"token"`
-	TokenType      string      `bson:"token_type"`
-	TokenTypeValue string      `bson:"token_type_value"`
-	Scope          string      `bson:"scope"`
-	TTL            time.Time   `bson:"ttl"`
-	Status         string      `bson:"status"`
-}
-
-type CreateTokenData struct {
-	Token          string    `bson:"token"`
-	TokenType      string    `bson:"token_type"`
-	TokenTypeValue string    `bson:"token_type_value"`
-	Scope          string    `bson:"scope"`
-	TTL            time.Time `bson:"ttl"`
-	Status         string    `bson:"status"`
-}
-
-type VerifyTokenData struct {
-	Token          string `bson:"token"`
-	TokenType      string `bson:"token_type"`
-	TokenTypeValue string `bson:"token_type_value"`
-	Scope          string `bson:"scope"`
-}
-
-func CreateToken(dataInput *CreateTokenData) (*TokenData, error) {
-	tokenCol, err := db.GetTokenCollection()
-	tokenInfo := &TokenData{}
+func UpsertToken(dataInput *exports.UpsertTokenData) (*exports.TokenData, error) {
+	fmt.Printf("\nuuuuuuuuuuuuuuuuuuuuuuuuuu\n%+v\npppppppppppppppppppppppppp\n", dataInput)
+	tokenCol, err := Datasource.GetTokenCollection()
 	if err != nil {
 		return nil, err
 	}
-	filter := struct {
-		Token string
-	}{}
+	tokenInfo := &exports.TokenData{}
+	filter := bson.M{
+		"token_type":       dataInput.TokenType,
+		"token_type_value": dataInput.TokenTypeValue,
+	}
+	dataInput.UpdatedAt = time.Now()
 	var upsert bool = true
-	updateDoc := bson.M{"$set": dataInput}
-	result := tokenCol.FindOneAndUpdate(context.TODO(), filter, updateDoc, &options.FindOneAndUpdateOptions{
-		Upsert: &upsert,
-	})
-	err = result.Decode(tokenInfo)
+	returnDoc := options.After
+	updateDoc := bson.M{"$set": dataInput, "$setOnInsert": bson.M{"created_at": time.Now()}}
+	err = tokenCol.FindOneAndUpdate(context.TODO(), filter, updateDoc, &options.FindOneAndUpdateOptions{
+		Upsert:         &upsert,
+		ReturnDocument: &returnDoc,
+	}).Decode(tokenInfo)
 	return tokenInfo, err
 }
 
-func VerifyToken(dataInput *VerifyTokenData) error {
+func VerifyToken(dataInput *exports.VerifyTokenData) error {
 	fmt.Printf("\n%+v\n", dataInput)
-	var tokenInfo TokenData
-	tokenCol, err := db.GetTokenCollection()
+	var tokenInfo exports.TokenData
+	tokenCol, err := Datasource.GetTokenCollection()
 	if err != nil {
 		return err
 	}
 	result := tokenCol.FindOne(context.TODO(), dataInput)
 	err = result.Decode(&tokenInfo)
 	if err != nil {
-		utils.MySugarLogger.Error(err)
+		exports.MySugarLogger.Error(err)
 		return errors.New("unable to verify token")
 	}
 	if tokenInfo.Token == "" {

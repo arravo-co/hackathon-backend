@@ -3,16 +3,16 @@ package routes
 import (
 	"net/http"
 
-	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/labstack/echo/v4"
 )
 
 type RegisterJudgeSuccessResponse struct {
-	Code    int                         `json:"code"`
-	Message string                      `json:"message"`
-	Data    data.CreateJudgeAccountData `data:"data"`
+	Code    int                            `json:"code"`
+	Message string                         `json:"message"`
+	Data    exports.CreateJudgeAccountData `data:"data"`
 }
 type RegisterJudgeFailResponse struct {
 	Code    int    `json:"code"`
@@ -23,8 +23,8 @@ type RegisterJudgeFailResponse struct {
 // @Summary		Register new participant
 // @Tags			Judges
 // @Produce		json
-// @Success		201	{object}	RegisterParticipantSuccessResponse
-// @Failure		400	{object}	RegisterParticipantFailResponse
+// @Success		201	{object}	RegisterJudgeSuccessResponse
+// @Failure		400	{object}	RegisterJudgeFailResponse
 // @Router			/api/judges               [post]
 func RegisterJudge(c echo.Context) error {
 	data := dtos.RegisterNewJudgeDTO{}
