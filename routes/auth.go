@@ -11,6 +11,7 @@ import (
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -69,6 +70,11 @@ type PasswordChangeSuccessResponse struct {
 }
 
 type PasswordChangeSuccessResponseData struct {
+	FirstName     string `json:"first_name"`
+	LastName      string `json:"last_name"`
+	Email         string `json:"email"`
+	Gender        string `json:"gender"`
+	ParticipantId string `json:"participant_id"`
 }
 
 type AuthUserInfoFetchFailureResponse struct {
@@ -297,26 +303,36 @@ func ChangePassword(c echo.Context) error {
 // @Failure		500	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
 // @Router			/api/auth/me [get]
 func GetAuthUserInfo(c echo.Context) error {
-	tokenData := c.Get("user").(authutils.Payload)
+	jwtData := c.Get("user").(*jwt.Token)
+	claims := jwtData.Claims.(*authutils.MyJWTCustomClaims)
+	tokenData := exports.Payload{
+		Email:     claims.Email,
+		LastName:  claims.LastName,
+		FirstName: claims.FirstName,
+		Role:      claims.Role,
+	}
+	user := AuthUserInfoFetchSuccessResponseData{}
+	fmt.Println(tokenData)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
 		participant := entity.Participant{}
 		err = participant.GetParticipant(tokenData.Email)
-
+		user.Participant.LastName = participant.LastName
+		user.Participant.Email = participant.Email
 	}
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &PasswordChangeFailureResponse{
+		return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
 			ResponseData{
 				Code:    http.StatusBadRequest,
 				Message: err.Error(),
 			},
 		})
 	}
-	return c.JSON(200, &PasswordChangeSuccessResponse{
+	return c.JSON(200, &AuthUserInfoFetchSuccessResponse{
 		ResponseData{
 			Code:    200,
-			Message: "Password change completed successfully",
-		}, &PasswordChangeSuccessResponseData{},
+			Message: "Auth user info fetched successfully",
+		}, &user,
 	})
 }
 
@@ -333,7 +349,7 @@ func GetAuthUserInfo(c echo.Context) error {
 // @Failure		500	{object}	AuthUserInfoFetchFailureResponse
 // @Router			/api/auth/me [put]
 func UpdateAuthUserInfo(c echo.Context) error {
-	tokenData := c.Get("user").(authutils.Payload)
+	tokenData := c.Get("user").(exports.Payload)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
 		updateData := dtos.AuthParticipantInfoUpdateDTO{}

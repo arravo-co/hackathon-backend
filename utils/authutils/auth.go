@@ -40,7 +40,7 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 }
 
 func GenerateAccessToken(payload *exports.AuthUtilsPayload) (string, error) {
-	claims := &jwtCustomClaims{
+	claims := &MyJWTCustomClaims{
 		payload.Email,
 		payload.FirstName,
 		payload.LastName,
@@ -57,7 +57,7 @@ func GenerateAccessToken(payload *exports.AuthUtilsPayload) (string, error) {
 func GetJWTConfig() echojwt.Config {
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(jwtCustomClaims)
+			return new(MyJWTCustomClaims)
 		},
 		SigningKey: []byte(config.GetSecretKey()),
 	}

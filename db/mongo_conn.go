@@ -103,6 +103,11 @@ func (m Mongo) GetTokenCollection() (*mongo.Collection, error) {
 	return col, err
 }
 
+func (m Mongo) GetScoreCollection() (*mongo.Collection, error) {
+	col, err := GetCollection("scores")
+	return col, err
+}
+
 func CreateParticipantColIndexes() error {
 	db, err := GetDefaultDB()
 	if err != nil {

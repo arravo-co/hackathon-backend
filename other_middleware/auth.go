@@ -1,9 +1,9 @@
 package othermiddleware
 
 import (
-	"fmt"
-
 	"github.com/arravoco/hackathon_backend/config"
+	"github.com/arravoco/hackathon_backend/utils/authutils"
+	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -14,15 +14,11 @@ func Auth() echo.MiddlewareFunc {
 		// ...
 		SigningKey: []byte(config.GetSecretKey()),
 		SuccessHandler: func(c echo.Context) {
-			fmt.Printf("%s", "Successful authentication")
+			//fmt.Printf("%s\n", "Successful authentication")
+		},
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(authutils.MyJWTCustomClaims)
 		},
 	})
-	var v echo.HandlerFunc = func(c echo.Context) error {
-		fmt.Printf("in v middleware")
-		return nil
-	}
-	var g echo.MiddlewareFunc = func(next echo.HandlerFunc) echo.HandlerFunc {
-		return y(v)
-	}
-	return g
+	return y
 }

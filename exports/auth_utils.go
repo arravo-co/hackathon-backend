@@ -1,4 +1,4 @@
-package authutils
+package exports
 
 import (
 	"time"
@@ -18,7 +18,7 @@ type BasicLoginSuccessData struct {
 	Exp          time.Time
 }
 
-type MyJWTCustomClaims struct {
+type JwtCustomClaims struct {
 	Email     string `json:"email"`
 	LastName  string `json:"last_name"`
 	FirstName string `json:"first_name"`
@@ -31,14 +31,6 @@ type Payload struct {
 	LastName  string
 	FirstName string
 	Role      string
-}
-
-type VerifyTokenData struct {
-	Email          string
-	Token          string
-	Scope          string
-	TokenType      string
-	TokenTypeValue string
 }
 
 type ConfigTokenData struct {

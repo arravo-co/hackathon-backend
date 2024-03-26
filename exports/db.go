@@ -1,6 +1,8 @@
 package exports
 
-import "time"
+import (
+	"time"
+)
 
 type AccountDocument struct {
 	Email             string    `bson:"email,omitempty"`
@@ -28,6 +30,15 @@ type ParticipantDocument struct {
 	CoParticipantEmails []string `bson:"co_participant_emails,omitempty"`
 	ParticipantEmail    string   `bson:"participant_email,omitempty"`
 	GithubAddress       string   `bson:"github_address,omitempty"`
+}
+
+type ParticipantScoreDocument struct {
+	Id            interface{}
+	HackathonId   string      `validate:"required" json:"hackathon_id"`
+	ParticipantId string      `validate:"required" json:"participant_id"`
+	Stage         string      `validate:"required" json:"stage"`
+	TotalScore    float32     `validate:"required" json:"score"`
+	ScoresInfo    []ScoreInfo `validate:"required" json:"scores_info"`
 }
 
 type UpdateAccountFilter struct {

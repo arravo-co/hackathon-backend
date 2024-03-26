@@ -5,7 +5,6 @@ import (
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/events"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/utils"
 )
 
 type Judge struct {
@@ -20,7 +19,7 @@ type Judge struct {
 
 func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAccountData, error) {
 
-	passwordHash, err := utils.GenerateHashPassword(input.Password)
+	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
 	}
