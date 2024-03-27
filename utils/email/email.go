@@ -72,7 +72,7 @@ func SendEmail(data *SendEmailData) error {
 	return nil
 }
 
-type SendIndividualWelcomeEmailData struct {
+type SendWelcomeEmailData struct {
 	LastName  string
 	FirstName string
 	Email     string
@@ -80,8 +80,33 @@ type SendIndividualWelcomeEmailData struct {
 	TTL       int
 	Token     string
 }
+type SendIndividualWelcomeEmailData struct {
+	SendWelcomeEmailData
+}
+
+type SendJudgeWelcomeEmailData struct {
+	SendWelcomeEmailData
+}
 
 func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData) {
+	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+	}
+}
+
+func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) {
 	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
 	var buf bytes.Buffer
 	err := tmpl.Execute(&buf, data)

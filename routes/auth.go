@@ -87,8 +87,15 @@ type AuthUserInfoFetchSuccessResponse struct {
 }
 
 type AuthUserInfoFetchSuccessResponseData struct {
-	entity.Participant
-	entity.Judge
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	Email           string `json:"email"`
+	passwordHash    string
+	Gender          string `json:"gender"`
+	State           string `json:"state"`
+	GithubAddress   string `json:"github_address"`
+	LinkedInAddress string `json:"linkedIn_address"`
+	Role            string `json:"role"`
 }
 
 type CompletePasswordRecoveryFailureResponse struct {
@@ -304,7 +311,7 @@ func ChangePassword(c echo.Context) error {
 // @Router			/api/auth/me [get]
 func GetAuthUserInfo(c echo.Context) error {
 	jwtData := c.Get("user").(*jwt.Token)
-	claims := jwtData.Claims.(*authutils.MyJWTCustomClaims)
+	claims := jwtData.Claims.(*exports.MyJWTCustomClaims)
 	tokenData := exports.Payload{
 		Email:     claims.Email,
 		LastName:  claims.LastName,
@@ -312,13 +319,18 @@ func GetAuthUserInfo(c echo.Context) error {
 		Role:      claims.Role,
 	}
 	user := AuthUserInfoFetchSuccessResponseData{}
-	fmt.Println(tokenData)
+	//fmt.Println(tokenData)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
 		participant := entity.Participant{}
 		err = participant.GetParticipant(tokenData.Email)
-		user.Participant.LastName = participant.LastName
-		user.Participant.Email = participant.Email
+		fmt.Println(participant)
+		user.LastName = participant.LastName
+		user.Email = participant.Email
+		user.FirstName = participant.FirstName
+		user.Role = participant.Role
+		user.GithubAddress = participant.GithubAddress
+		user.State = participant.State
 	}
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{

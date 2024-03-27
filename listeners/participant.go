@@ -24,12 +24,12 @@ func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreat
 			return
 		}
 		email.SendIndividualParticipantWelcomeEmail(&email.SendIndividualWelcomeEmailData{
-			Email:     eventDTOData.ParticipantEmail,
-			LastName:  eventDTOData.LastName,
-			FirstName: eventDTOData.FirstName,
-			Subject:   " Welcome to Arravo's Hackathon - Confirm Your Email Address",
-			Token:     dataToken.Token,
-			TTL:       dataToken.TTL.Minute(),
+			SendWelcomeEmailData: email.SendWelcomeEmailData{Email: eventDTOData.ParticipantEmail,
+				LastName:  eventDTOData.LastName,
+				FirstName: eventDTOData.FirstName,
+				Subject:   " Welcome to Arravo's Hackathon - Confirm Your Email Address",
+				Token:     dataToken.Token,
+				TTL:       dataToken.TTL.Minute()},
 		})
 
 	}

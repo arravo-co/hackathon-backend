@@ -28,4 +28,4 @@ type JudgeAccountCreatedEventData struct {
 	JudgeEmail string
 }
 
-type JudgeAccountCreatedEventHandler func(*JudgeAccountCreatedEventData)
+type JudgeAccountCreatedEventHandler func(input *JudgeAccountCreatedEventData, otherParams ...interface{})

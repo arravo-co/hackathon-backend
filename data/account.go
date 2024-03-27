@@ -103,7 +103,18 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 	if err != nil {
 		return nil, err
 	}
-	result, err := accountCol.InsertOne(ctx, dataToSave)
+	acc := exports.AccountDocument{
+		Email:           dataToSave.Email,
+		PasswordHash:    dataToSave.PasswordHash,
+		FirstName:       dataToSave.FirstName,
+		LastName:        dataToSave.LastName,
+		Gender:          dataToSave.Gender,
+		HackathonId:     hackathonId,
+		Role:            dataToSave.Role,
+		PhoneNumber:     dataToSave.PhoneNumber,
+		IsEmailVerified: false,
+	}
+	result, err := accountCol.InsertOne(ctx, &acc)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 		return nil, err
@@ -111,6 +122,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 	fmt.Printf("%#v", result.InsertedID)
 	return dataToSave, err
 }
+
 func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := Datasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)

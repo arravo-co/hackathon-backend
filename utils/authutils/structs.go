@@ -2,8 +2,6 @@ package authutils
 
 import (
 	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type BasicLoginData struct {
@@ -16,14 +14,6 @@ type BasicLoginSuccessData struct {
 	AccessToken  string
 	RefreshToken string
 	Exp          time.Time
-}
-
-type MyJWTCustomClaims struct {
-	Email     string `json:"email"`
-	LastName  string `json:"last_name"`
-	FirstName string `json:"first_name"`
-	Role      string `json:"role"`
-	jwt.RegisteredClaims
 }
 
 type Payload struct {

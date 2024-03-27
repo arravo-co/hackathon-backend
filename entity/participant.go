@@ -194,7 +194,7 @@ func (p *Participant) GetParticipant(input string) error {
 	p.LinkedInAddress = accountData.LinkedInAddress
 	// emit created event
 
-	return err
+	return nil
 }
 
 func (p *Participant) ReconcileParticipantInfo(accountDataInput *exports.AccountDocument, particicipantDataInput *exports.ParticipantDocument) error {

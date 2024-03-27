@@ -10,7 +10,7 @@ import (
 func CheckIfIsRole(role string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			tokenData := c.Get("user").(exports.Payload)
+			tokenData := exports.GetPayload(c)
 			if tokenData.Role != role {
 				return c.JSON(http.StatusUnauthorized, struct {
 					Message string `json:"message"`

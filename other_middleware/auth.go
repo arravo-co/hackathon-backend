@@ -2,7 +2,7 @@ package othermiddleware
 
 import (
 	"github.com/arravoco/hackathon_backend/config"
-	"github.com/arravoco/hackathon_backend/utils/authutils"
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -17,7 +17,7 @@ func Auth() echo.MiddlewareFunc {
 			//fmt.Printf("%s\n", "Successful authentication")
 		},
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(authutils.MyJWTCustomClaims)
+			return new(exports.MyJWTCustomClaims)
 		},
 	})
 	return y

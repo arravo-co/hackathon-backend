@@ -35,12 +35,14 @@ func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAc
 	}
 	dataResponse, err := data.CreateJudgeAccount(dataInput)
 	// emit created event
-
-	events.EmitParticipantAccountCreated(&exports.ParticipantAccountCreatedEventData{
-		ParticipantEmail: dataResponse.Email,
-		LastName:         dataResponse.LastName,
-		FirstName:        dataResponse.FirstName,
-		EventData:        exports.EventData{EventName: "JudgeAccountCreated"},
+	if err != nil {
+		return nil, err
+	}
+	events.EmitJudgeAccountCreated(&exports.JudgeAccountCreatedEventData{
+		JudgeEmail: dataResponse.Email,
+		LastName:   dataResponse.LastName,
+		FirstName:  dataResponse.FirstName,
+		EventData:  exports.EventData{EventName: "JudgeAccountCreated"},
 	})
 	return dataResponse, err
 }

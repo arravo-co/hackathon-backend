@@ -23,6 +23,7 @@ type RegisterJudgeFailResponse struct {
 // @Summary		Register new participant
 // @Tags			Judges
 // @Produce		json
+// @Param registerJudgeJSON body object dtos.RegisterNewJudgeDTO
 // @Success		201	{object}	RegisterJudgeSuccessResponse
 // @Failure		400	{object}	RegisterJudgeFailResponse
 // @Router			/api/judges               [post]

@@ -35,6 +35,7 @@ func StartAllRoutes(e *echo.Echo) {
 	setupAuthRoutes(api)
 	setupJudgesRoutes(api)
 	setupParticipantsRoutes(api)
+	setupScoreRoutes(api)
 }
 
 func setupParticipantsRoutes(api *echo.Group) {
@@ -58,4 +59,10 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.POST("/password/recovery/completion", ChangePassword)
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
 	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
+}
+
+func setupScoreRoutes(api *echo.Group) {
+	authRoutes = api.Group("/score_management")
+	authRoutes.GET("/create_score_record", ScoreParticipant, othermiddleware.CheckIfIsRole("JUDGE"))
+	authRoutes.GET("/score_participant", ScoreParticipant, othermiddleware.CheckIfIsRole("JUDGE"))
 }

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 )
 
 type BasicLoginData struct {
@@ -53,4 +54,24 @@ type ChangePasswordData struct {
 	Email       string
 	OldPassword string
 	NewPassword string
+}
+
+type MyJWTCustomClaims struct {
+	Email     string `json:"email"`
+	LastName  string `json:"last_name"`
+	FirstName string `json:"first_name"`
+	Role      string `json:"role"`
+	jwt.RegisteredClaims
+}
+
+func GetPayload(c echo.Context) *Payload {
+	jwtData := c.Get("user").(*jwt.Token)
+	claims := jwtData.Claims.(*MyJWTCustomClaims)
+	tokenData := Payload{
+		Email:     claims.Email,
+		LastName:  claims.LastName,
+		FirstName: claims.FirstName,
+		Role:      claims.Role,
+	}
+	return &tokenData
 }

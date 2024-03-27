@@ -7,9 +7,11 @@ import (
 
 var EventEmitter *eventemitter.Emitter
 
-var ParticipantAccountCreatedEvent eventemitter.EventType
+var ParticipantAccountCreatedEvent eventemitter.EventType = "ParticipantAccountCreated"
+var JudgeAccountCreatedEvent eventemitter.EventType = "JudgeAccountCreated"
 
 func init() {
 	EventEmitter = eventemitter.NewEmitter(true)
 	RegisterParticipantCreatedEvent(listeners.HandleParticipantCreatedEvent)
+	RegisterJudgeCreatedEvent(listeners.HandleJudgeCreatedEvent)
 }

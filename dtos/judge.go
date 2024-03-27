@@ -7,7 +7,5 @@ type RegisterNewJudgeDTO struct {
 	Password        string `validate:"min=7" json:"password"`
 	ConfirmPassword string `validate:"eqfield=Password" json:"confirm_password"`
 	Gender          string `validate:"oneof=MALE FEMALE" json:"gender"`
-	GithubAddress   string `validate:"url" json:"github_address"`
-	LinkedInAddress string `json:"linkedIn_address"`
 	State           string `json:"state"`
 }
