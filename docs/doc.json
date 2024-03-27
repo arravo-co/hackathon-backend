@@ -1,0 +1,1150 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Hackathon Backend API",
+    "description": "API usually works as expected. But sometimes its not true.",
+    "termsOfService": "http://arravo.co/contact",
+    "contact": {
+      "name": "David Alabi",
+      "email": "appdev@arravo.co"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://en.wikipedia.org/wiki/MIT_License"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "localhost:5000",
+      "description": " Localhost"
+    },
+    {
+      "url": "https://hackathon-backend-2cvk.onrender.com",
+      "description": " Development"
+    }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Users Responses JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Login failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Log a user in",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.BasicLoginDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "UserInfo fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "UserInfo fetch failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "UserInfo fetch failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "UserInfo fetch failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Get auth user information \"Type 'Bearer TOKEN' to correctly set the Bearer token\""
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Get auth user information",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/password/change": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Change User Password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/password/recovery/completion": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Complete password recovery",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/password/recovery/initiation": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Initiate Password Recovery",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Email to verify",
+            "schema": {
+              "type": "string",
+              "format": "string",
+              "description": "Email to verify"
+            }
+          }
+        ]
+      }
+    },
+    "/api/auth/verification/email/completion": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Email verification successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Email verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Email verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Verify user email address",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/verification/email/initiation": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Verification succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Generate token to verify user email address",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Email to verify",
+            "schema": {
+              "type": "string",
+              "format": "string",
+              "description": "Email to verify"
+            }
+          }
+        ]
+      }
+    },
+    "/api/judges": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterJudgeSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterJudgeFailResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Register new judge"
+      }
+    },
+    "/api/participants/individual": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantFailResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Register new participant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.RegisterNewIndividualParticipantDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/participants/team": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Register new participating team",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamParticipantDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO": {
+        "type": "object",
+        "properties": {
+          "github_address": {
+            "type": "string"
+          },
+          "linkedIn_address": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.AuthUserInfoUpdateDTO": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.ChangePasswordDTO": {
+        "type": "object",
+        "properties": {
+          "old_password": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.CompleteEmailVerificationDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.CompletePasswordRecoveryDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.RegisterNewIndividualParticipantDTO": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "confirm_password": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "github_address": {
+            "type": "string"
+          },
+          "linkedIn_address": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamParticipantDTO": {
+        "type": "object",
+        "properties": {
+          "team_name": {
+            "type": "string"
+          },
+          "team_lead_email": {
+            "type": "string"
+          },
+          "co_participant_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.exports.CreateAccountData": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "PasswordHash": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Gender": {
+            "type": "string"
+          },
+          "State": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "PhoneNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.exports.CreateIndividualParticipantAccountData": {
+        "type": "object",
+        "properties": {
+          "LinkedInAddress": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "PasswordHash": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Gender": {
+            "type": "string"
+          },
+          "State": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "PhoneNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.exports.CreateJudgeAccountData": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "PasswordHash": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Gender": {
+            "type": "string"
+          },
+          "State": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "PhoneNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "ParticipantId": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "HackathonId": {
+            "type": "string"
+          },
+          "Type": {
+            "type": "string"
+          },
+          "TeamLeadEmail": {
+            "type": "string"
+          },
+          "TeamName": {
+            "type": "string"
+          },
+          "CoParticipantEmails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "GithubAddress": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchFailureResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponseData"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.AuthUserInfoFetchSuccessResponseData": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "passwordHash": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "github_address": {
+            "type": "string"
+          },
+          "linkedIn_address": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.BasicLoginDTO": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.BasicLoginFailureResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.BasicLoginSuccessResponseData": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoveryFailureResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.CompletePasswordRecoverySuccessResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponseData"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationFailureResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponseData"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.InitiateEmailVerificationSuccessResponseData": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponseData"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.PasswordChangeSuccessResponseData": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantFailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "Data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateIndividualParticipantAccountData"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterJudgeFailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterJudgeSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "Data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateJudgeAccountData"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "Data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.ResponseData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

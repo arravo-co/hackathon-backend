@@ -19,11 +19,11 @@ type RegisterJudgeFailResponse struct {
 	Message string `json:"message"`
 }
 
-// @Description	Register new participant
-// @Summary		Register new participant
+// @Description	Register new judge
+// @Summary		Register New Judge
 // @Tags			Judges
 // @Produce		json
-// @Param registerJudgeJSON body object dtos.RegisterNewJudgeDTO
+// @Param registerJudgeJSON body object dtos.RegisterNewJudgeDTO true "Create Judge profile"
 // @Success		201	{object}	RegisterJudgeSuccessResponse
 // @Failure		400	{object}	RegisterJudgeFailResponse
 // @Router			/api/judges               [post]

@@ -22,6 +22,7 @@ type RegisterIndividualParticipantFailResponse struct {
 // @Description	Register new participant
 // @Summary		Register new participant
 // @Tags			Participants
+// @Param registerIndividualJSON body dtos.RegisterNewIndividualParticipantDTO true "register individual participant"
 // @Produce		json
 // @Success		201	{object}	RegisterIndividualParticipantSuccessResponse
 // @Failure		400	{object}	RegisterIndividualParticipantFailResponse
@@ -63,13 +64,14 @@ type RegisterTeamParticipantFailResponse struct {
 	Message string `json:"message"`
 }
 
-// @Description	Register new participant
-// @Summary		Register new participant
-// @Tags			Participants
+// @Description	Register new participating team
+// @Summary		Register New Participating Team
+// @Tags		Participants
 // @Produce		json
+// @Param registerTeam body dtos.RegisterNewTeamParticipantDTO true "egister participating team"
 // @Success		201	{object}	RegisterTeamParticipantSuccessResponse
 // @Failure		400	{object}	RegisterTeamParticipantFailResponse
-// @Router			/api/participants/team               [post]
+// @Router		/api/participants/team               [post]
 func RegisterTeamParticipant(c echo.Context) error {
 	data := dtos.RegisterNewTeamParticipantDTO{}
 	err := c.Bind(&data)

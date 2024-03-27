@@ -112,12 +112,11 @@ type CompletePasswordRecoverySuccessResponseData struct {
 
 // @Description	Log a user in
 // @Summary		Log a user in
-// @Tags			Auth
+// @Tags		Auth
 // @Produce		json
 // @Param       loginJSON   body BasicLoginDTO    true                   "login Request JSON"
 // @Success		200	  object 	BasicLoginSuccessResponse "Users Responses JSON"
-// @Resource users
-// @Failure		400	object	BasicLoginFailureResponse "hhhh"
+// @Failure		400	object	BasicLoginFailureResponse "Login failed"
 // @Router			/api/auth/login             [post]
 func BasicLogin(c echo.Context) error {
 	data := dtos.BasicLoginDTO{}
@@ -152,8 +151,8 @@ func BasicLogin(c echo.Context) error {
 	})
 }
 
-// @Summary		Verify user email address
-// @Description	Verify user email address
+// @Summary		Generate token to verify user email address
+// @Description	Generate token to verify user email address
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
@@ -256,8 +255,8 @@ func CompleteEmailVerification(c echo.Context) error {
 	})
 }
 
-// @Summary		Verify user email address
-// @Description	Verify user email address
+// @Summary		Change User Password
+// @Description	Change User Password
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
@@ -396,8 +395,8 @@ func UpdateAuthUserInfo(c echo.Context) error {
 	})
 }
 
-// @Summary		recover password
-// @Description	recover password
+// @Summary			Initiate Password Recovery
+// @Description	Initiate Password Recovery
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
@@ -444,8 +443,8 @@ func InitiatePasswordRecovery(c echo.Context) error {
 	})
 }
 
-// @Summary		Verify user email address
-// @Description	Verify user email address
+// @Summary		Complete  password recovery
+// @Description	Complete password recovery
 // @Tags			Auth
 // @Accept			json
 // @Produce		json

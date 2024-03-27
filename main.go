@@ -20,7 +20,7 @@ import (
 // @LicenseName MIT
 // @LicenseURL https://en.wikipedia.org/wiki/MIT_License
 // @Server localhost:5000 Localhost
-// @Server http://www.fake2.com Main
+// @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
 	e := echo.New()
 	port, err := config.GetPort()
