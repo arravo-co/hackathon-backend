@@ -1,6 +1,8 @@
 package othermiddleware
 
 import (
+	"net/http"
+
 	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/golang-jwt/jwt/v5"
@@ -21,4 +23,20 @@ func Auth() echo.MiddlewareFunc {
 		},
 	})
 	return y
+}
+
+func AuthRole(role string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return Auth()(func(c echo.Context) error {
+			tokenData := exports.GetPayload(c)
+			if tokenData.Role != role {
+				return c.JSON(http.StatusUnauthorized, struct {
+					Message string `json:"message"`
+					Code    int    `json:"code"`
+				}{Message: "Unauthorized access",
+					Code: http.StatusUnauthorized})
+			}
+			return next(c)
+		})
+	}
 }

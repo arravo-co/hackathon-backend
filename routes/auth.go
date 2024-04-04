@@ -11,7 +11,6 @@ import (
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -87,15 +86,7 @@ type AuthUserInfoFetchSuccessResponse struct {
 }
 
 type AuthUserInfoFetchSuccessResponseData struct {
-	FirstName       string `json:"first_name"`
-	LastName        string `json:"last_name"`
-	Email           string `json:"email"`
-	passwordHash    string
-	Gender          string `json:"gender"`
-	State           string `json:"state"`
-	GithubAddress   string `json:"github_address"`
-	LinkedInAddress string `json:"linkedIn_address"`
-	Role            string `json:"role"`
+	*entity.Participant
 }
 
 type CompletePasswordRecoveryFailureResponse struct {
@@ -166,7 +157,6 @@ func InitiateEmailVerification(c echo.Context) error {
 	emailToVerify := c.QueryParam("email")
 	if emailToVerify == "" {
 		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
-
 			Code:    http.StatusBadRequest,
 			Message: "'email' query parameter is required",
 		})
@@ -309,27 +299,23 @@ func ChangePassword(c echo.Context) error {
 // @Failure		500	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
 // @Router			/api/auth/me [get]
 func GetAuthUserInfo(c echo.Context) error {
-	jwtData := c.Get("user").(*jwt.Token)
-	claims := jwtData.Claims.(*exports.MyJWTCustomClaims)
-	tokenData := exports.Payload{
-		Email:     claims.Email,
-		LastName:  claims.LastName,
-		FirstName: claims.FirstName,
-		Role:      claims.Role,
-	}
+	tokenData := authutils.GetAuthPayload(c)
 	user := AuthUserInfoFetchSuccessResponseData{}
-	//fmt.Println(tokenData)
+	fmt.Println(tokenData)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
 		participant := entity.Participant{}
-		err = participant.GetParticipant(tokenData.Email)
+		err = participant.FillParticipantInfo(tokenData.Email)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
+				ResponseData{
+					Code:    http.StatusBadRequest,
+					Message: "Error getting user info",
+				},
+			})
+		}
 		fmt.Println(participant)
-		user.LastName = participant.LastName
-		user.Email = participant.Email
-		user.FirstName = participant.FirstName
-		user.Role = participant.Role
-		user.GithubAddress = participant.GithubAddress
-		user.State = participant.State
+		user.Participant = &participant
 	}
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
@@ -340,10 +326,10 @@ func GetAuthUserInfo(c echo.Context) error {
 		})
 	}
 	return c.JSON(200, &AuthUserInfoFetchSuccessResponse{
-		ResponseData{
+		ResponseData: ResponseData{
 			Code:    200,
 			Message: "Auth user info fetched successfully",
-		}, &user,
+		}, Data: &user,
 	})
 }
 
@@ -501,4 +487,28 @@ func CompletePasswordRecovery(c echo.Context) error {
 			Email: dataDto.Email,
 		},
 	})
+}
+
+// @Summary		Validate team invite link
+// @Description	Validate team invite link
+// @Tags			Auth
+// @Produce		json
+// @Param			completeToken	path		dt	true	"the required info"
+// @Success		200				{object}	string
+// @Failure		400				{object}	string
+// @Failure		404				{object}	string
+// @Failure		500				{object}	string
+// @Router			/api/auth/team/invite [get]
+func ValidateTeamInviteLink(c echo.Context) error {
+	tokenStr := c.QueryParam("token")
+	if tokenStr == "" {
+		return c.HTML(400, "<p>Invalid link</p>")
+	}
+	t, err := utils.ProcessInviteLink(tokenStr)
+	if err != nil {
+		fmt.Printf("")
+		c.HTML(400, err.Error())
+	}
+	fmt.Println(t)
+	return c.Redirect(301, "https://hackathon-dev.onrender.com/")
 }

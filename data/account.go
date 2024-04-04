@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -39,6 +40,37 @@ func GetAccountByEmail(email string) (*exports.AccountDocument, error) {
 	return &accountDoc, err
 }
 
+func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*exports.AccountDocument, error) {
+	accountCol, err := Datasource.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	acc := exports.AccountDocument{
+		Email:           dataToSave.Email,
+		PasswordHash:    dataToSave.PasswordHash,
+		FirstName:       dataToSave.FirstName,
+		LastName:        dataToSave.LastName,
+		Gender:          dataToSave.Gender,
+		HackathonId:     hackathonId,
+		Role:            dataToSave.Role,
+		PhoneNumber:     dataToSave.PhoneNumber,
+		IsEmailVerified: false,
+		Skillset:        dataToSave.Skillset,
+		State:           dataToSave.State,
+		ParticipantId:   dataToSave.ParticipantId,
+	}
+	fmt.Printf("Account\n")
+	result, err := accountCol.InsertOne(ctx, acc)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Printf("%#v", result.InsertedID)
+	return &acc, err
+}
+
+/*
 func CreateTeamParticipantAccount(dataToSave *exports.CreateTeamParticipantAccountData) (*exports.CreateTeamParticipantAccountData, error) {
 	accountCol, err := Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
@@ -55,6 +87,7 @@ func CreateTeamParticipantAccount(dataToSave *exports.CreateTeamParticipantAccou
 	fmt.Printf("%#v", result.InsertedID)
 	return dataToSave, err
 }
+*/
 
 func CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
 	accountCol, err := Datasource.GetAccountCollection()
@@ -71,12 +104,13 @@ func CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
 	return dataToSave, nil
 }
 
-func CreateIndividualParticipantAccount(dataToSave *exports.CreateIndividualParticipantAccountData) (*exports.AccountDocument, error) {
+func CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
 	}
+	hackathonId := config.GetHackathonId()
 	acc := exports.AccountDocument{
 		Email:           dataToSave.Email,
 		PasswordHash:    dataToSave.PasswordHash,
@@ -87,6 +121,8 @@ func CreateIndividualParticipantAccount(dataToSave *exports.CreateIndividualPart
 		Role:            dataToSave.Role,
 		PhoneNumber:     dataToSave.PhoneNumber,
 		IsEmailVerified: false,
+		ParticipantId:   dataToSave.ParticipantId,
+		Status:          "UNREVIEWED",
 	}
 	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {

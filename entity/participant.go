@@ -1,12 +1,17 @@
 package entity
 
 import (
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/arravoco/hackathon_backend/cache"
+	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/events"
@@ -14,26 +19,68 @@ import (
 )
 
 var wg sync.WaitGroup
-var hackathon_id string = "hackathonID"
 
+// AddMemberToParticipatingTeam
 type Participant struct {
-	FirstName       string `json:"first_name"`
-	LastName        string `json:"last_name"`
-	Email           string `json:"email"`
-	passwordHash    string
-	Gender          string `json:"gender"`
-	State           string `json:"state"`
-	GithubAddress   string `json:"github_address"`
-	LinkedInAddress string `json:"linkedIn_address"`
-	Role            string `json:"role"`
+	FirstName           string `json:"first_name"`
+	LastName            string `json:"last_name"`
+	Email               string `json:"email"`
+	passwordHash        string
+	Gender              string               `json:"gender"`
+	State               string               `json:"state"`
+	Age                 int                  `json:"age"`
+	DOB                 time.Time            `json:"dob"`
+	Role                string               `json:"role"`
+	ParticipantId       string               `json:"participant_id"`
+	TeamLeadEmail       string               `json:"team_lead_email"`
+	TeamName            string               `json:"team_name"`
+	TeamRole            string               `json:"team_role"`
+	HackathonId         string               `json:"hackathon_id"`
+	Type                string               `json:"type"`
+	CoParticipantEmails []string             `json:"co_participant_emails"`
+	ParticipantEmail    string               `json:"participant_email"`
+	InviteList          []exports.InviteInfo `json:"invite_list"`
+	Status              string               `json:"status"`
+	Skillset            []string             `json:"skillset"`
+	PhoneNumber         string               `json:"phone_number"`
 }
 
-func (p *Participant) RegisterIndividual(input dtos.RegisterNewIndividualParticipantDTO) (*exports.CreateIndividualParticipantAccountData, error) {
+func (p Participant) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
+	res, err := data.AddToTeamInviteList(dataInput)
+	if err != nil {
+		return nil, err
+	}
+	q, err := data.GetQueue("invite_list")
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+	}
+	queuePayload := exports.InvitelistQueuePayload{
+		InviterEmail: dataInput.InviterEmail,
+		InviterName:  "",
+		InviteeEmail: dataInput.Email,
+		TimeSent:     time.Now(),
+	}
+	byt, err := json.Marshal(queuePayload)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	err = q.PublishBytes(byt)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return res, nil
+}
+
+func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO) (*Participant, error) {
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
 	}
-	dataInput := &exports.CreateIndividualParticipantAccountData{}
+	dataInput := &exports.CreateTeamMemberAccountData{}
+	dob, err := time.Parse(time.RFC3339, input.DOB)
+	if err == nil {
+		dataInput.DOB = dob
+	}
 	dataInput.CreateAccountData =
 		exports.CreateAccountData{
 			Email:        input.Email,
@@ -42,14 +89,30 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewIndividualPartici
 			LastName:     input.LastName,
 			Gender:       input.Gender,
 			State:        input.State,
+			PhoneNumber:  input.PhoneNumber,
+			Skillset:     input.Skillset,
 			Role:         "PARTICIPANT",
 		}
-	dataInput.LinkedInAddress = input.LinkedInAddress
+	dataInput.ParticipantId = input.ParticipantId
 	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
 	if isEmailInCache {
 		return nil, errors.New("email is already existing")
 	}
-	dataResponse, err := data.CreateIndividualParticipantAccount(dataInput)
+	_, err = data.AddMemberToParticipatingTeam(&exports.AddMemberToParticipatingTeamData{
+		HackathonId:   config.GetHackathonId(),
+		ParticipantId: dataInput.ParticipantId,
+		Email:         dataInput.Email,
+		Role:          "PARTICIPANT",
+	})
+	if err != nil {
+		return nil, err
+	}
+	acc, err := data.CreateTeamMemberAccount(&exports.CreateTeamMemberAccountData{
+		CreateAccountData: exports.CreateAccountData{
+			Email: dataInput.Email,
+		},
+		ParticipantId: dataInput.ParticipantId,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -59,11 +122,58 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewIndividualPartici
 		exports.MySugarLogger.Warnln("Email is already in cache")
 	}
 
+	// emit created event
+	events.EmitParticipantAccountCreated(&exports.ParticipantAccountCreatedEventData{
+		ParticipantEmail: acc.Email,
+		LastName:         acc.LastName,
+		FirstName:        acc.FirstName,
+		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
+		ParticipantType:  "INDIVIDUAL",
+	})
+	p.FillParticipantInfo(acc.Email)
+	return p, nil
+}
+
+func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (*Participant, error) {
+	passwordHash, err := exports.GenerateHashPassword(input.Password)
+	participantId, err := GenerateParticipantID([]string{input.Email})
+	if err != nil {
+		return nil, err
+	}
+	dob, err := time.Parse(time.RFC3339, input.DOB)
+	if err == nil {
+		return nil, err
+	}
+	dataInput := &exports.CreateParticipantAccountData{
+		CreateAccountData: exports.CreateAccountData{
+			Email:        input.Email,
+			PasswordHash: passwordHash,
+			FirstName:    input.FirstName,
+			LastName:     input.LastName,
+			Gender:       input.Gender,
+			State:        input.State,
+			Role:         "PARTICIPANT",
+			Skillset:     input.Skillset,
+			DOB:          dob,
+		}, ParticipantId: participantId}
+	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
+	if isEmailInCache {
+		//return nil, errors.New("email is already existing")
+	}
+	dataResponse, err := data.CreateParticipantAccount(dataInput)
+	if err != nil {
+		return nil, err
+	}
+	addedToCache := cache.AddEmailToCache(dataInput.Email)
+
+	if !addedToCache {
+		exports.MySugarLogger.Warnln("Email is already in cache")
+	}
 	particicipantDoc, err := data.CreateParticipantRecord(&exports.CreateParticipantRecordData{
-		GithubAddress:    input.GithubAddress,
-		HackathonId:      hackathon_id,
+		HackathonId:      config.GetHackathonId(),
 		Type:             "INDIVIDUAL",
 		ParticipantEmail: input.Email,
+		ParticipantId:    participantId,
 	})
 
 	if err != nil {
@@ -78,72 +188,95 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewIndividualPartici
 		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
 		ParticipantType:  "INDIVIDUAL",
 	})
-	return dataInput, nil
+	return &Participant{
+		ParticipantId: participantId,
+		Email:         dataInput.Email,
+		LastName:      dataInput.LastName,
+		FirstName:     dataInput.FirstName,
+		Gender:        dataInput.Gender,
+		DOB:           dob,
+		Role:          dataInput.Role,
+		State:         dataInput.State,
+		Status:        dataResponse.Status,
+	}, nil
 }
 
-func (p *Participant) RegisterTeam(input dtos.RegisterNewTeamParticipantDTO) (*exports.TeamParticipantRecordCreatedData, error) {
+func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*Participant, error) {
 	teamMembers := []exports.TeamParticipantInfo{}
-	dataInput := &exports.CreateParticipantRecordData{
-		TeamLeadEmail:       input.TeamLeadEmail,
-		HackathonId:         hackathon_id,
-		TeamName:            input.TeamName,
-		CoParticipantEmails: input.CoParticipantEmails,
-	}
-	allEmails := append(input.CoParticipantEmails, input.TeamLeadEmail)
-	allEmailInterfaces := []interface{}{}
-	for _, v := range allEmails {
-		allEmailInterfaces = append(allEmailInterfaces, v)
-	}
-	areEmailsInCache, err := cache.FindEmailsInCache(allEmailInterfaces)
+	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
-		return nil, errors.New("cannot confirm uniqueness of all participants' emails")
+		return nil, err
 	}
-	fmt.Println(areEmailsInCache)
-	for index, item := range areEmailsInCache {
-		if item {
-			return nil, errors.New(strings.Join([]string{"email", allEmails[index], " already exists"}, " "))
-		}
+	participantId, err := GenerateParticipantID([]string{input.Email})
+	if err != nil {
+		return nil, err
 	}
+
+	areEmailsInCache := cache.FindEmailInCache(input.Email)
+	if !areEmailsInCache {
+		//return nil, errors.New("email already exists")
+	}
+
+	dob, err := time.Parse(time.RFC3339, input.DOB)
+	if err == nil {
+		return nil, err
+	}
+	data.CreateParticipantAccount(&exports.CreateParticipantAccountData{
+		ParticipantId: participantId,
+		CreateAccountData: exports.CreateAccountData{
+			Email:        input.Email,
+			FirstName:    input.FirstName,
+			LastName:     input.LastName,
+			Role:         "PARTICIPANT",
+			Gender:       input.Gender,
+			PasswordHash: passwordHash,
+			State:        input.State,
+			Skillset:     input.Skillset,
+			DOB:          dob,
+			PhoneNumber:  input.PhoneNumber,
+		},
+	})
+
+	dataInput := &exports.CreateParticipantRecordData{
+		TeamLeadEmail:       input.Email,
+		HackathonId:         config.GetHackathonId(),
+		TeamName:            input.TeamName,
+		CoParticipantEmails: []string{},
+		ParticipantId:       participantId,
+		ParticipantEmail:    input.Email,
+	}
+
 	particicipantDoc, err := data.CreateParticipantRecord(dataInput)
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range append(input.CoParticipantEmails, input.TeamLeadEmail) {
-		wg.Add(1)
-		v := v
-		go func() {
-			member, err := p.CreateCoParticipantAccount(v)
-			if err != nil {
-				wg.Done()
-				return
-			}
-			teamMembers = append(teamMembers, exports.TeamParticipantInfo{
-				Email:    member.Email,
-				Password: member.Password,
-			})
-			wg.Done()
-		}()
-	}
-	wg.Wait()
 	// emit created event
 
 	events.EmitParticipantAccountCreated(&exports.ParticipantAccountCreatedEventData{
 		TeamParticipants: teamMembers,
-		TeamLeadEmail:    input.TeamLeadEmail,
+		TeamLeadEmail:    input.Email,
 		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
+		ParticipantEmail: input.Email,
 		TeamName:         input.TeamName,
+		TeamRole:         "TEAM_LEAD",
 		ParticipantType:  "TEAM",
 	})
 
-	return &exports.TeamParticipantRecordCreatedData{
-		TeamLeadEmail:       dataInput.TeamLeadEmail,
-		Role:                "PARTICIPANT",
-		ParticipantId:       particicipantDoc.ParticipantId,
-		TeamName:            particicipantDoc.TeamName,
-		CoParticipantEmails: particicipantDoc.CoParticipantEmails,
-		GithubAddress:       particicipantDoc.GithubAddress,
-		Type:                particicipantDoc.Type,
-		HackathonId:         particicipantDoc.HackathonId,
+	return &Participant{
+		Email:            input.Email,
+		Role:             "PARTICIPANT",
+		FirstName:        input.FirstName,
+		LastName:         input.LastName,
+		Gender:           input.Gender,
+		State:            input.State,
+		Skillset:         input.Skillset,
+		PhoneNumber:      input.PhoneNumber,
+		DOB:              dob,
+		TeamLeadEmail:    particicipantDoc.TeamLeadEmail,
+		TeamName:         particicipantDoc.TeamName,
+		ParticipantId:    participantId,
+		ParticipantEmail: particicipantDoc.ParticipantEmail,
+		TeamRole:         "TEAM_LEAD",
 	}, err
 }
 
@@ -177,21 +310,40 @@ func (p *Participant) CreateCoParticipantAccount(email string) (*CoParticipantCr
 	}, nil
 }
 
-func (p *Participant) GetParticipant(input string) error {
+func (p *Participant) FillParticipantInfo(input string) error {
 	accountData, err := data.GetAccountByEmail(input)
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("accountData")
+	fmt.Println(accountData)
+	fmt.Println("accountData")
+	particicipantDocData, err := data.GetParticipantRecord(accountData.ParticipantId)
+	if err != nil {
+		return err
+	}
 	p.Email = accountData.Email
+	p.Status = accountData.Status
 	p.passwordHash = accountData.PasswordHash
 	p.FirstName = accountData.FirstName
 	p.LastName = accountData.LastName
 	p.Gender = accountData.Gender
 	p.State = accountData.State
 	p.Role = accountData.Role
-	//p.GithubAddress = accountData.GithubAddress
-	p.LinkedInAddress = accountData.LinkedInAddress
+	p.TeamName = particicipantDocData.TeamName
+	p.TeamLeadEmail = particicipantDocData.TeamLeadEmail
+	p.HackathonId = particicipantDocData.HackathonId
+	p.Type = particicipantDocData.Type
+	p.ParticipantEmail = particicipantDocData.ParticipantEmail
+	p.CoParticipantEmails = particicipantDocData.CoParticipantEmails
+	p.Age = time.Now().Year() - accountData.DOB.Year()
+	if particicipantDocData.Type == "TEAM" {
+		if particicipantDocData.TeamLeadEmail == accountData.Email {
+			p.TeamRole = "TEAM_LEAD"
+		} else {
+			p.TeamRole = "TEAM_MEMBER"
+		}
+	}
 	// emit created event
 
 	return nil
@@ -219,4 +371,25 @@ func (p *Participant) UpdateParticipantInfo(dataInput *dtos.AuthParticipantInfoU
 		LinkedInAddress: dataInput.LinkedInAddress,
 	})
 	return err
+}
+
+func GenerateParticipantID(emails []string) (string, error) {
+	slices.Sort[[]string](emails)
+	joined := strings.Join(emails, ":")
+	h := sha256.New()
+	_, err := h.Write([]byte(joined))
+	if err != nil {
+		return "", err
+	}
+	hashByte := h.Sum(nil)
+	hashedString := fmt.Sprintf("%x", hashByte)
+	fmt.Println("hashedString")
+	fmt.Println(joined)
+	fmt.Println(hashedString)
+	fmt.Println("hashedString")
+	slicesOfHash := strings.Split(hashedString, "")
+	prefixSlices := slicesOfHash[0:5]
+	postFix := slicesOfHash[len(slicesOfHash)-5:]
+	sub := strings.Join(append(prefixSlices, postFix...), "")
+	return sub, nil
 }

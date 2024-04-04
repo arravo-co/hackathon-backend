@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/arravoco/hackathon_backend/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,8 +27,9 @@ type Mongo struct {
 func GetMongoConn() (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	clientOpts := options.Client().ApplyURI(
-		"mongodb://localhost:27017")
+		config.GetMongoDBURL())
 
 	client, err := mongo.Connect(ctx, clientOpts)
 	if err != nil {

@@ -16,6 +16,7 @@ type ParticipantAccountCreatedEventData struct {
 	TeamParticipants []TeamParticipantInfo
 	TeamLeadEmail    string
 	TeamName         string
+	TeamRole         string
 	ParticipantType  string
 }
 

@@ -32,9 +32,19 @@ func GetPort() (int, error) {
 	return strconv.Atoi(portString)
 }
 
+func GetMongoDBURL() string {
+	url := os.Getenv("MONGODB_URL")
+	return url
+}
+
 func GetRedisURL() string {
 	url := os.Getenv("REDIS_URL")
 	return url
+}
+
+func GetHackathonId() string {
+	portString := os.Getenv("HACKATHON_ID")
+	return portString
 }
 
 func GetRedisPort() (int, error) {

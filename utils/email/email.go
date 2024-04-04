@@ -80,12 +80,44 @@ type SendWelcomeEmailData struct {
 	TTL       int
 	Token     string
 }
+
+type SendTeamLeadWelcomeEmailData struct {
+	SendWelcomeEmailData
+}
 type SendIndividualWelcomeEmailData struct {
 	SendWelcomeEmailData
 }
 
 type SendJudgeWelcomeEmailData struct {
 	SendWelcomeEmailData
+}
+
+type SendTeamInviteEmailData struct {
+	InviterName  string
+	InviteeName  string
+	InviterEmail string
+	InviteeEmail string
+	Subject      string
+	TTL          int
+	Link         string
+}
+
+func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) {
+	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+	}
 }
 
 func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData) {
@@ -275,4 +307,25 @@ func SendPasswordRecoveryCompleteEmail(dataInput *SendPasswordRecoveryCompleteEm
 		Message: &body,
 		Subject: dataInput.Subject,
 	})
+}
+
+func SendInviteTeamMemberEmail(data *SendTeamInviteEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/email_invite.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.InviteeEmail,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
 }

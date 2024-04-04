@@ -54,6 +54,19 @@ func GenerateAccessToken(payload *exports.AuthUtilsPayload) (string, error) {
 	return t, err
 }
 
+func GetAuthPayload(c echo.Context) *exports.Payload {
+
+	jwtData := c.Get("user").(*jwt.Token)
+	claims := jwtData.Claims.(*exports.MyJWTCustomClaims)
+	tokenData := exports.Payload{
+		Email:     claims.Email,
+		LastName:  claims.LastName,
+		FirstName: claims.FirstName,
+		Role:      claims.Role,
+	}
+	return &tokenData
+}
+
 func GetJWTConfig() echojwt.Config {
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {

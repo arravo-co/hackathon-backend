@@ -3,6 +3,7 @@ module github.com/arravoco/hackathon_backend
 go 1.21.6
 
 require (
+	github.com/adjust/rmq/v5 v5.2.0
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/jaevor/go-nanoid v1.3.0
@@ -23,10 +24,14 @@ require (
 	github.com/Masterminds/semver v1.4.2 // indirect
 	github.com/Masterminds/sprig v2.16.0+incompatible // indirect
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
+	github.com/alicebob/gopher-json v0.0.0-20230218143504-906a9b012302 // indirect
+	github.com/alicebob/miniredis/v2 v2.30.4 // indirect
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/aokoli/goutils v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -45,6 +50,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.3 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/olekukonko/tablewriter v0.0.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
@@ -57,6 +63,7 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
+	github.com/yuin/gopher-lua v1.1.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
@@ -64,4 +71,5 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

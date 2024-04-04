@@ -12,24 +12,34 @@ type AccountDocument struct {
 	LinkedInAddress   string    `bson:"linkedIn_address,omitempty"`
 	PasswordHash      string    `bson:"password_hash,omitempty"`
 	PhoneNumber       string    `bson:"phone_number,omitempty"`
+	Skillset          []string  `bson:"skillset,omitempty"`
 	ParticipantId     string    `bson:"participant_id,omitempty"`
 	HackathonId       string    `bson:"hackathon_id"`
 	State             string    `bson:"state,omitempty"`
 	Role              string    `bson:"role,omitempty"`
+	DOB               time.Time `bson:"dob,omitempty"`
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
+	Status            string    `bson:"status"`
 }
 
 type ParticipantDocument struct {
 	Id                  interface{}
-	ParticipantId       string   `bson:"participant_id"`
-	HackathonId         string   `bson:"hackathon_id"`
-	Type                string   `bson:"type,omitempty"`
-	TeamLeadEmail       string   `bson:"team_lead_email,omitempty"`
-	TeamName            string   `bson:"team_name,omitempty"`
-	CoParticipantEmails []string `bson:"co_participant_emails,omitempty"`
-	ParticipantEmail    string   `bson:"participant_email,omitempty"`
-	GithubAddress       string   `bson:"github_address,omitempty"`
+	ParticipantId       string       `bson:"participant_id"`
+	HackathonId         string       `bson:"hackathon_id"`
+	Type                string       `bson:"type,omitempty"`
+	TeamLeadEmail       string       `bson:"team_lead_email,omitempty"`
+	TeamName            string       `bson:"team_name,omitempty"`
+	CoParticipantEmails []string     `bson:"co_participant_emails,omitempty"`
+	ParticipantEmail    string       `bson:"participant_email,omitempty"`
+	GithubAddress       string       `bson:"github_address,omitempty"`
+	InviteList          []InviteInfo `bson:"invite_list,omitempty"`
+}
+
+type InviteInfo struct {
+	Email     string    `bson:"email,omitempty"`
+	Time      time.Time `bson:"time,omitempty"`
+	InviterId string    `bson:"inviter_id,omitempty"`
 }
 
 type ParticipantScoreDocument struct {
@@ -58,21 +68,43 @@ type UpdateAccountDocument struct {
 }
 
 type CreateAccountData struct {
-	Email        string `bson:"email"`
-	PasswordHash string `bson:"password_hash"`
-	FirstName    string `bson:"first_name"`
-	LastName     string `bson:"last_name"`
-	Gender       string `bson:"gender"`
-	State        string `bson:"state"`
-	Role         string `bson:"role"`
-	PhoneNumber  string `bson:"phone_number"`
+	Email        string    `bson:"email"`
+	PasswordHash string    `bson:"password_hash"`
+	FirstName    string    `bson:"first_name"`
+	LastName     string    `bson:"last_name"`
+	Gender       string    `bson:"gender"`
+	State        string    `bson:"state"`
+	Role         string    `bson:"role"`
+	PhoneNumber  string    `bson:"phone_number"`
+	DOB          time.Time `bson:"dob"`
+	Skillset     []string  `bson:"skillset"`
 }
 
-type CreateIndividualParticipantAccountData struct {
+type CreateParticipantAccountData struct {
 	CreateAccountData
-	LinkedInAddress string `bson:"linkedIn_address"`
+	ParticipantId string `bson:"participant_id"`
 }
 
+type CreateTeamMemberAccountData struct {
+	CreateAccountData
+	ParticipantId string `bson:"participant_id"`
+}
+
+type AddMemberToParticipatingTeamData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	Email         string `bson:"email"`
+	Role          string `bson:"role"`
+	Type          string `bson:"type,omitempty"`
+}
+
+type AddToTeamInviteListData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	InviterEmail  string `bson:"inviter_email"`
+	Email         string `bson:"email"`
+	Role          string `bson:"role"`
+}
 type CreateTeamParticipantAccountData struct {
 	Email               string   `bson:"email"`
 	ParticipantId       string   `bson:"participant_id"`
@@ -86,6 +118,7 @@ type CreateTeamParticipantAccountData struct {
 }
 
 type CreateParticipantRecordData struct {
+	ParticipantId       string   `bson:"participant_id"`
 	ParticipantEmail    string   `bson:"participant_email,omitempty"`
 	TeamLeadEmail       string   `bson:"team_lead_email,omitempty"`
 	TeamName            string   `bson:"team_name,omitempty"`

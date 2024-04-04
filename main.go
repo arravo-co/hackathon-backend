@@ -6,7 +6,9 @@ import (
 
 	"github.com/arravoco/hackathon_backend/config"
 	_ "github.com/arravoco/hackathon_backend/db"
+	_ "github.com/arravoco/hackathon_backend/jobs"
 	"github.com/arravoco/hackathon_backend/routes"
+	"github.com/arravoco/hackathon_backend/security"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,6 +24,7 @@ import (
 // @Server localhost:5000 Localhost
 // @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
+	security.GenerateKeys()
 	e := echo.New()
 	port, err := config.GetPort()
 	routes.StartAllRoutes(e)

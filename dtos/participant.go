@@ -23,31 +23,44 @@ func ValidateGender(fl validator.FieldLevel) bool {
 	return fl.Field().String() != ""
 }
 
-type RegisterNewIndividualParticipantDTO struct {
-	FirstName       string `validate:"min=2,omitempty" json:"first_name"`
-	LastName        string `validate:"min=2,omitempty" json:"last_name"`
-	Email           string `validate:"email,omitempty" json:"email"`
-	Password        string `validate:"min=7,omitempty" json:"password"`
-	ConfirmPassword string `validate:"eqfield=Password,omitempty" json:"confirm_password"`
-	Gender          string `validate:"oneof=MALE FEMALE,omitempty" json:"gender"`
-	GithubAddress   string `validate:"url,omitempty" json:"github_address"`
-	LinkedInAddress string `json:"linkedIn_address,omitempty"`
-	State           string `json:"state,omitempty"`
+type InviteToTeamData struct {
+	ParticipantId string `validate:"required" json:"participant_id"`
+	Email         string ` validate:"email" json:"email"`
+	Role          string `validate:"oneof= TEAM_MEMBER" json:"role"`
 }
 
-type RegisterNewTeamParticipantDTO struct {
-	TeamName            string   `validate:"min=2" json:"team_name"`
-	TeamLeadEmail       string   `validate:"email,omitempty" json:"team_lead_email"`
-	CoParticipantEmails []string `validate:"max=8,min=1,unique,required,dive,email" json:"co_participant_emails"`
+type RegisterNewTeamMemberDTO struct {
+	RegisterNewParticipantDTO
+	ParticipantId string `json:"participant_id"`
 }
 
-type IndividualParticipantCreatedResponseDTO struct {
-	FirstName       string `json:"first_name,omitempty"`
-	LastName        string `json:"last_name,omitempty"`
-	Email           string `json:"email,omitempty"`
-	Gender          string `json:"gender,omitempty"`
-	State           string `json:"state,omitempty"`
-	GithubAddress   string `json:"github_address,omitempty"`
-	LinkedInAddress string `json:"LinkedIn_address,omitempty"`
-	Role            string `json:"role,omitempty"`
+type RegisterNewParticipantDTO struct {
+	FirstName       string   `validate:"min=2" json:"first_name"`
+	LastName        string   `validate:"min=2" json:"last_name"`
+	Email           string   `validate:"email" json:"email"`
+	Password        string   `validate:"min=7" json:"password"`
+	PhoneNumber     string   `validate:"e164" json:"phone_number"`
+	ConfirmPassword string   `validate:"eqfield=Password" json:"confirm_password"`
+	Gender          string   `validate:"oneof=MALE FEMALE" json:"gender"`
+	Skillset        []string `validate:"min=1" json:"skillset"`
+	State           string   `validate:"min=3" json:"state"`
+	Type            string   `validate:"oneof=INDIVIDUAL TEAM" json:"type"`
+	TeamSize        int      `json:"team_size"`
+	DOB             string   ` json:"dob"`
+	TeamName        string   `validate:"omitempty" json:"team_name"`
+}
+
+type ParticipantCreatedResponseDTO struct {
+	FirstName       string   `validate:"min=2,omitempty" json:"first_name"`
+	LastName        string   `validate:"min=2,omitempty" json:"last_name"`
+	Email           string   `validate:"email,omitempty" json:"email"`
+	Password        string   `validate:"min=7,omitempty" json:"password"`
+	PhoneNumber     string   `json:"phone_number"`
+	ConfirmPassword string   `validate:"eqfield=Password,omitempty" json:"confirm_password"`
+	Gender          string   `validate:"oneof=MALE FEMALE,omitempty" json:"gender"`
+	Skillset        []string `json:"skillset,omitempty"`
+	State           string   `json:"state,omitempty"`
+	Type            string   `json:"type"`
+	TeamSize        int      `json:"team_size,omitempty"`
+	Age             int      `json:"age,omitempty"`
 }
