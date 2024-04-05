@@ -337,6 +337,53 @@
         ]
       }
     },
+    "/api/auth/team/invite": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": " Validate team invite link"
+      }
+    },
     "/api/auth/verification/email/completion": {
       "post": {
         "responses": {
@@ -480,7 +527,7 @@
         "description": " Register new judge"
       }
     },
-    "/api/participants/individual": {
+    "/api/participants": {
       "post": {
         "responses": {
           "201": {
@@ -488,7 +535,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantSuccessResponse"
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse"
                 }
               }
             }
@@ -498,7 +545,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantFailResponse"
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse"
                 }
               }
             }
@@ -509,7 +556,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.RegisterNewIndividualParticipantDTO"
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.RegisterNewParticipantDTO"
               }
             }
           },
@@ -517,7 +564,7 @@
         }
       }
     },
-    "/api/participants/team": {
+    "/api/participants/": {
       "post": {
         "responses": {
           "201": {
@@ -525,7 +572,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse"
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InviteTeamMemberSuccessResponse"
                 }
               }
             }
@@ -535,18 +582,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse"
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.InviteTeamMemberFailResponse"
                 }
               }
             }
           }
         },
-        "description": " Register new participating team",
+        "description": " Invite new member",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamParticipantDTO"
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.InviteToTeamData"
               }
             }
           },
@@ -557,6 +604,21 @@
   },
   "components": {
     "schemas": {
+      "InviteInfo": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "Time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "InviterId": {
+            "type": "string"
+          }
+        }
+      },
       "github.com.arravoco.hackathon_backend.dtos.AuthParticipantInfoUpdateDTO": {
         "type": "object",
         "properties": {
@@ -639,7 +701,21 @@
           }
         }
       },
-      "github.com.arravoco.hackathon_backend.dtos.RegisterNewIndividualParticipantDTO": {
+      "github.com.arravoco.hackathon_backend.dtos.InviteToTeamData": {
+        "type": "object",
+        "properties": {
+          "participant_id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.RegisterNewParticipantDTO": {
         "type": "object",
         "properties": {
           "first_name": {
@@ -654,30 +730,85 @@
           "password": {
             "type": "string"
           },
+          "phone_number": {
+            "type": "string"
+          },
           "confirm_password": {
             "type": "string"
           },
           "gender": {
             "type": "string"
           },
-          "github_address": {
-            "type": "string"
-          },
-          "linkedIn_address": {
-            "type": "string"
+          "skillset": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "state": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "team_size": {
+            "type": "integer"
+          },
+          "dob": {
+            "type": "string"
+          },
+          "team_name": {
             "type": "string"
           }
         }
       },
-      "github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamParticipantDTO": {
+      "github.com.arravoco.hackathon_backend.entity.Participant": {
         "type": "object",
         "properties": {
-          "team_name": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "passwordHash": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          },
+          "dob": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "role": {
+            "type": "string"
+          },
+          "participant_id": {
             "type": "string"
           },
           "team_lead_email": {
+            "type": "string"
+          },
+          "team_name": {
+            "type": "string"
+          },
+          "team_role": {
+            "type": "string"
+          },
+          "hackathon_id": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           },
           "co_participant_emails": {
@@ -685,6 +816,39 @@
             "items": {
               "type": "string"
             }
+          },
+          "participant_email": {
+            "type": "string"
+          },
+          "invite_list": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Email": {
+                  "type": "string"
+                },
+                "Time": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "InviterId": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "skillset": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phone_number": {
+            "type": "string"
           }
         }
       },
@@ -714,38 +878,16 @@
           },
           "PhoneNumber": {
             "type": "string"
-          }
-        }
-      },
-      "github.com.arravoco.hackathon_backend.exports.CreateIndividualParticipantAccountData": {
-        "type": "object",
-        "properties": {
-          "LinkedInAddress": {
-            "type": "string"
           },
-          "Email": {
-            "type": "string"
+          "DOB": {
+            "type": "string",
+            "format": "date-time"
           },
-          "PasswordHash": {
-            "type": "string"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "Gender": {
-            "type": "string"
-          },
-          "State": {
-            "type": "string"
-          },
-          "Role": {
-            "type": "string"
-          },
-          "PhoneNumber": {
-            "type": "string"
+          "Skillset": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -775,41 +917,16 @@
           },
           "PhoneNumber": {
             "type": "string"
-          }
-        }
-      },
-      "github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData": {
-        "type": "object",
-        "properties": {
-          "Email": {
-            "type": "string"
           },
-          "ParticipantId": {
-            "type": "string"
+          "DOB": {
+            "type": "string",
+            "format": "date-time"
           },
-          "Role": {
-            "type": "string"
-          },
-          "HackathonId": {
-            "type": "string"
-          },
-          "Type": {
-            "type": "string"
-          },
-          "TeamLeadEmail": {
-            "type": "string"
-          },
-          "TeamName": {
-            "type": "string"
-          },
-          "CoParticipantEmails": {
+          "Skillset": {
             "type": "array",
             "items": {
               "type": "string"
             }
-          },
-          "GithubAddress": {
-            "type": "string"
           }
         }
       },
@@ -860,13 +977,71 @@
           "state": {
             "type": "string"
           },
-          "github_address": {
-            "type": "string"
+          "age": {
+            "type": "integer"
           },
-          "linkedIn_address": {
-            "type": "string"
+          "dob": {
+            "type": "string",
+            "format": "date-time"
           },
           "role": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "team_lead_email": {
+            "type": "string"
+          },
+          "team_name": {
+            "type": "string"
+          },
+          "team_role": {
+            "type": "string"
+          },
+          "hackathon_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "co_participant_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "participant_email": {
+            "type": "string"
+          },
+          "invite_list": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Email": {
+                  "type": "string"
+                },
+                "Time": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "InviterId": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "skillset": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phone_number": {
             "type": "string"
           }
         }
@@ -1010,6 +1185,28 @@
           }
         }
       },
+      "github.com.arravoco.hackathon_backend.routes.InviteTeamMemberFailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.InviteTeamMemberSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "github.com.arravoco.hackathon_backend.routes.PasswordChangeFailureResponse": {
         "type": "object",
         "properties": {
@@ -1056,32 +1253,6 @@
           }
         }
       },
-      "github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantFailResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "github.com.arravoco.hackathon_backend.routes.RegisterIndividualParticipantSuccessResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          },
-          "Data": {
-            "type": "object",
-            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateIndividualParticipantAccountData"
-          }
-        }
-      },
       "github.com.arravoco.hackathon_backend.routes.RegisterJudgeFailResponse": {
         "type": "object",
         "properties": {
@@ -1108,7 +1279,7 @@
           }
         }
       },
-      "github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse": {
+      "github.com.arravoco.hackathon_backend.routes.RegisterParticipantFailResponse": {
         "type": "object",
         "properties": {
           "code": {
@@ -1119,7 +1290,7 @@
           }
         }
       },
-      "github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse": {
+      "github.com.arravoco.hackathon_backend.routes.RegisterParticipantSuccessResponse": {
         "type": "object",
         "properties": {
           "code": {
@@ -1130,7 +1301,7 @@
           },
           "Data": {
             "type": "object",
-            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData"
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.entity.Participant"
           }
         }
       },

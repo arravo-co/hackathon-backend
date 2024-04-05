@@ -102,6 +102,25 @@ type SendTeamInviteEmailData struct {
 	Link         string
 }
 
+type SendAdminWelcomeEmailData struct {
+	FirstName string
+	LastName  string
+	Email     string
+	Subject   string
+	TTL       int
+	Token     string
+}
+
+type SendAdminCreatedByAdminWelcomeEmailData struct {
+	FirstName string
+	LastName  string
+	Email     string
+	Subject   string
+	TTL       int
+	Token     string
+	Password  string
+}
+
 func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) {
 	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
 	var buf bytes.Buffer
@@ -320,6 +339,48 @@ func SendInviteTeamMemberEmail(data *SendTeamInviteEmailData) error {
 	body := buf.String()
 	err = SendEmailHtml(&SendEmailHtmlData{
 		Email:   data.InviteeEmail,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
+}
+
+func SendAdminWelcomeEmail(data *SendAdminWelcomeEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/admin_welcome_and_verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
+}
+
+func SendAdminCreatedByAdminWelcomeEmail(data *SendAdminCreatedByAdminWelcomeEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/admin_created_by_admin_welcome_and_verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
 		Message: body,
 		Subject: data.Subject,
 	})

@@ -89,6 +89,30 @@ func CreateTeamParticipantAccount(dataToSave *exports.CreateTeamParticipantAccou
 }
 */
 
+func CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (*exports.AccountDocument, error) {
+	accountCol, err := Datasource.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	result, err := accountCol.InsertOne(ctx, dataToSave)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Printf("%#v", result.InsertedID)
+	acc := &exports.AccountDocument{
+		Email:           dataToSave.Email,
+		FirstName:       dataToSave.FirstName,
+		LastName:        dataToSave.LastName,
+		PhoneNumber:     dataToSave.PhoneNumber,
+		Gender:          dataToSave.Gender,
+		Role:            dataToSave.Role,
+		IsEmailVerified: false,
+	}
+	return acc, nil
+}
+
 func CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
 	accountCol, err := Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())

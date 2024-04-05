@@ -10,11 +10,12 @@ import (
 var cfKeyId = "emails_per_hackathon:hackathon_id"
 
 func init() {
-	ctx := context.Background()
+	/**/ ctx := context.Background()
 	status := db.RedisClient.CFReserve(ctx, cfKeyId, 100000)
 	if status.Err() != nil {
 		utils.MySugarLogger.Errorln(status.Err().Error())
 	}
+
 }
 
 func RemoveEmailFromCache(email string) bool {

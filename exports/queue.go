@@ -8,3 +8,9 @@ type InvitelistQueuePayload struct {
 	InviterName  string    `json:"inviter_name"`
 	TimeSent     time.Time `json:"time_sent"`
 }
+
+type AdminWelcomeEmailQueuePayload struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}

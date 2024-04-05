@@ -67,6 +67,17 @@ type UpdateAccountDocument struct {
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 }
 
+type CreateAdminAccountData struct {
+	Email        string `bson:"email"`
+	PasswordHash string `bson:"password_hash"`
+	FirstName    string `bson:"first_name"`
+	LastName     string `bson:"last_name"`
+	Gender       string `bson:"gender"`
+	HackathonId  string `bson:"hackathon_id"`
+	Role         string `bson:"role"`
+	PhoneNumber  string `bson:"phone_number"`
+}
+
 type CreateAccountData struct {
 	Email        string    `bson:"email"`
 	PasswordHash string    `bson:"password_hash"`
