@@ -32,6 +32,7 @@ type InviteToTeamData struct {
 type RegisterNewTeamMemberDTO struct {
 	RegisterNewParticipantDTO
 	ParticipantId string `json:"participant_id"`
+	TeamLeadEmail string `json:"team_lead_email"`
 }
 
 type RegisterNewParticipantDTO struct {

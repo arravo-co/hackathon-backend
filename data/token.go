@@ -40,20 +40,68 @@ func VerifyToken(dataInput *exports.VerifyTokenData) error {
 	if err != nil {
 		return err
 	}
-	result := tokenCol.FindOne(context.TODO(), dataInput)
-	err = result.Decode(&tokenInfo)
-	if err != nil {
-		exports.MySugarLogger.Error(err)
+	filter := bson.M{
+		"token":            dataInput.Token,
+		"token_type":       dataInput.TokenType,
+		"token_type_value": dataInput.TokenTypeValue,
+	}
+	result := tokenCol.FindOneAndUpdate(context.TODO(), filter,
+		bson.A{bson.D{{
+			Key: "$set", Value: bson.D{{
+				Key: "status", Value: bson.D{{
+					Key: "$switch", Value: bson.D{{
+						Key: "branches", Value: bson.A{
+							bson.D{{
+								Key: "case", Value: bson.M{
+									"$and": bson.A{
+										bson.M{
+											"$lt": bson.A{"$ttl", "$$NOW"},
+										}, bson.M{
+											"$or": bson.A{
+												bson.M{
+													"$eq": bson.A{"$status", "PENDING"}}, bson.M{"$eq": bson.A{"$status", "UNVERIFIED"}},
+											},
+										},
+									},
+								}}, {
+								Key: "then", Value: "EXPIRED",
+							},
+								{
+									Key: "case", Value: bson.M{
+										"$and": bson.A{bson.M{
+											"$gte": bson.A{"$ttl", "$$NOW"},
+										}, bson.M{
+											"$or": bson.A{
+												bson.M{
+													"$eq": bson.A{"$status", "PENDING"}}, bson.M{"$eq": bson.A{"$status", "UNVERIFIED"}},
+											},
+										},
+										},
+									}}, {
+									Key: "then", Value: "VERIFIED",
+								},
+							},
+						}}, {
+						Key: "default", Value: bson.M{
+							"$getField": "status",
+						},
+					}},
+				},
+				},
+			}}}}},
+	) //bson.M{"status": "VERIFIED"}
+
+	if result.Err() != nil {
+		exports.MySugarLogger.Error(result.Err())
 		return errors.New("unable to verify token")
 	}
-	if tokenInfo.Token == "" {
-		return errors.New("token does not exist")
+	err = result.Decode(tokenInfo)
+	if result.Err() != nil {
+		exports.MySugarLogger.Error(result.Err())
+		return errors.New("Error verifying token")
 	}
-	if tokenInfo.TTL.Before(time.Now()) {
+	if tokenInfo.Status == "EXPIRED" {
 		return errors.New("token has expired")
-	}
-	if tokenInfo.Status == "VERIFIED" {
-		return errors.New("token has been used for verification of this entity in the past")
 	}
 
 	return nil

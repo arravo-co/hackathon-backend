@@ -79,6 +79,7 @@ type SendWelcomeEmailData struct {
 	Subject   string
 	TTL       int
 	Token     string
+	Link      string
 }
 
 type SendTeamLeadWelcomeEmailData struct {
@@ -109,6 +110,7 @@ type SendAdminWelcomeEmailData struct {
 	Subject   string
 	TTL       int
 	Token     string
+	Link      string
 }
 
 type SendAdminCreatedByAdminWelcomeEmailData struct {
@@ -193,6 +195,7 @@ type SendEmailVerificationEmailData struct {
 	Subject   string
 	Token     string
 	TokenTTL  time.Time
+	Link      string
 }
 
 func SendEmailVerificationEmail(dataInput *SendEmailVerificationEmailData) {

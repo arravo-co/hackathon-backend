@@ -83,15 +83,15 @@ type InviteTeamMemberSuccessResponse struct {
 	Message string `json:"message"`
 }
 
-// @Description	Register new member to the team
-// @Summary		Register new member to the Team
+// @Description	Fully register new member to the participating team
+// @Summary		Fully Register New Member To The Participating Team
 // @Tags		Participants
 // @Produce		json
+// @Param  participantId  path  string  true  "participant id of the participating team"
 // @Param registerTeam body dtos.RegisterNewTeamMemberDTO true "register new member to participating team"
 // @Success		201	{object}	RegisterTeamParticipantSuccessResponse
 // @Failure		400	{object}	RegisterTeamParticipantFailResponse
-// @Router		/api/participants/:participantId/members     [post]
-
+// @Router		/api/participants/{participantId}/members     [post]
 func RegisterNewTeamMember(c echo.Context) error {
 	participantId := c.Param("participantId")
 	data := dtos.RegisterNewTeamMemberDTO{}
@@ -132,12 +132,13 @@ func RegisterNewTeamMember(c echo.Context) error {
 // @Description	Invite new member
 // @Summary		Invite new member
 // @Tags			Participants
+// @Param  participantId  path  string  true  "participant id of the participating team"
 // @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
 // @Produce		json
 // @Success		201	{object}	InviteTeamMemberSuccessResponse
 // @Failure		400	{object}	InviteTeamMemberFailResponse
-// @Router			/api/participants/:participantId/invite               [post]
-func InviteParticipantToTeam(c echo.Context) error {
+// @Router			/api/participants/{participantId}/invite               [post]
+func InviteMemberToTeam(c echo.Context) error {
 	participantId := c.Param("participantId")
 	tokenData := authutils.GetAuthPayload(c)
 	data := dtos.InviteToTeamData{}
@@ -161,11 +162,10 @@ func InviteParticipantToTeam(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	fmt.Println(participant)
 	if participant.Type == "INDIVIDUAL" {
 		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
 			Code:    echo.ErrBadRequest.Code,
-			Message: "Only a participant team can invite new members.",
+			Message: "Only a participating team can invite new members.",
 		})
 	}
 	responseData, err := participant.InviteToTeam(&exports.AddToTeamInviteListData{

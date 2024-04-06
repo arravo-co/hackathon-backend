@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -24,16 +25,30 @@ func GetSecretKey() string {
 	return os.Getenv("SECRET_KEY")
 }
 
-func GetPort() (int, error) {
+func GetPort() int {
 	portString := os.Getenv("PORT")
 	if portString == "" {
-		return 0, errors.New("port must be set")
+		return 8080
 	}
-	return strconv.Atoi(portString)
+	port, _ := strconv.Atoi(portString)
+	return port
 }
 
 func GetMongoDBURL() string {
 	url := os.Getenv("MONGODB_URL")
+	return url
+}
+
+func GetServerURL() string {
+	url, notFound := os.LookupEnv("SERVER_URL")
+	if !notFound {
+		return strings.Join([]string{"http://localhost", strconv.Itoa(GetPort())}, ":")
+	}
+	return url
+}
+
+func GetFrontendURL() string {
+	url := os.Getenv("FRONTEND_URL")
 	return url
 }
 

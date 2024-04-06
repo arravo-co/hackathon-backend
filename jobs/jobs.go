@@ -49,7 +49,7 @@ func (c *InvitelistTaskConsumer) Consume(d rmq.Delivery) {
 	}
 	fmt.Println(payloadStruct)
 	ttl := time.Now().Add(time.Hour * 24 * 7)
-	linkPayload, err := utils.GenerateLinkPayload(&exports.LinkPayload{
+	linkPayload, err := utils.GenerateTeamInviteLinkPayload(&exports.TeamInviteLinkPayload{
 		InviteeEmail: payloadStruct.InviteeEmail,
 		InviterEmail: payloadStruct.InviterEmail,
 		TTL:          ttl.Unix(),

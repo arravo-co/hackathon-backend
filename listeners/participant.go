@@ -1,9 +1,11 @@
 package listeners
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
 )
@@ -21,6 +23,15 @@ func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreat
 			exports.MySugarLogger.Error(err)
 			return
 		}
+		link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
+			Token: dataToken.Token,
+			TTL:   dataToken.TTL,
+			Email: dataToken.TokenTypeValue,
+		})
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 		if eventDTOData.TeamRole == "TEAM_LEAD" {
 			email.SendTeamLeadWelcomeEmail(&email.SendTeamLeadWelcomeEmailData{
 				SendWelcomeEmailData: email.SendWelcomeEmailData{Email: eventDTOData.ParticipantEmail,
@@ -28,7 +39,9 @@ func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreat
 					FirstName: eventDTOData.FirstName,
 					Subject:   " Welcome to Arravo's Hackathon - Confirm Your Email Address",
 					Token:     dataToken.Token,
-					TTL:       dataToken.TTL.Minute()},
+					TTL:       dataToken.TTL.Minute(),
+					Link:      link,
+				},
 			})
 		}
 
@@ -42,13 +55,24 @@ func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreat
 			exports.MySugarLogger.Error(err)
 			return
 		}
+		link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
+			Token: dataToken.Token,
+			TTL:   dataToken.TTL,
+			Email: dataToken.TokenTypeValue,
+		})
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 		email.SendIndividualParticipantWelcomeEmail(&email.SendIndividualWelcomeEmailData{
-			SendWelcomeEmailData: email.SendWelcomeEmailData{Email: eventDTOData.ParticipantEmail,
+			SendWelcomeEmailData: email.SendWelcomeEmailData{
+				Email:     eventDTOData.ParticipantEmail,
 				LastName:  eventDTOData.LastName,
 				FirstName: eventDTOData.FirstName,
 				Subject:   " Welcome to Arravo's Hackathon - Confirm Your Email Address",
 				Token:     dataToken.Token,
-				TTL:       dataToken.TTL.Minute()},
+				TTL:       dataToken.TTL.Minute(),
+				Link:      link},
 		})
 
 	}

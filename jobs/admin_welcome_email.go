@@ -8,6 +8,7 @@ import (
 	"github.com/adjust/rmq/v5"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/queue"
+	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
 )
@@ -60,6 +61,15 @@ func (c *AdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		}
 		return
 	}
+	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
+		Token: dataToken.Token,
+		TTL:   dataToken.TTL,
+		Email: dataToken.TokenTypeValue,
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	err = email.SendAdminWelcomeEmail(&email.SendAdminWelcomeEmailData{
 		FirstName: payloadStruct.FirstName,
 		LastName:  payloadStruct.LastName,
@@ -67,6 +77,7 @@ func (c *AdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		Subject:   "Invitation to Join Arravo Hackathon Link As An Administrator",
 		TTL:       int(time.Now().Sub(ttl).Minutes()),
 		Token:     dataToken.Token,
+		Link:      link,
 	})
 	if err != nil {
 		exports.MySugarLogger.Errorln(err)

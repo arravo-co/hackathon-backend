@@ -16,7 +16,7 @@
   },
   "servers": [
     {
-      "url": "localhost:5000",
+      "url": "http://localhost:5000",
       "description": " Localhost"
     },
     {
@@ -385,6 +385,51 @@
       }
     },
     "/api/auth/verification/email/completion": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Email verification successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Email verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Email verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.CompleteEmailVerificationFailureResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Verify user email address"
+      },
       "post": {
         "responses": {
           "200": {
@@ -564,7 +609,7 @@
         }
       }
     },
-    "/api/participants/": {
+    "/api/participants/{participantId}/invite": {
       "post": {
         "responses": {
           "201": {
@@ -589,11 +634,74 @@
           }
         },
         "description": " Invite new member",
+        "parameters": [
+          {
+            "name": "participantId",
+            "in": "path",
+            "description": "participant id of the participating team",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "string",
+              "description": "participant id of the participating team"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.InviteToTeamData"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/participants/{participantId}/members": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": " Fully register new member to the participating team",
+        "parameters": [
+          {
+            "name": "participantId",
+            "in": "path",
+            "description": "participant id of the participating team",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "string",
+              "description": "participant id of the participating team"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamMemberDTO"
               }
             }
           },
@@ -718,6 +826,59 @@
       "github.com.arravoco.hackathon_backend.dtos.RegisterNewParticipantDTO": {
         "type": "object",
         "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "confirm_password": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "skillset": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "state": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "team_size": {
+            "type": "integer"
+          },
+          "dob": {
+            "type": "string"
+          },
+          "team_name": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamMemberDTO": {
+        "type": "object",
+        "properties": {
+          "participant_id": {
+            "type": "string"
+          },
+          "team_lead_email": {
+            "type": "string"
+          },
           "first_name": {
             "type": "string"
           },
@@ -927,6 +1088,41 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "ParticipantId": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "HackathonId": {
+            "type": "string"
+          },
+          "Type": {
+            "type": "string"
+          },
+          "TeamLeadEmail": {
+            "type": "string"
+          },
+          "TeamName": {
+            "type": "string"
+          },
+          "CoParticipantEmails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "GithubAddress": {
+            "type": "string"
           }
         }
       },
@@ -1302,6 +1498,32 @@
           "Data": {
             "type": "object",
             "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.entity.Participant"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantFailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.RegisterTeamParticipantSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateTeamParticipantAccountData"
           }
         }
       },

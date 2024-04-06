@@ -21,17 +21,14 @@ import (
 // @TermsOfServiceUrl http://arravo.co/contact
 // @LicenseName MIT
 // @LicenseURL https://en.wikipedia.org/wiki/MIT_License
-// @Server localhost:5000 Localhost
+// @Server http://localhost:5000 Localhost
 // @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
 	security.GenerateKeys()
 	e := echo.New()
-	port, err := config.GetPort()
+	port := config.GetPort()
 	routes.StartAllRoutes(e)
 	e.Logger.Info(port)
-	if err != nil {
-		e.Logger.Fatal(err)
-	}
 	e.Logger.Fatal(e.Start(getURL(port)))
 }
 

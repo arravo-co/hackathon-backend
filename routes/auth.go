@@ -3,8 +3,10 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
@@ -173,18 +175,77 @@ func InitiateEmailVerification(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-
-	email.SendEmailVerificationEmail(&email.SendEmailVerificationEmailData{
-		Email:    emailToVerify,
-		Token:    tokenData.Token,
-		TokenTTL: tokenData.TTL,
-		Subject:  "Email Verification",
+	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
+		Token: tokenData.Token,
+		TTL:   tokenData.TTL,
+		Email: tokenData.TokenTypeValue,
 	})
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		email.SendEmailVerificationEmail(&email.SendEmailVerificationEmailData{
+			Email:    tokenData.TokenTypeValue,
+			Token:    tokenData.Token,
+			TokenTTL: tokenData.TTL,
+			Subject:  "Email Verification",
+			Link:     link,
+		})
+	}
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
 		Code:    200,
 		Message: "Verification email sent successfully",
 		Data:    &InitiateEmailVerificationSuccessResponseData{},
 	})
+}
+
+// @Summary		Verify user email address
+// @Description	Verify user email address
+// @Tags			Auth
+// @Accept			json
+// @Produce		json
+// @Success		200				object	CompleteEmailVerificationSuccessResponse "Email verification successful"
+// @Failure		400				object	CompleteEmailVerificationFailureResponse "Email verification failed"
+// @Failure		404				object	CompleteEmailVerificationFailureResponse "Email verification failed"
+// @Failure		500				object	CompleteEmailVerificationFailureResponse "Email verification failed"
+// @Router			/api/auth/verification/email/completion [get]
+func CompleteEmailVerificationViaGet(c echo.Context) error {
+	queryToken := c.QueryParam("token")
+	payload, err := utils.ProcessEmailVerificationLink(queryToken)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	fmt.Println(payload)
+	if payload.TTL.Before(time.Now()) {
+		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: "Link has expired",
+			},
+		})
+	}
+
+	err = authutils.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
+		Token: payload.Token,
+		Email: payload.Email,
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	email.SendEmailVerificationCompleteEmail(&email.SendEmailVerificationCompleteEmailData{
+		Email:   payload.Email,
+		Subject: "Email Verification Success",
+	})
+	return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(), "verify"}, "/"))
 }
 
 // @Summary		Verify user email address
@@ -504,7 +565,7 @@ func ValidateTeamInviteLink(c echo.Context) error {
 	if tokenStr == "" {
 		return c.HTML(400, "<p>Invalid link</p>")
 	}
-	t, err := utils.ProcessInviteLink(tokenStr)
+	t, err := utils.ProcessTeamInviteLink(tokenStr)
 	if err != nil {
 		fmt.Printf("")
 		c.HTML(400, err.Error())
