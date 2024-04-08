@@ -7,7 +7,7 @@ import (
 	"github.com/arravoco/hackathon_backend/config"
 	_ "github.com/arravoco/hackathon_backend/db"
 	_ "github.com/arravoco/hackathon_backend/jobs"
-	"github.com/arravoco/hackathon_backend/routes"
+	routes_v1 "github.com/arravoco/hackathon_backend/routes/v1"
 	"github.com/arravoco/hackathon_backend/security"
 	"github.com/labstack/echo/v4"
 )
@@ -27,7 +27,7 @@ func main() {
 	security.GenerateKeys()
 	e := echo.New()
 	port := config.GetPort()
-	routes.StartAllRoutes(e)
+	routes_v1.StartAllRoutes(e)
 	e.Logger.Info(port)
 	e.Logger.Fatal(e.Start(getURL(port)))
 }

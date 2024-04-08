@@ -1,4 +1,4 @@
-package routes
+package routes_v1
 
 import (
 	"github.com/arravoco/hackathon_backend/data"

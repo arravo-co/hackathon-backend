@@ -1,4 +1,4 @@
-package routes
+package routes_v1
 
 import (
 	"fmt"
@@ -103,6 +103,7 @@ type CompletePasswordRecoverySuccessResponseData struct {
 	Email string `json:"email"`
 }
 
+// @Title Basic Log in
 // @Description	Log a user in
 // @Summary		Log a user in
 // @Tags		Auth
@@ -110,7 +111,7 @@ type CompletePasswordRecoverySuccessResponseData struct {
 // @Param       loginJSON   body BasicLoginDTO    true                   "login Request JSON"
 // @Success		200	  object 	BasicLoginSuccessResponse "Users Responses JSON"
 // @Failure		400	object	BasicLoginFailureResponse "Login failed"
-// @Router			/api/auth/login             [post]
+// @Router			/api/v1/auth/login             [post]
 func BasicLogin(c echo.Context) error {
 	data := dtos.BasicLoginDTO{}
 	c.Bind(&data)
@@ -144,17 +145,18 @@ func BasicLogin(c echo.Context) error {
 	})
 }
 
+// @Title Generate Email Verification Link
 // @Summary		Generate token to verify user email address
 // @Description	Generate token to verify user email address
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Param			email	query		string	false	"Email to verify"	Format(email)
+// @Param			email	query		string	true	"Email to verify"	Format(email)
 // @Success		200		object	InitiateEmailVerificationSuccessResponse "Verification succeeded"
 // @Failure		400		object	InitiateEmailVerificationFailureResponse "Verification failed"
 // @Failure		404		object	InitiateEmailVerificationFailureResponse "Verification failed"
 // @Failure		500		object	InitiateEmailVerificationFailureResponse "Verification failed"
-// @Router			/api/auth/verification/email/initiation [get]
+// @Router			/api/v1/auth/verification/email/initiation [get]
 func InitiateEmailVerification(c echo.Context) error {
 	emailToVerify := c.QueryParam("email")
 	if emailToVerify == "" {
@@ -198,6 +200,7 @@ func InitiateEmailVerification(c echo.Context) error {
 	})
 }
 
+// @Title Verify Email Via Link
 // @Summary		Verify user email address
 // @Description	Verify user email address
 // @Tags			Auth
@@ -207,17 +210,13 @@ func InitiateEmailVerification(c echo.Context) error {
 // @Failure		400				object	CompleteEmailVerificationFailureResponse "Email verification failed"
 // @Failure		404				object	CompleteEmailVerificationFailureResponse "Email verification failed"
 // @Failure		500				object	CompleteEmailVerificationFailureResponse "Email verification failed"
-// @Router			/api/auth/verification/email/completion [get]
+// @Router			/api/v1/auth/verification/email/completion [get]
 func CompleteEmailVerificationViaGet(c echo.Context) error {
 	queryToken := c.QueryParam("token")
 	payload, err := utils.ProcessEmailVerificationLink(queryToken)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: err.Error(),
-			},
-		})
+		return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(),
+			strings.Join([]string{"verify_fail", strings.Join([]string{"err", err.Error()}, "=")}, "?")}, "/"))
 	}
 	fmt.Println(payload)
 	if payload.TTL.Before(time.Now()) {
@@ -234,12 +233,8 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 		Email: payload.Email,
 	})
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: err.Error(),
-			},
-		})
+		return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(),
+			strings.Join([]string{"verify_fail", strings.Join([]string{"err", err.Error()}, "=")}, "?")}, "/"))
 	}
 	email.SendEmailVerificationCompleteEmail(&email.SendEmailVerificationCompleteEmailData{
 		Email:   payload.Email,
@@ -248,6 +243,7 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 	return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(), "verify"}, "/"))
 }
 
+// @Title Verify Email Via Token
 // @Summary		Verify user email address
 // @Description	Verify user email address
 // @Tags			Auth
@@ -258,7 +254,7 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 // @Failure		400				object	CompleteEmailVerificationFailureResponse "Email verification failed"
 // @Failure		404				object	CompleteEmailVerificationFailureResponse "Email verification failed"
 // @Failure		500				object	CompleteEmailVerificationFailureResponse "Email verification failed"
-// @Router			/api/auth/verification/email/completion [post]
+// @Router			/api/v1/auth/verification/email/completion [post]
 func CompleteEmailVerification(c echo.Context) error {
 	dataDto := dtos.CompleteEmailVerificationDTO{}
 	err := c.Bind(&dataDto)
@@ -306,6 +302,7 @@ func CompleteEmailVerification(c echo.Context) error {
 	})
 }
 
+// @Title Change Password
 // @Summary		Change User Password
 // @Description	Change User Password
 // @Tags			Auth
@@ -316,7 +313,7 @@ func CompleteEmailVerification(c echo.Context) error {
 // @Failure		400					object	PasswordChangeFailureResponse ""
 // @Failure		404					object	PasswordChangeFailureResponse ""
 // @Failure		500					object	PasswordChangeFailureResponse ""
-// @Router			/api/auth/password/change [post]
+// @Router			/api/v1/auth/password/change [post]
 func ChangePassword(c echo.Context) error {
 	dataDto := dtos.ChangePasswordDTO{}
 	err := c.Bind(&dataDto)
@@ -345,6 +342,7 @@ func ChangePassword(c echo.Context) error {
 	})
 }
 
+// @Title  Get Auth User Information
 // @Summary		Get auth user information
 // @Description	Get auth user information
 // @Tags			Auth
@@ -358,7 +356,7 @@ func ChangePassword(c echo.Context) error {
 // @Failure		400	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
 // @Failure		404	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
 // @Failure		500	object	AuthUserInfoFetchFailureResponse "UserInfo fetch failed"
-// @Router			/api/auth/me [get]
+// @Router			/api/v1/auth/me [get]
 func GetAuthUserInfo(c echo.Context) error {
 	tokenData := authutils.GetAuthPayload(c)
 	user := AuthUserInfoFetchSuccessResponseData{}
@@ -394,8 +392,9 @@ func GetAuthUserInfo(c echo.Context) error {
 	})
 }
 
-// @Summary		Get auth user information
-// @Description	Get auth user information
+// @Title Update Auth User Info
+// @Summary		Update auth user information
+// @Description	Update auth user information
 // @Tags			Auth
 // @Param			updateMyInfoJSON	body		dtos.AuthParticipantInfoUpdateDTO	true	"the required info"
 // @Produce		json
@@ -405,7 +404,7 @@ func GetAuthUserInfo(c echo.Context) error {
 // @Failure		400	{object}	AuthUserInfoFetchFailureResponse
 // @Failure		404	{object}	AuthUserInfoFetchFailureResponse
 // @Failure		500	{object}	AuthUserInfoFetchFailureResponse
-// @Router			/api/auth/me [put]
+// @Router			/api/v1/auth/me [put]
 func UpdateAuthUserInfo(c echo.Context) error {
 	tokenData := c.Get("user").(exports.Payload)
 	var err error
@@ -442,6 +441,7 @@ func UpdateAuthUserInfo(c echo.Context) error {
 	})
 }
 
+// @Title Initiate Password Recovery
 // @Summary			Initiate Password Recovery
 // @Description	Initiate Password Recovery
 // @Tags			Auth
@@ -452,7 +452,7 @@ func UpdateAuthUserInfo(c echo.Context) error {
 // @Failure		400		object	InitiateEmailVerificationFailureResponse
 // @Failure		404		object	InitiateEmailVerificationFailureResponse
 // @Failure		500		object	InitiateEmailVerificationFailureResponse
-// @Router		/api/auth/password/recovery/initiation [get]
+// @Router		/api/v1/auth/password/recovery/initiation [get]
 func InitiatePasswordRecovery(c echo.Context) error {
 	emailToVerify := c.QueryParam("email")
 	if emailToVerify == "" {
@@ -490,6 +490,7 @@ func InitiatePasswordRecovery(c echo.Context) error {
 	})
 }
 
+// @Title Complete Password Recovery
 // @Summary		Complete  password recovery
 // @Description	Complete password recovery
 // @Tags			Auth
@@ -500,7 +501,7 @@ func InitiatePasswordRecovery(c echo.Context) error {
 // @Failure		400				{object}	CompletePasswordRecoveryFailureResponse
 // @Failure		404				{object}	CompletePasswordRecoveryFailureResponse
 // @Failure		500				{object}	CompletePasswordRecoveryFailureResponse
-// @Router			/api/auth/password/recovery/completion [post]
+// @Router			/api/v1/auth/password/recovery/completion [post]
 func CompletePasswordRecovery(c echo.Context) error {
 	dataDto := dtos.CompletePasswordRecoveryDTO{}
 	err := c.Bind(&dataDto)
@@ -550,6 +551,7 @@ func CompletePasswordRecovery(c echo.Context) error {
 	})
 }
 
+// @Title Validate Team Invite Link
 // @Summary		Validate team invite link
 // @Description	Validate team invite link
 // @Tags			Auth
@@ -559,7 +561,7 @@ func CompletePasswordRecovery(c echo.Context) error {
 // @Failure		400				{object}	string
 // @Failure		404				{object}	string
 // @Failure		500				{object}	string
-// @Router			/api/auth/team/invite [get]
+// @Router			/api/v1/auth/team/invite [get]
 func ValidateTeamInviteLink(c echo.Context) error {
 	tokenStr := c.QueryParam("token")
 	if tokenStr == "" {

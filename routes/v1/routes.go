@@ -1,4 +1,4 @@
-package routes
+package routes_v1
 
 import (
 	"net/http"
@@ -21,28 +21,45 @@ var authRoutes *echo.Group
 var judgesRoutes *echo.Group
 var validate *validator.Validate
 
+// @Version 1.0.0
+// @Title Hackathon Backend API
+// @Description API usually works as expected. But sometimes its not true.
+// @ContactName David Alabi
+// @ContactEmail appdev@arravo.co
+// @ContactURL http://arravo.co/contact
+// @TermsOfServiceUrl http://arravo.co/contact
+// @LicenseName MIT
+// @LicenseURL https://en.wikipedia.org/wiki/MIT_License
+// @Server http://localhost:5000 Localhost
+// @Server https://hackathon-backend-2cvk.onrender.com Development
 func StartAllRoutes(e *echo.Echo) {
 	validate = validator.New()
 	e.Renderer = t
 	e.GET("/hello", Hello)
-	e.Static("/api/docs", "static/docs")
+	e.Static("/api/v1/docs", "static/docs")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPost, http.MethodPut, http.MethodDelete},
 	}))
 
-	api := e.Group("/api")
+	api := e.Group("/api/v1")
 	setupAuthRoutes(api)
 	setupJudgesRoutes(api)
 	setupParticipantsRoutes(api)
 	setupScoreRoutes(api)
+	setupAdminsRoutes(api)
+}
+
+func setupAdminsRoutes(api *echo.Group) {
+	adminsRoutes := api.Group("/admin")
+	adminsRoutes.POST("/register_admin", RegisterAnotherAdmin, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
 }
 
 func setupParticipantsRoutes(api *echo.Group) {
 	participantsRoutes = api.Group("/participants")
 	participantsRoutes.POST("", RegisterParticipant)
 	participantsRoutes.POST("/participants/:participantId/members ", RegisterNewTeamMember)
-	participantsRoutes.POST("/:participantId/invite", InviteMemberToTeam, othermiddleware.AuthRole("PARTICIPANT"))
+	participantsRoutes.POST("/:participantId/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 }
 
 func setupJudgesRoutes(api *echo.Group) {

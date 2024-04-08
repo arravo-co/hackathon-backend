@@ -25,11 +25,17 @@ func Auth() echo.MiddlewareFunc {
 	return y
 }
 
-func AuthRole(role string) echo.MiddlewareFunc {
+func AuthRole(roles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return Auth()(func(c echo.Context) error {
 			tokenData := exports.GetPayload(c)
-			if tokenData.Role != role {
+			var found bool = false
+			for _, role := range roles {
+				if role == tokenData.Role {
+					found = true
+				}
+			}
+			if !found {
 				return c.JSON(http.StatusUnauthorized, struct {
 					Message string `json:"message"`
 					Code    int    `json:"code"`

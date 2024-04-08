@@ -1,4 +1,4 @@
-package routes
+package routes_v1
 
 import (
 	"fmt"
@@ -23,6 +23,7 @@ type RegisterParticipantFailResponse struct {
 	Message string `json:"message"`
 }
 
+// @Title Register New Participant
 // @Description	Register new participant
 // @Summary		Register new participant
 // @Tags			Participants
@@ -30,7 +31,7 @@ type RegisterParticipantFailResponse struct {
 // @Produce		json
 // @Success		201	{object}	RegisterParticipantSuccessResponse
 // @Failure		400	{object}	RegisterParticipantFailResponse
-// @Router			/api/participants               [post]
+// @Router			/api/v1/participants               [post]
 func RegisterParticipant(c echo.Context) error {
 	data := dtos.RegisterNewParticipantDTO{}
 	err := c.Bind(&data)
@@ -83,6 +84,7 @@ type InviteTeamMemberSuccessResponse struct {
 	Message string `json:"message"`
 }
 
+// @Title Fully Register New Team Member
 // @Description	Fully register new member to the participating team
 // @Summary		Fully Register New Member To The Participating Team
 // @Tags		Participants
@@ -91,7 +93,7 @@ type InviteTeamMemberSuccessResponse struct {
 // @Param registerTeam body dtos.RegisterNewTeamMemberDTO true "register new member to participating team"
 // @Success		201	{object}	RegisterTeamParticipantSuccessResponse
 // @Failure		400	{object}	RegisterTeamParticipantFailResponse
-// @Router		/api/participants/{participantId}/members     [post]
+// @Router		/api/v1/participants/{participantId}/members     [post]
 func RegisterNewTeamMember(c echo.Context) error {
 	participantId := c.Param("participantId")
 	data := dtos.RegisterNewTeamMemberDTO{}
@@ -129,6 +131,7 @@ func RegisterNewTeamMember(c echo.Context) error {
 	})
 }
 
+// @Title Invite New Member
 // @Description	Invite new member
 // @Summary		Invite new member
 // @Tags			Participants
@@ -137,7 +140,7 @@ func RegisterNewTeamMember(c echo.Context) error {
 // @Produce		json
 // @Success		201	{object}	InviteTeamMemberSuccessResponse
 // @Failure		400	{object}	InviteTeamMemberFailResponse
-// @Router			/api/participants/{participantId}/invite               [post]
+// @Router			/api/v1/participants/{participantId}/invite               [post]
 func InviteMemberToTeam(c echo.Context) error {
 	participantId := c.Param("participantId")
 	tokenData := authutils.GetAuthPayload(c)

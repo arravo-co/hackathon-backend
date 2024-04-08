@@ -13,12 +13,11 @@ type Admin struct {
 	LastName     string `json:"last_name"`
 	Email        string `json:"email"`
 	passwordHash string
-	Gender       string   `json:"gender"`
-	Role         string   `json:"role"`
-	HackathonId  string   `json:"hackathon_id"`
-	Status       string   `json:"status"`
-	Skillset     []string `json:"skillset"`
-	PhoneNumber  string   `json:"phone_number"`
+	Gender       string `json:"gender"`
+	Role         string `json:"role"`
+	HackathonId  string `json:"hackathon_id"`
+	Status       string `json:"status"`
+	PhoneNumber  string `json:"phone_number"`
 }
 
 func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
@@ -89,5 +88,20 @@ func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminDTO) e
 	ad.Gender = acc.Gender
 	ad.Role = acc.Role
 
+	return nil
+}
+
+func (ad *Admin) FillEntity(email string) error {
+	acc, err := data.GetAccountByEmail(email)
+	if err != nil {
+		return err
+	}
+	ad.Email = acc.Email
+	ad.Role = acc.Role
+	ad.FirstName = acc.FirstName
+	ad.LastName = acc.LastName
+	ad.Gender = acc.Gender
+	ad.HackathonId = acc.HackathonId
+	ad.PhoneNumber = acc.PhoneNumber
 	return nil
 }

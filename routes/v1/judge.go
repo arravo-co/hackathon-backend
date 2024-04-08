@@ -1,4 +1,4 @@
-package routes
+package routes_v1
 
 import (
 	"net/http"
@@ -19,6 +19,7 @@ type RegisterJudgeFailResponse struct {
 	Message string `json:"message"`
 }
 
+// @Title Register New Judge
 // @Description	Register new judge
 // @Summary		Register New Judge
 // @Tags			Judges
@@ -26,7 +27,7 @@ type RegisterJudgeFailResponse struct {
 // @Param registerJudgeJSON body object dtos.RegisterNewJudgeDTO true "Create Judge profile"
 // @Success		201	{object}	RegisterJudgeSuccessResponse
 // @Failure		400	{object}	RegisterJudgeFailResponse
-// @Router			/api/judges               [post]
+// @Router			/api/v1/judges               [post]
 func RegisterJudge(c echo.Context) error {
 	data := dtos.RegisterNewJudgeDTO{}
 	err := c.Bind(&data)
