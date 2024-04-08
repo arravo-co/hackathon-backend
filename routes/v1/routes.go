@@ -22,16 +22,6 @@ var judgesRoutes *echo.Group
 var validate *validator.Validate
 
 // @Version 1.0.0
-// @Title Hackathon Backend API
-// @Description API usually works as expected. But sometimes its not true.
-// @ContactName David Alabi
-// @ContactEmail appdev@arravo.co
-// @ContactURL http://arravo.co/contact
-// @TermsOfServiceUrl http://arravo.co/contact
-// @LicenseName MIT
-// @LicenseURL https://en.wikipedia.org/wiki/MIT_License
-// @Server http://localhost:5000 Localhost
-// @Server https://hackathon-backend-2cvk.onrender.com Development
 func StartAllRoutes(e *echo.Echo) {
 	validate = validator.New()
 	e.Renderer = t
@@ -74,7 +64,7 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.GET("/verification/email/completion", CompleteEmailVerificationViaGet)
 	authRoutes.POST("/verification/email/completion", CompleteEmailVerification)
 	authRoutes.POST("/password/change", ChangePassword, othermiddleware.Auth())
-	authRoutes.POST("/password/recovery/initiation", InitiatePasswordRecovery)
+	authRoutes.GET("/password/recovery/initiation", InitiatePasswordRecovery)
 	authRoutes.POST("/password/recovery/completion", ChangePassword)
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
 	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
