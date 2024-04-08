@@ -88,17 +88,19 @@ type CreateAccountData struct {
 	Role         string    `bson:"role"`
 	PhoneNumber  string    `bson:"phone_number"`
 	DOB          time.Time `bson:"dob"`
-	Skillset     []string  `bson:"skillset"`
+	HackathonId  string    `bson:"hackathon_id"`
 }
 
 type CreateParticipantAccountData struct {
 	CreateAccountData
-	ParticipantId string `bson:"participant_id"`
+	ParticipantId string   `bson:"participant_id"`
+	Skillset      []string `bson:"skillset"`
 }
 
 type CreateTeamMemberAccountData struct {
 	CreateAccountData
-	ParticipantId string `bson:"participant_id"`
+	ParticipantId string   `bson:"participant_id"`
+	Skillset      []string `bson:"skillset"`
 }
 
 type AddMemberToParticipatingTeamData struct {

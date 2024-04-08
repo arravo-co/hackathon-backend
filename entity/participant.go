@@ -90,10 +90,10 @@ func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO
 			Gender:       input.Gender,
 			State:        input.State,
 			PhoneNumber:  input.PhoneNumber,
-			Skillset:     input.Skillset,
 			Role:         "PARTICIPANT",
 		}
 	dataInput.ParticipantId = input.ParticipantId
+
 	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
 	if isEmailInCache {
 		return nil, errors.New("email is already existing")
@@ -109,9 +109,19 @@ func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO
 	}
 	acc, err := data.CreateTeamMemberAccount(&exports.CreateTeamMemberAccountData{
 		CreateAccountData: exports.CreateAccountData{
-			Email: dataInput.Email,
+			Email:        dataInput.Email,
+			LastName:     dataInput.LastName,
+			FirstName:    dataInput.FirstName,
+			PasswordHash: passwordHash,
+			Gender:       dataInput.Gender,
+			Role:         dataInput.Role,
+			PhoneNumber:  dataInput.PhoneNumber,
+			DOB:          dataInput.DOB,
+			HackathonId:  config.GetHackathonId(),
+			State:        dataInput.State,
 		},
 		ParticipantId: dataInput.ParticipantId,
+		Skillset:      dataInput.Skillset,
 	})
 	if err != nil {
 		return nil, err
@@ -153,9 +163,10 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (
 			Gender:       input.Gender,
 			State:        input.State,
 			Role:         "PARTICIPANT",
-			Skillset:     input.Skillset,
 			DOB:          dob,
-		}, ParticipantId: participantId}
+		},
+		Skillset:      input.Skillset,
+		ParticipantId: participantId}
 	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
 	if isEmailInCache {
 		//return nil, errors.New("email is already existing")
@@ -223,6 +234,7 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 	}
 	data.CreateParticipantAccount(&exports.CreateParticipantAccountData{
 		ParticipantId: participantId,
+		Skillset:      input.Skillset,
 		CreateAccountData: exports.CreateAccountData{
 			Email:        input.Email,
 			FirstName:    input.FirstName,
@@ -231,7 +243,6 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 			Gender:       input.Gender,
 			PasswordHash: passwordHash,
 			State:        input.State,
-			Skillset:     input.Skillset,
 			DOB:          dob,
 			PhoneNumber:  input.PhoneNumber,
 		},

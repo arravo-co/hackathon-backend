@@ -3,7 +3,6 @@ package entity
 import (
 	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/dtos"
-	"github.com/arravoco/hackathon_backend/events"
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
@@ -38,11 +37,12 @@ func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAc
 	if err != nil {
 		return nil, err
 	}
-	events.EmitJudgeAccountCreated(&exports.JudgeAccountCreatedEventData{
+	/*events.EmitJudgeAccountCreated(&exports.JudgeAccountCreatedByAdminEventData{
 		JudgeEmail: dataResponse.Email,
 		LastName:   dataResponse.LastName,
 		FirstName:  dataResponse.FirstName,
 		EventData:  exports.EventData{EventName: "JudgeAccountCreated"},
 	})
+	*/
 	return dataResponse, err
 }

@@ -39,14 +39,16 @@ type ParticipantAccountCreatedEventData struct {
 
 type ParticipantAccountCreatedEventHandler func(data *ParticipantAccountCreatedEventData, otherParams ...interface{})
 
-type JudgeAccountCreatedEventData struct {
+type JudgeAccountCreatedByAdminEventData struct {
 	EventData
-	FirstName  string
-	LastName   string
-	JudgeEmail string
+	InviteeEmail string
+	InviterName  string
+	JudgeName    string
+	JudgeEmail   string
+	Password     string
 }
 
-type JudgeAccountCreatedEventHandler func(input *JudgeAccountCreatedEventData, otherParams ...interface{})
+type JudgeAccountCreatedByAdminEventHandler func(input *JudgeAccountCreatedByAdminEventData, otherParams ...interface{})
 
 type AdminAccountCreatedEventHandler func(data *AdminAccountCreatedEventData, otherParams ...interface{})
 

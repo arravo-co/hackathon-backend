@@ -90,7 +90,13 @@ type SendIndividualWelcomeEmailData struct {
 }
 
 type SendJudgeWelcomeEmailData struct {
-	SendWelcomeEmailData
+	JudgeName   string
+	Email       string
+	Subject     string
+	TTL         int
+	Token       string
+	Link        string
+	InviterName string
 }
 
 type SendTeamInviteEmailData struct {

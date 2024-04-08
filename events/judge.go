@@ -4,13 +4,13 @@ import (
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
-func EmitJudgeAccountCreated(input *exports.JudgeAccountCreatedEventData) {
-	EventEmitter.EmitEvent(JudgeAccountCreatedEvent, input)
+func EmitJudgeAccountCreatedByAdmin(input *exports.JudgeAccountCreatedByAdminEventData) {
+	EventEmitter.EmitEvent(JudgeAccountCreatedByAdminEvent, input)
 }
 
-func RegisterJudgeCreatedEvent(fn exports.JudgeAccountCreatedEventHandler) {
-	EventEmitter.AddListener(JudgeAccountCreatedEvent, func(arguments ...interface{}) {
-		arg0 := arguments[0].(*exports.JudgeAccountCreatedEventData)
+func RegisterJudgeCreatedByAdminEvent(fn exports.JudgeAccountCreatedByAdminEventHandler) {
+	EventEmitter.AddListener(JudgeAccountCreatedByAdminEvent, func(arguments ...interface{}) {
+		arg0 := arguments[0].(*exports.JudgeAccountCreatedByAdminEventData)
 		args := arguments[1:]
 		fn(arg0, args)
 	})

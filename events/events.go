@@ -8,7 +8,7 @@ import (
 var EventEmitter *eventemitter.Emitter
 
 var ParticipantAccountCreatedEvent eventemitter.EventType = "ParticipantAccountCreated"
-var JudgeAccountCreatedEvent eventemitter.EventType = "JudgeAccountCreated"
+var JudgeAccountCreatedByAdminEvent eventemitter.EventType = "JudgeAccountByAdminCreated"
 
 var AdminAccountCreatedEvent eventemitter.EventType = "AdminAccountCreated"
 
@@ -17,7 +17,7 @@ var AdminAccountCreatedByAdminEvent eventemitter.EventType = "AdminAccountCreate
 func init() {
 	EventEmitter = eventemitter.NewEmitter(true)
 	RegisterParticipantCreatedEvent(listeners.HandleParticipantCreatedEvent)
-	RegisterJudgeCreatedEvent(listeners.HandleJudgeCreatedEvent)
+	RegisterJudgeCreatedByAdminEvent(listeners.HandleJudgeCreatedEvent)
 	RegisterAdminCreatedEvent(listeners.HandleAdminCreatedEvent)
 	RegisterAdminCreatedByAdminEvent(listeners.HandleAdminCreatedByAdminEvent)
 }

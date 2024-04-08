@@ -105,3 +105,42 @@ func (ad *Admin) FillEntity(email string) error {
 	ad.PhoneNumber = acc.PhoneNumber
 	return nil
 }
+
+func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewAdminDTO) error {
+	password := exports.GeneratePassword()
+	passwordHash, err := exports.GenerateHashPassword(password)
+	if err != nil {
+		return err
+	}
+	acc, err := data.CreateJudgeAccount(&exports.CreateJudgeAccountData{
+		CreateAccountData: exports.CreateAccountData{Role: "JUDGE",
+			Email:        dataInput.Email,
+			FirstName:    dataInput.FirstName,
+			LastName:     dataInput.LastName,
+			Gender:       dataInput.Gender,
+			PhoneNumber:  dataInput.PhoneNumber,
+			HackathonId:  config.GetHackathonId(),
+			PasswordHash: passwordHash},
+	})
+	if err != nil {
+		return err
+	}
+	// raise event
+	events.EmitJudgeAccountCreatedByAdmin(&exports.JudgeAccountCreatedByAdminEventData{
+		InviteeEmail: acc.Email,
+		JudgeName:    acc.FirstName,
+		InviterName:  ad.FirstName,
+		EventData:    exports.EventData{EventName: string(events.JudgeAccountCreatedByAdminEvent)},
+		Password:     password,
+	})
+
+	ad.passwordHash = acc.PasswordHash
+	ad.Email = acc.Email
+	ad.FirstName = acc.FirstName
+	ad.LastName = acc.LastName
+	ad.HackathonId = acc.HackathonId
+	ad.Gender = acc.Gender
+	ad.Role = acc.Role
+
+	return nil
+}
