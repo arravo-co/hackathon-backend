@@ -166,7 +166,7 @@ func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData)
 }
 
 func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) {
-	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
+	tmpl := template.Must(template.ParseFiles("templates/judge_created_by_admin_welcome_and_verify_email.go.tmpl"))
 	var buf bytes.Buffer
 	err := tmpl.Execute(&buf, data)
 	if err != nil {
