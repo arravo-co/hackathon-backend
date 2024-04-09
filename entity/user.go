@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/exports"
@@ -26,6 +27,7 @@ func ChangePassword(dataInput *PasswordChangeData) (*exports.AccountDocument, er
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(acc)
 	valid, _ := exports.ComparePasswordAndHash(dataInput.OldPassword, acc.PasswordHash)
 	if !valid {
 		return nil, errors.New("email/password does not match")
@@ -34,6 +36,6 @@ func ChangePassword(dataInput *PasswordChangeData) (*exports.AccountDocument, er
 	if err != nil {
 		return nil, err
 	}
-	acc, err = data.UpdatePasswordByEmail(&exports.UpdateAccountFilter{}, passwordHash)
+	acc, err = data.UpdatePasswordByEmail(&exports.UpdateAccountFilter{Email: dataInput.Email}, passwordHash)
 	return acc, err
 }
