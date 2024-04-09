@@ -11,7 +11,7 @@ type CompleteEmailVerificationDTO struct {
 }
 
 type ChangePasswordDTO struct {
-	OldPassword string ` validate:"required,email" json:"old_password"`
+	OldPassword string ` validate:"required" json:"old_password"`
 	NewPassword string ` validate:"required" json:"new_password"`
 }
 

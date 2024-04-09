@@ -1117,11 +1117,8 @@
             "type": "string",
             "format": "date-time"
           },
-          "Skillset": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "HackathonId": {
+            "type": "string"
           }
         }
       },
@@ -1156,11 +1153,8 @@
             "type": "string",
             "format": "date-time"
           },
-          "Skillset": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "HackathonId": {
+            "type": "string"
           }
         }
       },

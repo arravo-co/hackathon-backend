@@ -315,6 +315,7 @@ func CompleteEmailVerification(c echo.Context) error {
 // @Failure		500					object	PasswordChangeFailureResponse ""
 // @Router			/api/v1/auth/password/change [post]
 func ChangePassword(c echo.Context) error {
+	tokenData := authutils.GetAuthPayload(c)
 	dataDto := dtos.ChangePasswordDTO{}
 	err := c.Bind(&dataDto)
 	if err != nil {
@@ -334,11 +335,25 @@ func ChangePassword(c echo.Context) error {
 			},
 		})
 	}
+	fmt.Println(tokenData)
+	acc, err := entity.ChangePassword(&entity.PasswordChangeData{
+		Email:       tokenData.Email,
+		OldPassword: dataDto.OldPassword,
+		NewPassword: dataDto.NewPassword,
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &PasswordChangeFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
 	return c.JSON(200, &PasswordChangeSuccessResponse{
 		ResponseData{
 			Code:    200,
 			Message: "Password change completed successfully",
-		}, &PasswordChangeSuccessResponseData{},
+		}, &PasswordChangeSuccessResponseData{FirstName: acc.FirstName},
 	})
 }
 
