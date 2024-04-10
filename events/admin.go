@@ -21,7 +21,7 @@ func RegisterAdminCreatedEvent(fn exports.AdminAccountCreatedEventHandler) {
 }
 
 func RegisterAdminCreatedByAdminEvent(fn exports.AdminAccountCreatedByAdminEventHandler) {
-	EventEmitter.AddListener(AdminAccountCreatedEvent, func(arguments ...interface{}) {
+	EventEmitter.AddListener(AdminAccountCreatedByAdminEvent, func(arguments ...interface{}) {
 		arg0 := arguments[0].(*exports.AdminAccountCreatedByAdminEventData)
 		args := arguments[1:]
 		fn(arg0, args)

@@ -55,6 +55,7 @@ func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByA
 		return
 	}
 	queue, err := queue.GetQueue("send_admin_created_by_admin_welcome_email")
+	fmt.Println("Queue created")
 	payload := exports.AdminCreatedByAdminWelcomeEmailQueuePayload{
 		Email:       eventDTOData.Email,
 		AdminName:   eventDTOData.AdminName,

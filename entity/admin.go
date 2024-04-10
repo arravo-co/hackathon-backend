@@ -92,7 +92,7 @@ func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminDTO) e
 	events.EmitAdminAccountCreatedByAdmin(&exports.AdminAccountCreatedByAdminEventData{
 		Email:       acc.Email,
 		AdminName:   acc.FirstName,
-		EventData:   exports.EventData{EventName: string(events.AdminAccountCreatedEvent)},
+		EventData:   exports.EventData{EventName: string(events.AdminAccountCreatedByAdminEvent)},
 		Password:    password,
 		InviterName: acc.FirstName,
 	})
