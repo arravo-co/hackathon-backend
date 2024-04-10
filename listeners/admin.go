@@ -58,7 +58,7 @@ func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByA
 	payload := exports.AdminCreatedByAdminWelcomeEmailQueuePayload{
 		Email:       eventDTOData.Email,
 		AdminName:   eventDTOData.AdminName,
-		InviterName: eventDTOData.LastName,
+		InviterName: eventDTOData.InviterName,
 		Password:    eventDTOData.Password,
 		TTL:         dataToken.TTL,
 		Token:       dataToken.Token,
