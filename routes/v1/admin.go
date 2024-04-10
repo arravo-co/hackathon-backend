@@ -57,7 +57,7 @@ func RegisterAnotherAdmin(c echo.Context) error {
 	})
 }
 
-// @Title Register A New Admin
+// @Title Register A New Judge
 // @Security AuthorizationHeader read write
 // @SecurityScheme AuthorizationHeader http bearer Input your token
 // @Summary Register new judge

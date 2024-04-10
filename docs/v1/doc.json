@@ -87,7 +87,7 @@
             }
           }
         },
-        "summary": "Register A New Admin",
+        "summary": "Register A New Judge",
         "description": " Register new judge",
         "requestBody": {
           "content": {

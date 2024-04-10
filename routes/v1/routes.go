@@ -43,6 +43,7 @@ func StartAllRoutes(e *echo.Echo) {
 func setupAdminsRoutes(api *echo.Group) {
 	adminsRoutes := api.Group("/admin")
 	adminsRoutes.POST("/register_admin", RegisterAnotherAdmin, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
+	adminsRoutes.POST("/register_judge", RegisterJudgeByAdmin, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
 }
 
 func setupParticipantsRoutes(api *echo.Group) {
