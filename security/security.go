@@ -98,12 +98,13 @@ func Base64UrlDecode(str string) ([]byte, error) {
 	*/
 }
 
-func VerifyHash(hash []byte, signature []byte) error {
+func VerifyHash(byt []byte, signature []byte) error {
 	key, err := ReadPrivateKey()
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
+	hash := sha256.Sum256(byt)
 	err = rsa.VerifyPKCS1v15(&key.PublicKey, crypto.SHA256, hash[:], signature)
 	if err != nil {
 		fmt.Println(err.Error())

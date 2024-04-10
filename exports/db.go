@@ -76,6 +76,7 @@ type CreateAdminAccountData struct {
 	HackathonId  string `bson:"hackathon_id"`
 	Role         string `bson:"role"`
 	PhoneNumber  string `bson:"phone_number"`
+	Status       string `bson:"status"`
 }
 
 type CreateAccountData struct {
@@ -89,6 +90,7 @@ type CreateAccountData struct {
 	PhoneNumber  string    `bson:"phone_number"`
 	DOB          time.Time `bson:"dob"`
 	HackathonId  string    `bson:"hackathon_id"`
+	Status       string    `bson:"status"`
 }
 
 type CreateParticipantAccountData struct {

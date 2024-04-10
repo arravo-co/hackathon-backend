@@ -84,11 +84,7 @@ type AuthUserInfoFetchFailureResponse struct {
 
 type AuthUserInfoFetchSuccessResponse struct {
 	ResponseData
-	Data *AuthUserInfoFetchSuccessResponseData `json:"data"`
-}
-
-type AuthUserInfoFetchSuccessResponseData struct {
-	*entity.Participant
+	Data interface{} `json:"data"`
 }
 
 type CompletePasswordRecoveryFailureResponse struct {
@@ -374,7 +370,7 @@ func ChangePassword(c echo.Context) error {
 // @Router			/api/v1/auth/me [get]
 func GetAuthUserInfo(c echo.Context) error {
 	tokenData := authutils.GetAuthPayload(c)
-	user := AuthUserInfoFetchSuccessResponseData{}
+	var user interface{}
 	fmt.Println(tokenData)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
@@ -389,7 +385,25 @@ func GetAuthUserInfo(c echo.Context) error {
 			})
 		}
 		fmt.Println(participant)
-		user.Participant = &participant
+		user = &participant
+	}
+
+	if tokenData.Role == "ADMIN" {
+		participant := entity.Admin{}
+		fmt.Println("admin")
+		err = participant.FillAdminEntity(tokenData.Email)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
+				ResponseData{
+					Code:    http.StatusBadRequest,
+					Message: "Error getting user info",
+				},
+			})
+		}
+		fmt.Println("participant")
+		fmt.Println(participant)
+		fmt.Println("participant")
+		user = &participant
 	}
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{

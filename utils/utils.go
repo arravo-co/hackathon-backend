@@ -132,11 +132,12 @@ func UnencryptAndVerifyLink(str string) ([]byte, error) {
 	hashBytes := fromBase64
 	signature := hashBytes[len(hashBytes)-signLen:]
 	originalMsgCipherText := hashBytes[:len(hashBytes)-signLen]
-	err = security.VerifyHash(hashBytes, signature)
+	err = security.VerifyHash(originalMsgCipherText, signature)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	}
+	fmt.Println(key)
 	originalMsg, err := rsa.DecryptPKCS1v15(nil, key, originalMsgCipherText)
 	return originalMsg, err
 }

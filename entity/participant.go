@@ -326,9 +326,6 @@ func (p *Participant) FillParticipantInfo(input string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("accountData")
-	fmt.Println(accountData)
-	fmt.Println("accountData")
 	particicipantDocData, err := data.GetParticipantRecord(accountData.ParticipantId)
 	if err != nil {
 		return err

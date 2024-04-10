@@ -20,7 +20,7 @@ type Admin struct {
 	PhoneNumber  string `json:"phone_number"`
 }
 
-func (ad *Admin) FillEntity(email string) error {
+func (ad *Admin) FillAdminEntity(email string) error {
 	acc, err := data.GetAccountByEmail(email)
 	if err != nil {
 		return err
@@ -32,6 +32,7 @@ func (ad *Admin) FillEntity(email string) error {
 	ad.Gender = acc.Gender
 	ad.HackathonId = acc.HackathonId
 	ad.PhoneNumber = acc.PhoneNumber
+	ad.Status = acc.Status
 	return nil
 }
 
@@ -82,6 +83,7 @@ func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminDTO) e
 		PhoneNumber:  dataInput.PhoneNumber,
 		HackathonId:  config.GetHackathonId(),
 		PasswordHash: passwordHash,
+		Status:       "INVITED",
 	})
 	if err != nil {
 		return err
@@ -122,7 +124,7 @@ func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewJudgeByAdmi
 			Gender:       dataInput.Gender,
 			PhoneNumber:  dataInput.PhoneNumber,
 			HackathonId:  config.GetHackathonId(),
-			PasswordHash: passwordHash},
+			PasswordHash: passwordHash, Status: "INVITED"},
 	})
 	if err != nil {
 		return err
@@ -131,6 +133,7 @@ func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewJudgeByAdmi
 	events.EmitJudgeAccountCreatedByAdmin(&exports.JudgeAccountCreatedByAdminEventData{
 		InviteeEmail: acc.Email,
 		JudgeName:    dataInput.FirstName,
+		JudgeEmail:   dataInput.Email,
 		InviterName:  acc.FirstName,
 		EventData:    exports.EventData{EventName: string(events.JudgeAccountCreatedByAdminEvent)},
 		Password:     password,

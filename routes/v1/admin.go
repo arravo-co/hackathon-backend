@@ -32,7 +32,7 @@ func RegisterAnotherAdmin(c echo.Context) error {
 	c.Bind(&dataInput)
 	validate.Struct(dataInput)
 	authAdmin := entity.Admin{}
-	err := authAdmin.FillEntity(authPayload.Email)
+	err := authAdmin.FillAdminEntity(authPayload.Email)
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{
 			Code:    400,
@@ -72,7 +72,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 	c.Bind(&dataInput)
 	validate.Struct(dataInput)
 	authAdmin := entity.Admin{}
-	err := authAdmin.FillEntity(authPayload.Email)
+	err := authAdmin.FillAdminEntity(authPayload.Email)
 	if err != nil {
 		return c.JSON(400, &RegisterJudgeByAdminResponseData{
 			Code:    400,
