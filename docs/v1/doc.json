@@ -63,6 +63,44 @@
         }
       }
     },
+    "/api/v1/admin/register_judge": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Judge successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.RegisterJudgeByAdminResponseData"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed to register new Judge",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.RegisterJudgeByAdminResponseData"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Register A New Admin",
+        "description": " Register new judge",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github.com.arravoco.hackathon_backend.dtos.CreateNewJudgeByAdminDTO"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "responses": {
@@ -882,6 +920,26 @@
           }
         }
       },
+      "github.com.arravoco.hackathon_backend.dtos.CreateNewJudgeByAdminDTO": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          }
+        }
+      },
       "github.com.arravoco.hackathon_backend.dtos.InviteToTeamData": {
         "type": "object",
         "properties": {
@@ -1517,6 +1575,17 @@
         }
       },
       "github.com.arravoco.hackathon_backend.routes.v1.RegisterAnotherAdminResponseData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "github.com.arravoco.hackathon_backend.routes.v1.RegisterJudgeByAdminResponseData": {
         "type": "object",
         "properties": {
           "code": {

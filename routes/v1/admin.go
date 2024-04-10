@@ -93,6 +93,6 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 	}
 	return c.JSON(201, &RegisterAnotherAdminResponseData{
 		Code:    201,
-		Message: "Invite sent!!!",
+		Message: "Judge Profile Created. Invite sent!!!",
 	})
 }
