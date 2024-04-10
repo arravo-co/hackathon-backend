@@ -20,6 +20,21 @@ type Admin struct {
 	PhoneNumber  string `json:"phone_number"`
 }
 
+func (ad *Admin) FillEntity(email string) error {
+	acc, err := data.GetAccountByEmail(email)
+	if err != nil {
+		return err
+	}
+	ad.Email = acc.Email
+	ad.Role = acc.Role
+	ad.FirstName = acc.FirstName
+	ad.LastName = acc.LastName
+	ad.Gender = acc.Gender
+	ad.HackathonId = acc.HackathonId
+	ad.PhoneNumber = acc.PhoneNumber
+	return nil
+}
+
 func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
 	acc, err := data.CreateAdminAccount(&exports.CreateAdminAccountData{
 		Role:        "ADMIN",
@@ -73,11 +88,12 @@ func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminDTO) e
 	}
 	// raise event
 	events.EmitAdminAccountCreatedByAdmin(&exports.AdminAccountCreatedByAdminEventData{
-		Email:     acc.Email,
-		LastName:  acc.LastName,
-		FirstName: acc.FirstName,
-		EventData: exports.EventData{EventName: string(events.AdminAccountCreatedEvent)},
-		Password:  password,
+		Email:       acc.Email,
+		LastName:    acc.LastName,
+		AdminName:   acc.FirstName,
+		EventData:   exports.EventData{EventName: string(events.AdminAccountCreatedEvent)},
+		Password:    password,
+		InviterName: acc.FirstName,
 	})
 
 	ad.passwordHash = acc.PasswordHash
@@ -91,29 +107,15 @@ func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminDTO) e
 	return nil
 }
 
-func (ad *Admin) FillEntity(email string) error {
-	acc, err := data.GetAccountByEmail(email)
-	if err != nil {
-		return err
-	}
-	ad.Email = acc.Email
-	ad.Role = acc.Role
-	ad.FirstName = acc.FirstName
-	ad.LastName = acc.LastName
-	ad.Gender = acc.Gender
-	ad.HackathonId = acc.HackathonId
-	ad.PhoneNumber = acc.PhoneNumber
-	return nil
-}
-
-func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewAdminDTO) error {
+func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewJudgeByAdminDTO) error {
 	password := exports.GeneratePassword()
 	passwordHash, err := exports.GenerateHashPassword(password)
 	if err != nil {
 		return err
 	}
 	acc, err := data.CreateJudgeAccount(&exports.CreateJudgeAccountData{
-		CreateAccountData: exports.CreateAccountData{Role: "JUDGE",
+		CreateAccountData: exports.CreateAccountData{
+			Role:         "JUDGE",
 			Email:        dataInput.Email,
 			FirstName:    dataInput.FirstName,
 			LastName:     dataInput.LastName,
@@ -128,8 +130,8 @@ func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewAdminDTO) e
 	// raise event
 	events.EmitJudgeAccountCreatedByAdmin(&exports.JudgeAccountCreatedByAdminEventData{
 		InviteeEmail: acc.Email,
-		JudgeName:    acc.FirstName,
-		InviterName:  ad.FirstName,
+		JudgeName:    dataInput.FirstName,
+		InviterName:  acc.FirstName,
 		EventData:    exports.EventData{EventName: string(events.JudgeAccountCreatedByAdminEvent)},
 		Password:     password,
 	})

@@ -41,7 +41,7 @@ func GenerateEmailVerificationLink(payload *exports.EmailVerificationLinkPayload
 		return "", err
 	}
 	linkPayload, err := EncryptAndSignPayload(payloadStr)
-	return strings.Join([]string{strings.Join([]string{config.GetServerURL(), "api/auth/verification/email/completion"}, "/"),
+	return strings.Join([]string{strings.Join([]string{config.GetServerURL(), "api/v1/auth/verification/email/completion"}, "/"),
 		strings.Join([]string{"token", linkPayload}, "=")}, "?"), err
 }
 
@@ -86,8 +86,6 @@ func ProcessTeamInviteLink(str string) (*exports.TeamInviteLinkPayload, error) {
 		fmt.Println(err.Error())
 		//return nil, err
 	}
-	fmt.Println("valid")
-	fmt.Println(originalMsgCipherText)
 	originalMsg, err := rsa.DecryptPKCS1v15(nil, key, originalMsgCipherText)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -116,7 +114,6 @@ func ProcessEmailVerificationLink(str string) (*exports.EmailVerificationLinkPay
 		fmt.Println(err.Error())
 		return nil, err
 	}
-	fmt.Println(payload)
 	return payload, nil
 }
 
@@ -132,17 +129,14 @@ func UnencryptAndVerifyLink(str string) ([]byte, error) {
 		return nil, err
 	}
 	signLen := key.PublicKey.Size()
-	fmt.Println(signLen)
 	hashBytes := fromBase64
 	signature := hashBytes[len(hashBytes)-signLen:]
 	originalMsgCipherText := hashBytes[:len(hashBytes)-signLen]
 	err = security.VerifyHash(hashBytes, signature)
 	if err != nil {
 		fmt.Println(err.Error())
-		//return nil, err
+		return nil, err
 	}
-	fmt.Println("valid")
-	fmt.Println(originalMsgCipherText)
 	originalMsg, err := rsa.DecryptPKCS1v15(nil, key, originalMsgCipherText)
 	return originalMsg, err
 }

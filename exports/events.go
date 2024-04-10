@@ -18,11 +18,12 @@ type AdminAccountCreatedEventData struct {
 
 type AdminAccountCreatedByAdminEventData struct {
 	EventData
-	Email     string
-	FirstName string
-	LastName  string
-	Gender    string
-	Password  string
+	Email       string
+	AdminName   string
+	LastName    string
+	Gender      string
+	Password    string
+	InviterName string
 }
 
 type ParticipantAccountCreatedEventData struct {
