@@ -27,7 +27,7 @@ func init() {
 		fmt.Println(err)
 		fmt.Println()
 	}
-	taskConsumer := &AdminWelcomeEmailTaskConsumer{}
+	taskConsumer := &JudgeCreatedByAdminWelcomeEmailTaskConsumer{}
 	adminWelcomeEmailQueue.AddConsumer("judge_created_by_admin_welcome_email_list", taskConsumer)
 }
 

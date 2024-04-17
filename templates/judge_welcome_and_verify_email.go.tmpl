@@ -1,6 +1,6 @@
 <div>
   <p>
-    Dear {{.JudgeName}},
+    Dear {{.Name}},
   </p>
 
   <p>
@@ -27,6 +27,20 @@
     Please be aware that this link will expire in {{.TTL}} minutes for security purposes.
   </p>
 
+  <p>
+    Next, you can login with the following credentials.
+  </p>
+
+<p style="text-align:center">
+  <span>Email: <strong>{{.Email}}</strong></span>
+</p>
+
+
+<p style="text-align:center">
+  <span>Password: <strong>{{.Password}}</strong></span>
+</p>
+
+<p>You are urged to change your password as soon as you login</p>
   <p>
     If you require any assistance or have inquiries, please don't hesitate to reply to this email. We are here to support you!
   </p>
