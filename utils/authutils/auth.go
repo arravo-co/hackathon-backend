@@ -34,9 +34,20 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 		FirstName: accountDoc.FirstName,
 		Role:      accountDoc.Role,
 	})
-	return &exports.AuthUtilsBasicLoginSuccessData{
+	if err != nil {
+		return nil, err
+	}
+	dataOutput := &exports.AuthUtilsBasicLoginSuccessData{
 		AccessToken: accessToken,
-	}, err
+		FirstName:   accountDoc.FirstName,
+		LastName:    accountDoc.LastName,
+		Status:      accountDoc.Status,
+		Role:        accountDoc.Role,
+		Gender:      accountDoc.Gender,
+		Email:       accountDoc.Email,
+		HackathonId: accountDoc.HackathonId,
+	}
+	return dataOutput, err
 }
 
 func GenerateAccessToken(payload *exports.AuthUtilsPayload) (string, error) {

@@ -66,7 +66,7 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.POST("/verification/email/completion", CompleteEmailVerification)
 	authRoutes.POST("/password/change", ChangePassword, othermiddleware.Auth())
 	authRoutes.GET("/password/recovery/initiation", InitiatePasswordRecovery)
-	authRoutes.POST("/password/recovery/completion", ChangePassword)
+	authRoutes.POST("/password/recovery/completion", CompletePasswordRecovery)
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
 	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
 	authRoutes.GET("/team/invite", ValidateTeamInviteLink)

@@ -22,9 +22,9 @@ type BasicLoginFailureResponse struct {
 }
 
 type BasicLoginSuccessResponse struct {
-	Code    int                           `json:"code"`
-	Message string                        `json:"message"`
-	Data    BasicLoginSuccessResponseData `json:"data"`
+	Code    int                                     `json:"code"`
+	Message string                                  `json:"message"`
+	Data    *exports.AuthUtilsBasicLoginSuccessData `json:"data"`
 }
 
 type BasicLoginSuccessResponseData struct {
@@ -131,13 +131,11 @@ func BasicLogin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	fmt.Printf("%#v", dataResponse)
+	fmt.Printf("%#v\n", dataResponse)
 	return c.JSON(200, &BasicLoginSuccessResponse{
 		Code:    200,
 		Message: "Successfully logged in",
-		Data: BasicLoginSuccessResponseData{
-			AccessToken: dataResponse.AccessToken,
-		},
+		Data:    dataResponse,
 	})
 }
 
@@ -567,7 +565,7 @@ func CompletePasswordRecovery(c echo.Context) error {
 	}
 
 	email.SendPasswordRecoveryCompleteEmail(&email.SendPasswordRecoveryCompleteEmailData{
-		Email:   "",
+		Email:   dataDto.Email,
 		Subject: "Password Recovery Success",
 	})
 	return c.JSON(200, &CompletePasswordRecoverySuccessResponse{

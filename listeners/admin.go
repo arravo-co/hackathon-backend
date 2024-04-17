@@ -44,7 +44,7 @@ func HandleAdminCreatedEvent(eventDTOData *exports.AdminAccountCreatedEventData,
 }
 
 func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByAdminEventData, otherParams ...interface{}) {
-
+	fmt.Println("listener has recieved admin_created_by_admin_event")
 	ttl := time.Now().Add(time.Minute * 15)
 	dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		Email: eventDTOData.Email,
@@ -55,6 +55,10 @@ func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByA
 		return
 	}
 	queue, err := queue.GetQueue("send_admin_created_by_admin_welcome_email")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	fmt.Println("Queue created")
 	payload := exports.AdminCreatedByAdminWelcomeEmailQueuePayload{
 		Email:       eventDTOData.Email,
@@ -68,6 +72,7 @@ func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByA
 	if err != nil {
 		fmt.Println("Go to")
 	}
+	fmt.Println("Queue payload published")
 	queue.PublishBytes(byt)
 
 }

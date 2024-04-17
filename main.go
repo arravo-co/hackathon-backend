@@ -6,10 +6,13 @@ import (
 
 	"github.com/arravoco/hackathon_backend/config"
 	_ "github.com/arravoco/hackathon_backend/db"
+	"github.com/arravoco/hackathon_backend/exports"
 	_ "github.com/arravoco/hackathon_backend/jobs"
 	routes_v1 "github.com/arravoco/hackathon_backend/routes/v1"
 	"github.com/arravoco/hackathon_backend/security"
 	"github.com/labstack/echo/v4"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // @Version 1.0.0
@@ -24,10 +27,17 @@ import (
 // @Server http://localhost:5000 Localhost
 // @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
+	prometheus.MustRegister(exports.MyFirstCounter)
 	security.GenerateKeys()
 	e := echo.New()
 	port := config.GetPort()
 	routes_v1.StartAllRoutes(e)
+	e.GET("/metrics", func(c echo.Context) error {
+		handler := promhttp.Handler()
+		handler.ServeHTTP(c.Response().Writer, c.Request())
+		return nil
+	})
+
 	e.Logger.Info(port)
 	e.Logger.Fatal(e.Start(getURL(port)))
 }

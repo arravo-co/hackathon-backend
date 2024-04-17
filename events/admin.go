@@ -1,6 +1,8 @@
 package events
 
 import (
+	"fmt"
+
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
@@ -9,7 +11,9 @@ func EmitAdminAccountCreated(input *exports.AdminAccountCreatedEventData) {
 }
 
 func EmitAdminAccountCreatedByAdmin(input *exports.AdminAccountCreatedByAdminEventData) {
+	fmt.Println("About to emit event")
 	EventEmitter.EmitEvent(AdminAccountCreatedByAdminEvent, input)
+	fmt.Println("Event emitted")
 }
 
 func RegisterAdminCreatedEvent(fn exports.AdminAccountCreatedEventHandler) {

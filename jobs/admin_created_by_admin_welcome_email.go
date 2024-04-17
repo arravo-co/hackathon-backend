@@ -27,11 +27,12 @@ func init() {
 		fmt.Println(err)
 		fmt.Println()
 	}
-	taskConsumer := &AdminWelcomeEmailTaskConsumer{}
+	taskConsumer := &AdminCreatedByAdminWelcomeEmailTaskConsumer{}
 	adminWelcomeEmailQueue.AddConsumer("admin_welcome_email_list", taskConsumer)
 }
 
 func (c *AdminCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
+	fmt.Println("job consumer received job")
 	payload := d.Payload()
 
 	payloadStruct := exports.AdminCreatedByAdminWelcomeEmailQueuePayload{}
@@ -44,6 +45,7 @@ func (c *AdminCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		}
 		return
 	}
+	fmt.Println("email tokens prepared to be sent")
 	fmt.Println(payloadStruct)
 	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
 		Token: payloadStruct.Token,
@@ -54,6 +56,7 @@ func (c *AdminCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		fmt.Println(err.Error())
 		return
 	}
+	fmt.Println("Preparing to send email to new admin created by %s...", payloadStruct.InviterName)
 	err = email.SendAdminCreatedByAdminWelcomeEmail(&email.SendAdminCreatedByAdminWelcomeEmailData{
 		Email:       payloadStruct.Email,
 		InviterName: payloadStruct.InviterName,

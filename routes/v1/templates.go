@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,6 +27,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 }
 
 func Hello(c echo.Context) error {
+	exports.MyFirstCounter.Inc()
 	fmt.Printf(c.Request().RequestURI)
 	return c.Render(http.StatusOK, "hell", "World")
 }
