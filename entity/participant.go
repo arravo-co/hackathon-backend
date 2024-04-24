@@ -26,23 +26,25 @@ type Participant struct {
 	LastName            string `json:"last_name"`
 	Email               string `json:"email"`
 	passwordHash        string
-	Gender              string               `json:"gender"`
-	State               string               `json:"state"`
-	Age                 int                  `json:"age"`
-	DOB                 time.Time            `json:"dob"`
-	Role                string               `json:"role"`
-	ParticipantId       string               `json:"participant_id"`
-	TeamLeadEmail       string               `json:"team_lead_email"`
-	TeamName            string               `json:"team_name"`
-	TeamRole            string               `json:"team_role"`
-	HackathonId         string               `json:"hackathon_id"`
-	Type                string               `json:"type"`
-	CoParticipantEmails []string             `json:"co_participant_emails"`
-	ParticipantEmail    string               `json:"participant_email"`
-	InviteList          []exports.InviteInfo `json:"invite_list"`
-	Status              string               `json:"status"`
-	Skillset            []string             `json:"skillset"`
-	PhoneNumber         string               `json:"phone_number"`
+	Gender              string                   `json:"gender"`
+	State               string                   `json:"state"`
+	Age                 int                      `json:"age"`
+	DOB                 time.Time                `json:"dob"`
+	Role                string                   `json:"role"`
+	ParticipantId       string                   `json:"participant_id"`
+	TeamLeadEmail       string                   `json:"team_lead_email"`
+	TeamName            string                   `json:"team_name"`
+	TeamRole            string                   `json:"team_role"`
+	HackathonId         string                   `json:"hackathon_id"`
+	Type                string                   `json:"type"`
+	CoParticipantEmails []string                 `json:"co_participant_emails"`
+	ParticipantEmail    string                   `json:"participant_email"`
+	InviteList          []exports.InviteInfo     `json:"invite_list"`
+	AccountStatus       string                   `json:"account_status"`
+	ParticipationStatus string                   `json:"participation_status"`
+	Skillset            []string                 `json:"skillset"`
+	PhoneNumber         string                   `json:"phone_number"`
+	Solution            exports.SolutionDocument `json:"solution"`
 }
 
 func (p Participant) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
@@ -200,15 +202,15 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (
 		ParticipantType:  "INDIVIDUAL",
 	})
 	return &Participant{
-		ParticipantId: participantId,
-		Email:         dataInput.Email,
-		LastName:      dataInput.LastName,
-		FirstName:     dataInput.FirstName,
-		Gender:        dataInput.Gender,
-		DOB:           dob,
-		Role:          dataInput.Role,
-		State:         dataInput.State,
-		Status:        dataResponse.Status,
+		ParticipantId:       participantId,
+		Email:               dataInput.Email,
+		LastName:            dataInput.LastName,
+		FirstName:           dataInput.FirstName,
+		Gender:              dataInput.Gender,
+		DOB:                 dob,
+		Role:                dataInput.Role,
+		State:               dataInput.State,
+		ParticipationStatus: dataResponse.Status,
 	}, nil
 }
 
@@ -331,7 +333,8 @@ func (p *Participant) FillParticipantInfo(input string) error {
 		return err
 	}
 	p.Email = accountData.Email
-	p.Status = accountData.Status
+	p.ParticipationStatus = accountData.Status
+	p.ParticipationStatus = particicipantDocData.Status
 	p.passwordHash = accountData.PasswordHash
 	p.FirstName = accountData.FirstName
 	p.LastName = accountData.LastName
@@ -344,6 +347,8 @@ func (p *Participant) FillParticipantInfo(input string) error {
 	p.Type = particicipantDocData.Type
 	p.ParticipantEmail = particicipantDocData.ParticipantEmail
 	p.CoParticipantEmails = particicipantDocData.CoParticipantEmails
+	p.Solution = particicipantDocData.Solution
+	p.ParticipantId = particicipantDocData.ParticipantId
 	p.Age = time.Now().Year() - accountData.DOB.Year()
 	if particicipantDocData.Type == "TEAM" {
 		if particicipantDocData.TeamLeadEmail == accountData.Email {

@@ -25,15 +25,24 @@ type AccountDocument struct {
 
 type ParticipantDocument struct {
 	Id                  interface{}
-	ParticipantId       string       `bson:"participant_id"`
-	HackathonId         string       `bson:"hackathon_id"`
-	Type                string       `bson:"type,omitempty"`
-	TeamLeadEmail       string       `bson:"team_lead_email,omitempty"`
-	TeamName            string       `bson:"team_name,omitempty"`
-	CoParticipantEmails []string     `bson:"co_participant_emails,omitempty"`
-	ParticipantEmail    string       `bson:"participant_email,omitempty"`
-	GithubAddress       string       `bson:"github_address,omitempty"`
-	InviteList          []InviteInfo `bson:"invite_list,omitempty"`
+	ParticipantId       string           `bson:"participant_id"`
+	HackathonId         string           `bson:"hackathon_id"`
+	Type                string           `bson:"type,omitempty"`
+	TeamLeadEmail       string           `bson:"team_lead_email,omitempty"`
+	TeamName            string           `bson:"team_name,omitempty"`
+	CoParticipantEmails []string         `bson:"co_participant_emails,omitempty"`
+	ParticipantEmail    string           `bson:"participant_email,omitempty"`
+	GithubAddress       string           `bson:"github_address,omitempty"`
+	InviteList          []InviteInfo     `bson:"invite_list,omitempty"`
+	Status              string           `bson:"status,omitempty"`
+	Solution            SolutionDocument `bson:"solution_document"`
+}
+
+type SolutionDocument struct {
+	Title       string `bson:"title,omitempty"`
+	Description string `bson:"description"`
+	Unique      string `bson:"unique"`
+	Url         string `bson:"url"`
 }
 
 type InviteInfo struct {

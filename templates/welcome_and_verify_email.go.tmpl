@@ -1,34 +1,98 @@
-<div>
-<p>
-Dear {{.FirstName}} {{.LastName}},
-</p>
-
-<p>
-Welcome to Arravo's 2024 Hackathon! We are thrilled to have you join our hackathon.
-</p>
-
-<p>
-To get started, we need to confirm your email address. Please click the button below to verify your email:
-</p>
-
-<p style="text-align:center;" >
-<a href={{.Link}} style="margin-left:20px;padding: 8px 16px;background-color: #007bff;color: #fff;border-radius: 4px;text-decoration: none;transition: background-color 0.3s ease;">Verify</a>
-</p>
-<p>
- If the button doesn't work, you can also copy and paste the following link into your browser:
- </p>
-<p style="text-align:center;">
- <strong>{{.Token}}</strong>
-</p>
-
-Please note that this link will expire in {{.TTL}} minutes for security reasons.
-
-<p>
-    If you have any questions or need assistance, feel free to reply to this email. We're here to help!
-</p>
-
-Thank you,
-<h3>Eunice King</h3>
-<h4>VP, Digital Innovation</h4>
-<h4>Arravo</h4> 
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arravo Hackathon Registration</title>
+</head>
+<body 
+style="
+  font-family: Google Sans, roboto, Noto Sans Myanmar UI, arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;">
+  <div style="
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 8px;
+  text-align: center;
+  position: relative;">
+    <div style="
+    display: flex;
+    justify-content: center;
+    background-color: #553C9A;
+    height: 130px;">
+    <img src="https://hackathon-dev.onrender.com/assets/arravo_white_logo-_4nVMq0D.png" style="
+    align-self: center;
+    width: 150px;
+    top: 20px;">
+    </div>
+    <!-- <h1 style="
+    font-size: 18px;">Hey Team Leader Extraordinaire!</h1> -->
+    <h1 style="
+    font-size: 18px;">Welcome aboard Arravo's 2024 Hackathon!</h1>
+    <p style="
+    text-align: center; 
+    color: #333;
+    font-size: 1.3em;
+    line-height: 1.5em;
+    margin-top: 0; 
+    margin-bottom: 0; 
+    font-weight: 300;">You're one step away</p>
+    <p style="
+    text-align: justify; 
+    color: #333;
+    font-size: 1.3em;
+    line-height: 1.5em;
+    margin-top: 0px; 
+    margin-bottom: 10px; 
+    font-weight: 300;
+    padding: 20px">We're super pumped to have you leading your team through this exhilarating journey. <br> <br> Before we dive into the action, we just need to confirm your email address. Give that button a click below to get verified and set for success:</p>
+    <h1 style="
+    font-size: 18px;">Verify your email address:</h1>
+    <div>
+      <a href={{.Link}} style="
+      display: inline-block;
+      padding: 15px 45px;
+      background-color: #553C9A;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: 25px; 
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
+      transition: box-shadow 0.3s ease;"
+       onmouseover="this.style.backgroundColor='#805AD5'; this.style.boxShadow='0 12px 24px rgba(0, 0, 0, 0.4)'; this.style.cursor='pointer';"
+       onmouseout="this.style.backgroundColor='#553C9A'; this.style.boxShadow='0 8px 16px rgba(0, 0, 0, 0.3)'; this.style.cursor='auto';"
+      >Verify</a>
+      <p style="
+      font-size: 1.2em;
+      line-height: 1.5em;
+      margin-top: 0; 
+      margin-bottom: 10px; 
+      font-weight: 300;
+      padding: 20px;">Alternatively, you can use the following token to verify your email: <br> Verification Token: <span style="font-weight: bold;">{{.Token}}</span></p>
+    </div>
+    <div class="box-container">
+      <p style="
+      padding-top: 40px; 
+      padding-bottom: 40px; 
+      font-weight: 500;
+      color: #fff;
+      font-size: 1.3em;
+      background-color: #553C9A; 
+      position: static;">
+      <a href="https://www.imf.org/en/home" target="_blank" style="
+      color: #fff; 
+      text-decoration: underline;"
+      onmouseover="
+      this.style.Color='#fff'; 
+      this.style.cursor='pointer';"
+      onmouseout="
+      this.style.Color='#3223df'; 
+      this.style.cursor='auto';">
+      </a>Link expires in: <span id="timer">{{.TTL}}</span> seconds</p>
+    </div>
+</body>
+</html>
