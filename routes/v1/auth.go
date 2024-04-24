@@ -131,7 +131,6 @@ func BasicLogin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	fmt.Printf("%#v\n", dataResponse)
 	return c.JSON(200, &BasicLoginSuccessResponse{
 		Code:    200,
 		Message: "Successfully logged in",
@@ -212,7 +211,6 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 		return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(),
 			strings.Join([]string{"verify_fail", strings.Join([]string{"err", err.Error()}, "=")}, "?")}, "/"))
 	}
-	fmt.Println(payload)
 	if payload.TTL.Before(time.Now()) {
 		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
 			ResponseData{
@@ -329,7 +327,6 @@ func ChangePassword(c echo.Context) error {
 			},
 		})
 	}
-	fmt.Println(tokenData)
 	acc, err := entity.ChangePassword(&entity.PasswordChangeData{
 		Email:       tokenData.Email,
 		OldPassword: dataDto.OldPassword,
@@ -369,7 +366,6 @@ func ChangePassword(c echo.Context) error {
 func GetAuthUserInfo(c echo.Context) error {
 	tokenData := authutils.GetAuthPayload(c)
 	var user interface{}
-	fmt.Println(tokenData)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
 		participant := entity.Participant{}
@@ -382,13 +378,11 @@ func GetAuthUserInfo(c echo.Context) error {
 				},
 			})
 		}
-		fmt.Println(participant)
 		user = &participant
 	}
 
 	if tokenData.Role == "ADMIN" {
 		participant := entity.Admin{}
-		fmt.Println("admin")
 		err = participant.FillAdminEntity(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
@@ -511,7 +505,6 @@ func InitiatePasswordRecovery(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	fmt.Println(payload)
 	email.SendPasswordRecoveryEmail(&email.SendPasswordRecoveryEmailData{
 		Email: dataResult.TokenTypeValue,
 		Token: dataResult.Token,
@@ -529,7 +522,7 @@ func InitiatePasswordRecovery(c echo.Context) error {
 
 		Code:    200,
 		Message: "Verification of email sent successfully",
-		Data:    &InitiateEmailVerificationSuccessResponseData{},
+		Data:    &InitiateEmailVerificationSuccessResponseData{Email: emailToVerify},
 	})
 }
 
@@ -610,12 +603,11 @@ func ValidateTeamInviteLink(c echo.Context) error {
 	if tokenStr == "" {
 		return c.HTML(400, "<p>Invalid link</p>")
 	}
-	t, err := utils.ProcessTeamInviteLink(tokenStr)
+	_, err := utils.ProcessTeamInviteLink(tokenStr)
 	if err != nil {
-		fmt.Printf("")
+		fmt.Printf(err.Error())
 		c.HTML(400, err.Error())
 	}
-	fmt.Println(t)
 	return c.Redirect(301, "https://hackathon-dev.onrender.com/")
 }
 
@@ -634,10 +626,9 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 	}
 	t, err := utils.ProcessPasswordRecoveryLink(tokenStr)
 	if err != nil {
-		fmt.Printf("")
+		fmt.Printf(err.Error())
 		c.HTML(400, err.Error())
 	}
-	fmt.Println(t)
 	return c.Redirect(301, strings.Join([]string{
 		strings.Join([]string{config.GetFrontendURL(), "password_reset_complete"}, "/"),
 		strings.Join([]string{
