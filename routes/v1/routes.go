@@ -70,6 +70,7 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
 	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
 	authRoutes.GET("/team/invite", ValidateTeamInviteLink)
+	authRoutes.GET("/password/recovery/link/verification", ValidatePasswordRecoveryLink)
 }
 
 func setupScoreRoutes(api *echo.Group) {

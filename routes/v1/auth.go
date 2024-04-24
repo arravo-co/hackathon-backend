@@ -398,9 +398,6 @@ func GetAuthUserInfo(c echo.Context) error {
 				},
 			})
 		}
-		fmt.Println("participant")
-		fmt.Println(participant)
-		fmt.Println("participant")
 		user = &participant
 	}
 	if err != nil {
@@ -502,12 +499,31 @@ func InitiatePasswordRecovery(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-
+	payload, err := utils.GeneratePasswordRecoveryLinkPayload(&exports.PaswordRecoveryPayload{
+		Email: dataResult.TokenTypeValue,
+		Token: dataResult.Token,
+		TTL:   dataResult.TTL,
+	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, struct {
+			Message string `json:"message"`
+		}{
+			Message: err.Error(),
+		})
+	}
+	fmt.Println(payload)
 	email.SendPasswordRecoveryEmail(&email.SendPasswordRecoveryEmailData{
-		Email:    dataResult.TokenTypeValue,
-		Token:    dataResult.Token,
-		TokenTTL: dataResult.TTL,
-		Subject:  "Password Recovery",
+		Email: dataResult.TokenTypeValue,
+		Token: dataResult.Token,
+		TTL:   uint32(dataResult.TTL.Sub((time.Now())).Minutes()),
+		//Link:strings.Join([]string{config.GetFrontendURL(),"/password_reset_complete"},""),
+		Link: strings.Join([]string{
+			config.GetServerURL(),
+			strings.Join(
+				[]string{"api/v1/auth/password/recovery/link/verification",
+					strings.Join([]string{"?token", payload}, "=")}, ""),
+		}, "/"),
+		Subject: "Password Recovery for Arravo Hackathon Account",
 	})
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
 
@@ -601,4 +617,32 @@ func ValidateTeamInviteLink(c echo.Context) error {
 	}
 	fmt.Println(t)
 	return c.Redirect(301, "https://hackathon-dev.onrender.com/")
+}
+
+// @Title Validate Password Recovery Link
+// @Summary		Validate Password Recovery link
+// @Description	Validate Password Recovery link
+// @Tags			Auth
+// @Produce		json
+// @Param			completeToken	path		dt	true	"the required info"
+// @Success		200				{object}	string
+// @Router			/api/v1/auth/password/recovery/link/verification [get]
+func ValidatePasswordRecoveryLink(c echo.Context) error {
+	tokenStr := c.QueryParam("token")
+	if tokenStr == "" {
+		return c.HTML(400, strings.Join([]string{config.GetFrontendURL()}, "/"))
+	}
+	t, err := utils.ProcessPasswordRecoveryLink(tokenStr)
+	if err != nil {
+		fmt.Printf("")
+		c.HTML(400, err.Error())
+	}
+	fmt.Println(t)
+	return c.Redirect(301, strings.Join([]string{
+		strings.Join([]string{config.GetFrontendURL(), "password_reset_complete"}, "/"),
+		strings.Join([]string{
+			strings.Join([]string{"email", t.Email}, "="),
+			strings.Join([]string{"token", t.Token}, "="),
+		}, "&"),
+	}, "?"))
 }

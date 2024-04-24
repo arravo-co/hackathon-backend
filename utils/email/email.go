@@ -283,42 +283,27 @@ type SendPasswordRecoveryEmailData struct {
 	Email     string
 	Subject   string
 	Token     string
-	TokenTTL  time.Time
+	Link      string
+	TTL       uint32
 }
 
-func SendPasswordRecoveryEmail(dataInput *SendPasswordRecoveryEmailData) {
-
-	body := hermes.Body{
-		Name: strings.Join([]string{dataInput.FirstName, dataInput.LastName}, " "),
-		Intros: []string{
-			"Welcome to Arravo Hackathon!",
-			"Please verify your email to complete the registration process.",
-		},
-		Actions: []hermes.Action{
-			{
-				Instructions: "To recover your password, click the button below:",
-				Button: hermes.Button{
-					Color: "#22BC66",
-					Text:  "Verify Email",
-					Link:  "https://arravo.com/verify-email",
-				},
-			},
-			{
-				Instructions: "Alternatively, you can use the following token to recover your password:",
-				InviteCode:   fmt.Sprintf("Token: %s", dataInput.Token),
-			},
-		},
-		Outros: []string{
-			"If you have any questions, feel free to contact us at support@arravo.co",
-			"Thank you for joining Arravo Hackathon!",
-		},
+func SendPasswordRecoveryEmail(data *SendPasswordRecoveryEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/password_recovery.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
 	}
+	body := buf.String()
+	//Subject: Password Recovery for Arravo Hackathon Account
 
-	SendEmail(&SendEmailData{
-		Email:   dataInput.Email,
-		Message: &body,
-		Subject: dataInput.Subject,
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
 	})
+	return err
 }
 
 type SendPasswordRecoveryCompleteEmailData struct {

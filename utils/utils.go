@@ -55,6 +55,32 @@ func GenerateEmailVerificationLinkPayload(payload *exports.EmailVerificationLink
 	return linkPayload, err
 }
 
+func GeneratePasswordRecoveryLinkPayload(payload *exports.PaswordRecoveryPayload) (string, error) {
+	payloadStr, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	linkPayload, err := EncryptAndSignPayload(payloadStr)
+	return linkPayload, err
+}
+
+func ProcessPasswordRecoveryLink(str string) (*exports.PaswordRecoveryPayload, error) {
+
+	originalMsg, err := UnencryptAndVerifyLink(str)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	payload := &exports.PaswordRecoveryPayload{}
+	err = json.Unmarshal(originalMsg, payload)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	return payload, nil
+}
+
 func GenerateTeamInviteLinkPayload(payload *exports.TeamInviteLinkPayload) (string, error) {
 	payloadStr, err := json.Marshal(payload)
 	if err != nil {

@@ -14,3 +14,9 @@ type TeamInviteLinkPayload struct {
 	InviterEmail string `json:"inviter_email"`
 	TTL          int64  `json:"ttl"`
 }
+
+type PaswordRecoveryPayload struct {
+	Token string    `json:"token"`
+	Email string    `json:"inviter_email"`
+	TTL   time.Time `json:"ttl"`
+}
