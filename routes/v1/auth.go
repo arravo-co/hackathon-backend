@@ -505,7 +505,7 @@ func InitiatePasswordRecovery(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	email.SendPasswordRecoveryEmail(&email.SendPasswordRecoveryEmailData{
+	err = email.SendPasswordRecoveryEmail(&email.SendPasswordRecoveryEmailData{
 		Email: dataResult.TokenTypeValue,
 		Token: dataResult.Token,
 		TTL:   uint32(dataResult.TTL.Sub((time.Now())).Minutes()),
@@ -518,6 +518,9 @@ func InitiatePasswordRecovery(c echo.Context) error {
 		}, "/"),
 		Subject: "Password Recovery for Arravo Hackathon Account",
 	})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
 
 		Code:    200,

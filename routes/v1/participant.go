@@ -47,7 +47,7 @@ func RegisterParticipant(c echo.Context) error {
 		})
 	}
 	var responseData *entity.Participant
-	if data.Type == "PARTICIPANT" {
+	if data.Type == "INDIVIDUAL" {
 		responseData, err = newParticipant.RegisterIndividual(data)
 	} else if data.Type == "TEAM" {
 		responseData, err = newParticipant.RegisterTeamLead(data)

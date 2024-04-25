@@ -147,7 +147,7 @@ func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO
 }
 
 func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (*Participant, error) {
-	passwordHash, err := exports.GenerateHashPassword(input.Password)
+	passwordHash, _ := exports.GenerateHashPassword(input.Password)
 	participantId, err := GenerateParticipantID([]string{input.Email})
 	if err != nil {
 		return nil, err
@@ -182,7 +182,7 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (
 	if !addedToCache {
 		exports.MySugarLogger.Warnln("Email is already in cache")
 	}
-	particicipantDoc, err := data.CreateParticipantRecord(&exports.CreateParticipantRecordData{
+	_, err = data.CreateParticipantRecord(&exports.CreateParticipantRecordData{
 		HackathonId:      config.GetHackathonId(),
 		Type:             "INDIVIDUAL",
 		ParticipantEmail: input.Email,
@@ -192,8 +192,6 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("\n%+v\n", particicipantDoc)
-	// emit created event
 	events.EmitParticipantAccountCreated(&exports.ParticipantAccountCreatedEventData{
 		ParticipantEmail: dataResponse.Email,
 		LastName:         dataResponse.LastName,
@@ -201,6 +199,16 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (
 		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
 		ParticipantType:  "INDIVIDUAL",
 	})
+	/*
+		dt := struct {
+			FirstName string `json:"message"`
+		}{FirstName: dataResponse.FirstName}
+		by, _ := json.Marshal(&dt)
+		err = producer.Publish("participant_register", by)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	*/
 	return &Participant{
 		ParticipantId:       participantId,
 		Email:               dataInput.Email,

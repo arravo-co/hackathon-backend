@@ -8,6 +8,8 @@ import (
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 	_ "github.com/arravoco/hackathon_backend/jobs"
+
+	_ "github.com/arravoco/hackathon_backend/nsq/consumer"
 	routes_v1 "github.com/arravoco/hackathon_backend/routes/v1"
 	"github.com/arravoco/hackathon_backend/security"
 	"github.com/labstack/echo/v4"
@@ -27,6 +29,7 @@ import (
 // @Server http://localhost:5000 Localhost
 // @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
+	//consumer.Cleanup()
 	prometheus.MustRegister(exports.MyFirstCounter)
 	security.GenerateKeys()
 	e := echo.New()
