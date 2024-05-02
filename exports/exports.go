@@ -60,10 +60,15 @@ type jwtCustomClaims struct {
 }
 
 type AuthUtilsPayload struct {
-	Email     string
-	LastName  string
-	FirstName string
-	Role      string
+	AccountId       string
+	HackathonId     string
+	Email           string
+	LastName        string
+	FirstName       string
+	Role            string
+	IsParticipant   bool
+	ParticipantType string
+	ParticipantId   string
 }
 
 type AuthUtilsVerifyTokenData struct {

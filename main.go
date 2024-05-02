@@ -30,8 +30,20 @@ import (
 // @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
 	//consumer.Cleanup()
+	/*
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+		defer stop()
+		shutdown, err := opentel.Setup(ctx)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer func() {
+			err = errors.Join(err, shutdown(ctx))
+		}()
+	*/
 	prometheus.MustRegister(exports.MyFirstCounter)
 	security.GenerateKeys()
+
 	e := echo.New()
 	port := config.GetPort()
 	routes_v1.StartAllRoutes(e)
@@ -43,6 +55,13 @@ func main() {
 
 	e.Logger.Info(port)
 	e.Logger.Fatal(e.Start(getURL(port)))
+
+	/*
+		select {
+		case <-ctx.Done():
+			stop()
+		}
+	*/
 }
 
 func getURL(port int) string {

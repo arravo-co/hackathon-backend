@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -84,6 +82,17 @@ type InviteTeamMemberSuccessResponse struct {
 	Message string `json:"message"`
 }
 
+type FailResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type GetTeamMembersSuccessResponse struct {
+	Code    int                        `json:"code"`
+	Message string                     `json:"message"`
+	Data    []entity.TeamMemberAccount `json:"data"`
+}
+
 // @Title Fully Register New Team Member
 // @Description	Fully register new member to the participating team
 // @Summary		Fully Register New Member To The Participating Team
@@ -131,62 +140,33 @@ func RegisterNewTeamMember(c echo.Context) error {
 	})
 }
 
-// @Title Invite New Member
-// @Description	Invite new member
-// @Summary		Invite new member
+// @Title Get Team Members Info
+// @Description	 Get Team Members Info
+// @Summary		 Get Team Members Info
 // @Tags			Participants
 // @Param  participantId  path  string  true  "participant id of the participating team"
 // @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
 // @Produce		json
-// @Success		201	{object}	InviteTeamMemberSuccessResponse
-// @Failure		400	{object}	InviteTeamMemberFailResponse
-// @Router			/api/v1/participants/{participantId}/invite               [post]
-func InviteMemberToTeam(c echo.Context) error {
-	participantId := c.Param("participantId")
-	tokenData := authutils.GetAuthPayload(c)
-	data := dtos.InviteToTeamData{}
-	err := c.Bind(&data)
+// @Success		200	{object}	GetTeamMembersSuccessResponse
+// @Failure		400	{object}	FailResponse
+// @Router			/api/v1/participants/{participantId}/team              [get]
+func GetTeamMembersInfo(ctx echo.Context) error {
+	participantId := ctx.Param("participantId")
+	participant := &entity.Participant{}
+	err := participant.FillParticipantInfo(participantId)
 	if err != nil {
 		return err
 	}
-	data.ParticipantId = participantId
-	err = validate.Struct(data)
+	participants, err := participant.GetTeamMembersInfo()
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
-			Code:    echo.ErrBadRequest.Code,
-			Message: err.Error(),
+		return ctx.JSON(400, GetTeamMembersSuccessResponse{
+			Message: "",
+			Data:    participants,
 		})
 	}
-	participant := entity.Participant{}
-	err = participant.FillParticipantInfo(tokenData.Email)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
-			Code:    echo.ErrBadRequest.Code,
-			Message: err.Error(),
-		})
-	}
-	if participant.Type == "INDIVIDUAL" {
-		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
-			Code:    echo.ErrBadRequest.Code,
-			Message: "Only a participating team can invite new members.",
-		})
-	}
-	responseData, err := participant.InviteToTeam(&exports.AddToTeamInviteListData{
-		HackathonId:   config.GetHackathonId(),
-		ParticipantId: data.ParticipantId,
-		Email:         data.Email,
-		Role:          data.Role,
-		InviterEmail:  participant.Email,
-	})
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
-			Code:    echo.ErrBadRequest.Code,
-			Message: err.Error(),
-		})
-	}
-	fmt.Println(responseData)
-	return c.JSON(http.StatusCreated, &InviteTeamMemberSuccessResponse{
-		Code:    http.StatusCreated,
-		Message: "Member will be invited!!!",
+	return ctx.JSON(200, GetTeamMembersSuccessResponse{
+		Message: "",
+		Data:    participants,
+		Code:    200,
 	})
 }

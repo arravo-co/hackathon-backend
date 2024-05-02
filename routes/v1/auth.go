@@ -590,6 +590,72 @@ func CompletePasswordRecovery(c echo.Context) error {
 	})
 }
 
+// @Title Invite New Member
+// @Description	Invite new member
+// @Summary		Invite new member
+// @Tags			Participants
+// @Param  participantId  path  string  true  "participant id of the participating team"
+// @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
+// @Produce		json
+// @Success		201	{object}	InviteTeamMemberSuccessResponse
+// @Failure		400	{object}	InviteTeamMemberFailResponse
+// @Router			/api/v1/auth/me/team/invite               [post]
+func InviteMemberToTeam(c echo.Context) error {
+	tokenData := authutils.GetAuthPayload(c)
+	participantId := tokenData.ParticipantId
+	hackathonId := tokenData.HackathonId
+	data := dtos.InviteToTeamData{}
+	err := c.Bind(&data)
+	if err != nil {
+		return err
+	}
+	err = validate.Struct(data)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: err.Error(),
+		})
+	}
+	participant := entity.Participant{}
+	err = participant.FillParticipantInfo(tokenData.Email)
+	if participantId != participant.ParticipantId {
+		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: "Wrong authentication.",
+		})
+	}
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: err.Error(),
+		})
+	}
+	if participant.Type == "INDIVIDUAL" {
+		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: "Only a participating team can invite new members.",
+		})
+	}
+	responseData, err := participant.InviteToTeam(&exports.AddToTeamInviteListData{
+		HackathonId:   hackathonId,
+		ParticipantId: participant.ParticipantId,
+		Email:         data.Email,
+		Role:          data.Role,
+		InviterEmail:  participant.Email,
+	})
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: err.Error(),
+		})
+	}
+	fmt.Println(responseData)
+	return c.JSON(http.StatusCreated, &InviteTeamMemberSuccessResponse{
+		Code:    http.StatusCreated,
+		Message: "Member will be invited!!!",
+	})
+}
+
 // @Title Validate Team Invite Link
 // @Summary		Validate team invite link
 // @Description	Validate team invite link
@@ -639,4 +705,79 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 			strings.Join([]string{"token", t.Token}, "="),
 		}, "&"),
 	}, "?"))
+}
+
+// @Title Get Team Members Info
+// @Description	 Get Team Members Info
+// @Summary		 Get Team Members Info
+// @Tags			Participants
+// @Param  participantId  path  string  true  "participant id of the participating team"
+// @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
+// @Produce		json
+// @Success		200	{object}	GetTeamMembersSuccessResponse
+// @Failure		400	{object}	FailResponse
+// @Router			/api/v1/auth/me/team              [get]
+func GetMyTeamMembersInfo(ctx echo.Context) error {
+	payload := authutils.GetAuthPayload(ctx)
+	participant := &entity.Participant{}
+	err := participant.FillParticipantInfo(payload.Email)
+	if err != nil {
+		return err
+	}
+	participants, err := participant.GetTeamMembersInfo()
+	fmt.Println(participants)
+	if err != nil {
+		return ctx.JSON(400, GetTeamMembersSuccessResponse{
+			Message: "",
+			Data:    participants,
+		})
+	}
+	return ctx.JSON(200, GetTeamMembersSuccessResponse{
+		Message: "",
+		Data:    participants,
+		Code:    200,
+	})
+}
+
+type DeleteTeamMemberSuccessResponse struct {
+	Code    int                       `json:"code"`
+	Message string                    `json:"message"`
+	Data    *entity.TeamMemberAccount `json:"data"`
+}
+
+// @Title Get Team Members Info
+// @Description	 Get Team Members Info
+// @Summary		 Get Team Members Info
+// @Tags			Participants
+// @Param  participantId  path  string  true  "participant id of the participating team"
+// @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
+// @Produce		json
+// @Success		200	{object}	DeleteTeamMemberSuccessResponse
+// @Failure		400	{object}	FailResponse
+// @Router			/api/v1/auth/team/{memberId}              [delete]
+func RemoveMemberFromMyTeam(ctx echo.Context) error {
+	payload := authutils.GetAuthPayload(ctx)
+	memberId := ctx.Param("memberId")
+	participant := &entity.Participant{}
+	err := participant.FillParticipantInfo(payload.Email)
+
+	if err != nil {
+		return err
+	}
+	member, err := participant.RemoveMemberFromTeam(&entity.RemoveMemberFromTeamData{
+		MemberEmail:   memberId,
+		HackathonId:   payload.HackathonId,
+		ParticipantId: payload.ParticipantId,
+	})
+	if err != nil {
+		return ctx.JSON(400, FailResponse{
+			Message: err.Error(),
+			Code:    400,
+		})
+	}
+	return ctx.JSON(200, DeleteTeamMemberSuccessResponse{
+		Message: "",
+		Data:    member,
+		Code:    200,
+	})
 }

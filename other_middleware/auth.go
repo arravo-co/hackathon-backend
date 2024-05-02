@@ -1,6 +1,7 @@
 package othermiddleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/arravoco/hackathon_backend/config"
@@ -29,6 +30,7 @@ func AuthRole(roles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return Auth()(func(c echo.Context) error {
 			tokenData := exports.GetPayload(c)
+			fmt.Println(tokenData)
 			var found bool = false
 			for _, role := range roles {
 				if role == tokenData.Role {

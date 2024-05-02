@@ -28,10 +28,15 @@ type JwtCustomClaims struct {
 }
 
 type Payload struct {
-	Email     string
-	LastName  string
-	FirstName string
-	Role      string
+	AccountId       string
+	HackathonId     string
+	Email           string
+	LastName        string
+	FirstName       string
+	Role            string
+	IsParticipant   bool
+	ParticipantType string
+	ParticipantId   string
 }
 
 type ConfigTokenData struct {
@@ -57,10 +62,15 @@ type ChangePasswordData struct {
 }
 
 type MyJWTCustomClaims struct {
-	Email     string `json:"email"`
-	LastName  string `json:"last_name"`
-	FirstName string `json:"first_name"`
-	Role      string `json:"role"`
+	Email           string `json:"email"`
+	LastName        string `json:"last_name"`
+	FirstName       string `json:"first_name"`
+	Role            string `json:"role"`
+	ParticipantId   string `json:"participant_id"`
+	AccountId       string `json:"account_id"`
+	HackathonId     string `json:"hackathon_id"`
+	IsParticipant   bool   `json:"is_participant"`
+	ParticipantType string `json:"participant_type"`
 	jwt.RegisteredClaims
 }
 

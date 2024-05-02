@@ -28,12 +28,24 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 		fmt.Printf("%s", err.Error())
 		return nil, err
 	}
-	accessToken, err := GenerateAccessToken(&exports.AuthUtilsPayload{
-		Email:     accountDoc.Email,
-		LastName:  accountDoc.LastName,
-		FirstName: accountDoc.FirstName,
-		Role:      accountDoc.Role,
-	})
+	var participantDoc *exports.ParticipantDocument
+	if accountDoc.Role == "PARTICIPANT" {
+		participantDoc, _ = data.GetParticipantRecord(accountDoc.ParticipantId)
+	}
+	rr := &exports.AuthUtilsPayload{
+		Email:       accountDoc.Email,
+		LastName:    accountDoc.LastName,
+		FirstName:   accountDoc.FirstName,
+		Role:        accountDoc.Role,
+		HackathonId: accountDoc.HackathonId,
+	}
+	if participantDoc.ParticipantId != "" {
+		rr.IsParticipant = true
+		rr.ParticipantType = participantDoc.Type
+		rr.ParticipantId = participantDoc.ParticipantId
+	}
+	accessToken, err := GenerateAccessToken(rr)
+
 	if err != nil {
 		return nil, err
 	}
@@ -52,11 +64,15 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 
 func GenerateAccessToken(payload *exports.AuthUtilsPayload) (string, error) {
 	claims := &exports.MyJWTCustomClaims{
-		payload.Email,
-		payload.FirstName,
-		payload.LastName,
-		payload.Role,
-		jwt.RegisteredClaims{
+		Email:           payload.Email,
+		FirstName:       payload.FirstName,
+		LastName:        payload.LastName,
+		Role:            payload.Role,
+		ParticipantId:   payload.ParticipantId,
+		ParticipantType: payload.ParticipantType,
+		IsParticipant:   payload.IsParticipant,
+		HackathonId:     payload.HackathonId,
+		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
 		},
 	}
@@ -70,10 +86,14 @@ func GetAuthPayload(c echo.Context) *exports.Payload {
 	jwtData := c.Get("user").(*jwt.Token)
 	claims := jwtData.Claims.(*exports.MyJWTCustomClaims)
 	tokenData := exports.Payload{
-		Email:     claims.Email,
-		LastName:  claims.LastName,
-		FirstName: claims.FirstName,
-		Role:      claims.Role,
+		Email:           claims.Email,
+		LastName:        claims.LastName,
+		FirstName:       claims.FirstName,
+		Role:            claims.Role,
+		ParticipantType: claims.ParticipantType,
+		IsParticipant:   claims.IsParticipant,
+		ParticipantId:   claims.ParticipantId,
+		HackathonId:     claims.HackathonId,
 	}
 	return &tokenData
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -40,6 +39,29 @@ func GetAccountByEmail(email string) (*exports.AccountDocument, error) {
 	return &accountDoc, err
 }
 
+func GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
+	var accounts []exports.AccountDocument
+	accountCol, err := Datasource.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	var filterStructs bson.A
+	for _, email := range emails {
+		filterStructs = append(filterStructs, bson.M{"email": email})
+	}
+	cursor, err := accountCol.Find(ctx, bson.D{{"$or", filterStructs}} /*bson.D{{"$or", filterStructs}}*/)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(context.Background(), &accounts)
+	fmt.Println(accounts)
+	if err != nil {
+		return nil, err
+	}
+	return accounts, err
+}
+
 func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
@@ -52,7 +74,7 @@ func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*
 		FirstName:       dataToSave.FirstName,
 		LastName:        dataToSave.LastName,
 		Gender:          dataToSave.Gender,
-		HackathonId:     hackathonId,
+		HackathonId:     dataToSave.HackathonId,
 		Role:            dataToSave.Role,
 		PhoneNumber:     dataToSave.PhoneNumber,
 		IsEmailVerified: false,
@@ -67,6 +89,24 @@ func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
+	return &acc, err
+}
+
+func RemoveTeamMemberAccount(dataToSave *exports.RemoveTeamMemberAccountData) (*exports.AccountDocument, error) {
+	accountCol, err := Datasource.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	acc := exports.AccountDocument{}
+	fmt.Printf("Account\n")
+	result := accountCol.FindOneAndDelete(ctx, dataToSave)
+	err = result.Decode(&acc)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Printf("%#v", result)
 	return &acc, err
 }
 
@@ -109,6 +149,7 @@ func CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (*exports.Ac
 		Gender:          dataToSave.Gender,
 		Role:            dataToSave.Role,
 		IsEmailVerified: false,
+		HackathonId:     dataToSave.HackathonId,
 	}
 	return acc, nil
 }
@@ -134,14 +175,13 @@ func CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) 
 	if err != nil {
 		return nil, err
 	}
-	hackathonId := config.GetHackathonId()
 	acc := exports.AccountDocument{
 		Email:           dataToSave.Email,
 		PasswordHash:    dataToSave.PasswordHash,
 		FirstName:       dataToSave.FirstName,
 		LastName:        dataToSave.LastName,
 		Gender:          dataToSave.Gender,
-		HackathonId:     hackathonId,
+		HackathonId:     dataToSave.HackathonId,
 		Role:            dataToSave.Role,
 		PhoneNumber:     dataToSave.PhoneNumber,
 		IsEmailVerified: false,
@@ -169,7 +209,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 		FirstName:       dataToSave.FirstName,
 		LastName:        dataToSave.LastName,
 		Gender:          dataToSave.Gender,
-		HackathonId:     hackathonId,
+		HackathonId:     dataToSave.HackathonId,
 		Role:            dataToSave.Role,
 		PhoneNumber:     dataToSave.PhoneNumber,
 		IsEmailVerified: false,

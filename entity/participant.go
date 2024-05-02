@@ -47,6 +47,24 @@ type Participant struct {
 	Solution            exports.SolutionDocument `json:"solution"`
 }
 
+type TeamMemberAccount struct {
+	Email             string    `json:"email"`
+	FirstName         string    `json:"first_name"`
+	LastName          string    `json:"last_name"`
+	Gender            string    `json:"gender,omitempty"`
+	LinkedInAddress   string    `json:"linkedIn_address,omitempty"`
+	PhoneNumber       string    `json:"phone_number,omitempty"`
+	Skillset          []string  `json:"skillset,omitempty"`
+	ParticipantId     string    `json:"participant_id,omitempty"`
+	HackathonId       string    `json:"hackathon_id"`
+	State             string    `json:"state,omitempty"`
+	Role              string    `json:"role,omitempty"`
+	DOB               time.Time `json:"dob,omitempty"`
+	IsEmailVerified   bool      `json:"is_email_verified,omitempty"`
+	IsEmailVerifiedAt time.Time `json:"is_email_verified_at,omitempty"`
+	Status            string    `json:"status"`
+}
+
 func (p Participant) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
 	res, err := data.AddToTeamInviteList(dataInput)
 	if err != nil {
@@ -93,6 +111,8 @@ func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO
 			State:        input.State,
 			PhoneNumber:  input.PhoneNumber,
 			Role:         "PARTICIPANT",
+			HackathonId:  config.GetHackathonId(),
+			Status:       "VERIFIED",
 		}
 	dataInput.ParticipantId = input.ParticipantId
 
@@ -364,10 +384,27 @@ func (p *Participant) FillParticipantInfo(input string) error {
 		} else {
 			p.TeamRole = "TEAM_MEMBER"
 		}
+		p.CoParticipantEmails = particicipantDocData.CoParticipantEmails
 	}
 	// emit created event
 
 	return nil
+}
+
+func FillTeamMemberInfo(account *exports.AccountDocument) *TeamMemberAccount {
+	info := &TeamMemberAccount{}
+	info.Email = account.Email
+	info.Status = account.Status
+	info.FirstName = account.FirstName
+	info.LastName = account.LastName
+	info.Gender = account.Gender
+	info.State = account.State
+	info.Role = account.Role
+	info.HackathonId = account.HackathonId
+	info.DOB = account.DOB
+	// emit created event
+
+	return info
 }
 
 func (p *Participant) ReconcileParticipantInfo(accountDataInput *exports.AccountDocument, particicipantDataInput *exports.ParticipantDocument) error {
@@ -413,4 +450,36 @@ func GenerateParticipantID(emails []string) (string, error) {
 	postFix := slicesOfHash[len(slicesOfHash)-5:]
 	sub := strings.Join(append(prefixSlices, postFix...), "")
 	return sub, nil
+}
+
+type RemoveMemberFromTeamData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	MemberEmail   string `bson:"email"`
+}
+
+func (p *Participant) RemoveMemberFromTeam(dataInput *RemoveMemberFromTeamData) (*TeamMemberAccount, error) {
+	if p == nil {
+		return nil, errors.New("unable to find participant")
+	}
+	data.RemoveMemberFromParticipatingTeam(&exports.RemoveMemberFromParticipatingTeamData{
+		HackathonId:   dataInput.HackathonId,
+		MemberEmail:   dataInput.MemberEmail,
+		ParticipantId: dataInput.ParticipantId,
+	})
+
+	acc := FillTeamMemberInfo(&exports.AccountDocument{})
+	return acc, nil
+}
+
+func (p *Participant) GetTeamMembersInfo() ([]TeamMemberAccount, error) {
+	team := []TeamMemberAccount{}
+	fmt.Println(p.CoParticipantEmails)
+	accounts, err := data.GetAccountsByEmails(p.CoParticipantEmails)
+	fmt.Println(accounts)
+	for _, acc := range accounts {
+		oo := FillTeamMemberInfo(&acc)
+		team = append(team, *oo)
+	}
+	return team, err
 }

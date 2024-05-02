@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/adjust/rmq/v5"
+	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/queue"
 	"github.com/arravoco/hackathon_backend/utils"
@@ -69,7 +70,11 @@ func (c *InvitelistTaskConsumer) Consume(d rmq.Delivery) {
 		InviteeName:  payloadStruct.InviterName,
 		Subject:      "Invitation to Join Arravo Hackathon Link",
 		TTL:          ttl.Day(),
-		Link:         strings.Join([]string{"http://localhost:5000/api/auth/team/invite", linkPayload}, "?token="),
+		Link: strings.Join(
+			[]string{
+				strings.Join(
+					[]string{
+						config.GetServerURL(), "/api/v1/auth/team/invite"}, ","), linkPayload}, "?token="),
 	})
 	if err != nil {
 		exports.MySugarLogger.Errorln(err)

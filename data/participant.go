@@ -26,6 +26,7 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 		CoParticipantEmails: dataToSave.CoParticipantEmails,
 		GithubAddress:       dataToSave.GithubAddress,
 		ParticipantEmail:    dataToSave.ParticipantEmail,
+		InviteList:          []exports.InviteInfo{},
 	}
 	result, err := participantCol.InsertOne(ctx, dat)
 	if err != nil {
@@ -36,14 +37,14 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 	return &dat, nil
 }
 
-func GetParticipantRecord(dataToSave string) (*exports.ParticipantDocument, error) {
+func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
 	participantCol, err := Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
 	}
 	dat := exports.ParticipantDocument{}
-	result := participantCol.FindOne(ctx, bson.M{"participant_id": dataToSave})
+	result := participantCol.FindOne(ctx, bson.M{"participant_id": participantId})
 	if result.Err() != nil {
 		fmt.Printf("\n%s\n", result.Err())
 		return nil, result.Err()
@@ -62,8 +63,6 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Account\n")
-	fmt.Printf("%#v\n", dataToSave)
 	filter := bson.M{
 		"participant_id":    dataToSave.ParticipantId,
 		"hackathon_id":      dataToSave.HackathonId,
@@ -74,30 +73,7 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 			InviterId: dataToSave.InviterEmail, Time: time.Now()}},
 	}
 	fmt.Println(upd)
-	/*
 
-			"": bson.M{
-				"$cond": bson.M{
-				"if": bson.M{"$isArray":"$invite_list"},
-
-				},},
-
-		upd1 := bson.M{
-			"$set": bson.M{
-				"invite_list": bson.M{
-					"$cond": bson.M{
-						"if":   bson.M{"$in": bson.A{dataToSave.Email, "$invite_list.email"}},
-						"then": bson.M{"$getField": "invite_list"},
-						"else": bson.M{
-							"$concatArrays": bson.A{
-								bson.M{"$getField": "invite_list"},
-								exports.InviteInfo{Email: dataToSave.Email,
-									InviterId: dataToSave.InviterEmail, Time: time.Now()}}},
-					},
-				},
-			},
-		}
-	*/
 	result, err := participantCol.UpdateOne(ctx, filter, upd)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
@@ -106,11 +82,11 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 	fmt.Printf("%#v", result)
 	if result.MatchedCount == 0 {
 		fmt.Printf("failed to add to invite list")
-		return nil, errors.New("failed to add to invite list")
+		return nil, errors.New("failed to add to invite list: failed to match")
 	}
 	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
 		fmt.Printf("No changes made")
-		return nil, errors.New("failed to add to invite list")
+		return nil, errors.New("failed to add to invite list: failed to save")
 	}
 	return result, err
 }
@@ -131,6 +107,28 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 	upd := bson.M{
 		"$addToSet": bson.M{"co_participant_emails": dataToSave.Email},
 		"$pull":     bson.M{"invite_list": dataToSave.Email},
+	}
+	result, err := participantCol.UpdateOne(ctx, filter, upd, &options.UpdateOptions{})
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Printf("%#v", result.ModifiedCount)
+	return participantCol, err
+}
+
+func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParticipatingTeamData) (interface{}, error) {
+	participantCol, err := Datasource.GetParticipantCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.M{
+		"participant_id": dataToSave.ParticipantId,
+		"hackathon_id":   dataToSave.HackathonId,
+	}
+	upd := bson.M{
+		"$pull": bson.M{"co_participant_emails": dataToSave.MemberEmail},
 	}
 	result, err := participantCol.UpdateOne(ctx, filter, upd, &options.UpdateOptions{})
 	if err != nil {

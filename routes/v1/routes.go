@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 
 	//_ "github.com/arravoco/hackathon_backend/docs"
 	othermiddleware "github.com/arravoco/hackathon_backend/other_middleware"
@@ -32,7 +33,8 @@ func StartAllRoutes(e *echo.Echo) {
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPost, http.MethodPut, http.MethodDelete},
 	}))
 
-	api := e.Group("/api/v1")
+	rrr := otelecho.Middleware("")
+	api := e.Group("/api/v1" /**/, rrr)
 	setupAuthRoutes(api)
 	setupJudgesRoutes(api)
 	setupParticipantsRoutes(api)
@@ -48,9 +50,9 @@ func setupAdminsRoutes(api *echo.Group) {
 
 func setupParticipantsRoutes(api *echo.Group) {
 	participantsRoutes = api.Group("/participants")
+	participantsRoutes.POST("/:participantId/members", RegisterNewTeamMember)
 	participantsRoutes.POST("", RegisterParticipant)
-	participantsRoutes.POST("/participants/:participantId/members ", RegisterNewTeamMember)
-	participantsRoutes.POST("/:participantId/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
+	//participantsRoutes.POST("/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 }
 
 func setupJudgesRoutes(api *echo.Group) {
@@ -69,7 +71,9 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.POST("/password/recovery/completion", CompletePasswordRecovery)
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
 	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
+	authRoutes.POST("/me/team/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 	authRoutes.GET("/team/invite", ValidateTeamInviteLink)
+	authRoutes.GET("/me/team", GetMyTeamMembersInfo, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 	authRoutes.GET("/password/recovery/link/verification", ValidatePasswordRecoveryLink)
 }
 

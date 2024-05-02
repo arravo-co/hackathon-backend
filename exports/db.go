@@ -114,12 +114,24 @@ type CreateTeamMemberAccountData struct {
 	Skillset      []string `bson:"skillset"`
 }
 
+type RemoveTeamMemberAccountData struct {
+	Email         string `bson:"email"`
+	ParticipantId string `bson:"participant_id"`
+	HackathonId   string `bson:"hackathon_id"`
+}
+
 type AddMemberToParticipatingTeamData struct {
 	HackathonId   string `bson:"hackathon_id"`
 	ParticipantId string `bson:"participant_id"`
 	Email         string `bson:"email"`
 	Role          string `bson:"role"`
 	Type          string `bson:"type,omitempty"`
+}
+
+type RemoveMemberFromParticipatingTeamData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	MemberEmail   string `bson:"email"`
 }
 
 type AddToTeamInviteListData struct {

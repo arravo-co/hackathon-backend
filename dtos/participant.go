@@ -24,15 +24,23 @@ func ValidateGender(fl validator.FieldLevel) bool {
 }
 
 type InviteToTeamData struct {
-	ParticipantId string `validate:"required" json:"participant_id"`
-	Email         string ` validate:"email" json:"email"`
-	Role          string `validate:"oneof= TEAM_MEMBER" json:"role"`
+	Email string ` validate:"email" json:"email"`
+	Role  string `validate:"oneof= TEAM_MEMBER" json:"role"`
 }
 
 type RegisterNewTeamMemberDTO struct {
-	RegisterNewParticipantDTO
-	ParticipantId string `json:"participant_id"`
-	TeamLeadEmail string `json:"team_lead_email"`
+	FirstName       string   `validate:"min=2" json:"first_name"`
+	LastName        string   `validate:"min=2" json:"last_name"`
+	Email           string   `validate:"email" json:"email"`
+	Password        string   `validate:"min=7" json:"password"`
+	PhoneNumber     string   `validate:"e164" json:"phone_number"`
+	ConfirmPassword string   `validate:"eqfield=Password" json:"confirm_password"`
+	Gender          string   `validate:"oneof=MALE FEMALE" json:"gender"`
+	Skillset        []string `validate:"min=1" json:"skillset"`
+	State           string   `validate:"min=3" json:"state"`
+	DOB             string   ` json:"dob"`
+	ParticipantId   string
+	TeamLeadEmail   string `json:"team_lead_email"`
 }
 
 type RegisterNewParticipantDTO struct {
