@@ -97,8 +97,6 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Account\n")
-	fmt.Printf("%#v\n", dataToSave)
 	filter := bson.M{
 		"participant_id":    dataToSave.ParticipantId,
 		"hackathon_id":      dataToSave.HackathonId,

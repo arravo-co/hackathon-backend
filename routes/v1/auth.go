@@ -594,7 +594,6 @@ func CompletePasswordRecovery(c echo.Context) error {
 // @Description	Invite new member
 // @Summary		Invite new member
 // @Tags			Participants
-// @Param  participantId  path  string  true  "participant id of the participating team"
 // @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
 // @Produce		json
 // @Success		201	{object}	InviteTeamMemberSuccessResponse
@@ -672,12 +671,19 @@ func ValidateTeamInviteLink(c echo.Context) error {
 	if tokenStr == "" {
 		return c.HTML(400, "<p>Invalid link</p>")
 	}
-	_, err := utils.ProcessTeamInviteLink(tokenStr)
+	data, err := utils.ProcessTeamInviteLink(tokenStr)
 	if err != nil {
 		fmt.Printf(err.Error())
 		c.HTML(400, err.Error())
 	}
-	return c.Redirect(301, "https://hackathon-dev.onrender.com/")
+	return c.Redirect(301,
+		strings.Join([]string{"https://hackathon-dev.onrender.com",
+			strings.Join([]string{
+				strings.Join([]string{"participant_id", data.ParticipantId}, "="),
+				strings.Join([]string{"hackathon_id", data.HackathonId}, "="),
+				strings.Join([]string{"invitee_email", data.InviteeEmail}, "="),
+				strings.Join([]string{"teamlead_email", data.TeamLeadEmailEmail}, "="),
+			}, "&")}, "?"))
 }
 
 // @Title Validate Password Recovery Link
@@ -711,8 +717,6 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 // @Description	 Get Team Members Info
 // @Summary		 Get Team Members Info
 // @Tags			Participants
-// @Param  participantId  path  string  true  "participant id of the participating team"
-// @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
 // @Produce		json
 // @Success		200	{object}	GetTeamMembersSuccessResponse
 // @Failure		400	{object}	FailResponse
@@ -749,8 +753,7 @@ type DeleteTeamMemberSuccessResponse struct {
 // @Description	 Get Team Members Info
 // @Summary		 Get Team Members Info
 // @Tags			Participants
-// @Param  participantId  path  string  true  "participant id of the participating team"
-// @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
+// @Param  memberId  path  string  true  "email of team member"
 // @Produce		json
 // @Success		200	{object}	DeleteTeamMemberSuccessResponse
 // @Failure		400	{object}	FailResponse

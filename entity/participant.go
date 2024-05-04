@@ -75,10 +75,13 @@ func (p Participant) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (i
 		fmt.Printf("%s\n", err.Error())
 	}
 	queuePayload := exports.InvitelistQueuePayload{
-		InviterEmail: dataInput.InviterEmail,
-		InviterName:  "",
-		InviteeEmail: dataInput.Email,
-		TimeSent:     time.Now(),
+		InviterEmail:       dataInput.InviterEmail,
+		InviterName:        p.FirstName,
+		InviteeEmail:       dataInput.Email,
+		ParticipantId:      dataInput.ParticipantId,
+		HackathonId:        dataInput.HackathonId,
+		TeamLeadEmailEmail: dataInput.InviterEmail,
+		TimeSent:           time.Now(),
 	}
 	byt, err := json.Marshal(queuePayload)
 	if err != nil {
@@ -118,7 +121,7 @@ func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO
 
 	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
 	if isEmailInCache {
-		return nil, errors.New("email is already existing")
+		//return nil, errors.New("email is already existing")
 	}
 	_, err = data.AddMemberToParticipatingTeam(&exports.AddMemberToParticipatingTeamData{
 		HackathonId:   config.GetHackathonId(),
@@ -325,30 +328,6 @@ type CoParticipantCreatedData struct {
 	Email         string
 	Password      string
 	ParticipantId string
-}
-
-func (p *Participant) CreateCoParticipantAccount(email string) (*CoParticipantCreatedData, error) {
-	isFound := cache.FindEmailInCache(email)
-	if isFound {
-		exports.MySugarLogger.Error("Email already exists")
-		return nil, errors.New("email already exists")
-	}
-	password := exports.GeneratePassword()
-	passwordHash, _ := exports.GenerateHashPassword(password)
-	createDataInput :=
-		&exports.CreateAccountData{
-			Email:        email,
-			PasswordHash: passwordHash,
-			Role:         "PARTICIPANT"}
-	_, err := data.CreateAccount(createDataInput)
-	if err != nil {
-		return nil, err
-	}
-	cache.AddEmailToCache(email)
-	return &CoParticipantCreatedData{
-		Email:    createDataInput.Email,
-		Password: password,
-	}, nil
 }
 
 func (p *Participant) FillParticipantInfo(input string) error {

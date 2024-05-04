@@ -9,10 +9,11 @@ type EmailVerificationLinkPayload struct {
 }
 
 type TeamInviteLinkPayload struct {
-	InviteeEmail string `json:"invitee_email"`
-	Token        string `json:"token"`
-	InviterEmail string `json:"inviter_email"`
-	TTL          int64  `json:"ttl"`
+	InviteeEmail       string `json:"invitee_email"`
+	TeamLeadEmailEmail string `json:"teamlead_email"`
+	HackathonId        string `json:"hackathon_id"`
+	ParticipantId      string `json:"participant_id"`
+	TTL                int64  `json:"ttl"`
 }
 
 type PaswordRecoveryPayload struct {

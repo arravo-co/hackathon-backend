@@ -9,6 +9,8 @@ import (
 	"github.com/arravoco/hackathon_backend/exports"
 	_ "github.com/arravoco/hackathon_backend/jobs"
 
+	_ "net/http/pprof"
+
 	_ "github.com/arravoco/hackathon_backend/nsq/consumer"
 	routes_v1 "github.com/arravoco/hackathon_backend/routes/v1"
 	"github.com/arravoco/hackathon_backend/security"

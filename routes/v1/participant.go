@@ -145,7 +145,6 @@ func RegisterNewTeamMember(c echo.Context) error {
 // @Summary		 Get Team Members Info
 // @Tags			Participants
 // @Param  participantId  path  string  true  "participant id of the participating team"
-// @Param registerIndividualJSON body dtos.InviteToTeamData true "invite member to team"
 // @Produce		json
 // @Success		200	{object}	GetTeamMembersSuccessResponse
 // @Failure		400	{object}	FailResponse

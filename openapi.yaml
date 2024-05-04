@@ -284,7 +284,15 @@ components:
           type: string
         invite_list:
           items:
-            $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.InviteInfo'
+            properties:
+              Email:
+                type: string
+              InviterId:
+                type: string
+              Time:
+                format: date-time
+                type: string
+            type: object
           type: array
         last_name:
           type: string
@@ -849,15 +857,6 @@ paths:
   /api/v1/auth/me/team/invite:
     post:
       description: ' Invite new member'
-      parameters:
-      - description: participant id of the participating team
-        in: path
-        name: participantId
-        required: true
-        schema:
-          description: participant id of the participating team
-          format: string
-          type: string
       requestBody:
         content:
           application/json:
@@ -1000,20 +999,14 @@ paths:
     delete:
       description: ' Get Team Members Info'
       parameters:
-      - description: participant id of the participating team
+      - description: email of team member
         in: path
-        name: participantId
+        name: memberId
         required: true
         schema:
-          description: participant id of the participating team
+          description: email of team member
           format: string
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.dtos.InviteToTeamData'
-        required: true
       responses:
         "200":
           content:
@@ -1242,12 +1235,6 @@ paths:
           description: participant id of the participating team
           format: string
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.dtos.InviteToTeamData'
-        required: true
       responses:
         "200":
           content:

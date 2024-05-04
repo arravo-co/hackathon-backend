@@ -51,9 +51,11 @@ func (c *InvitelistTaskConsumer) Consume(d rmq.Delivery) {
 	fmt.Println(payloadStruct)
 	ttl := time.Now().Add(time.Hour * 24 * 7)
 	linkPayload, err := utils.GenerateTeamInviteLinkPayload(&exports.TeamInviteLinkPayload{
-		InviteeEmail: payloadStruct.InviteeEmail,
-		InviterEmail: payloadStruct.InviterEmail,
-		TTL:          ttl.Unix(),
+		ParticipantId:      payloadStruct.ParticipantId,
+		TeamLeadEmailEmail: payloadStruct.TeamLeadEmailEmail,
+		InviteeEmail:       payloadStruct.InviteeEmail,
+		HackathonId:        payloadStruct.HackathonId,
+		TTL:                ttl.Unix(),
 	})
 	if err != nil {
 		fmt.Println(err.Error())
@@ -74,7 +76,7 @@ func (c *InvitelistTaskConsumer) Consume(d rmq.Delivery) {
 			[]string{
 				strings.Join(
 					[]string{
-						config.GetServerURL(), "/api/v1/auth/team/invite"}, ","), linkPayload}, "?token="),
+						config.GetServerURL(), "api/v1/auth/team/invite"}, "/"), linkPayload}, "?token="),
 	})
 	if err != nil {
 		exports.MySugarLogger.Errorln(err)

@@ -27,7 +27,7 @@ func StartAllRoutes(e *echo.Echo) {
 	validate = validator.New()
 	e.Renderer = t
 	e.GET("/hello", Hello)
-	e.Static("/api/v1/docs", "static/docs")
+	e.Static("/api/v1/docs", "docs/v1/html")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPost, http.MethodPut, http.MethodDelete},
