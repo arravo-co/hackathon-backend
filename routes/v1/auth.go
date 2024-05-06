@@ -751,7 +751,7 @@ type DeleteTeamMemberSuccessResponse struct {
 }
 
 // @Title Get Team Members Info
-// @Description	 Delete Team Members from Team
+// @Description	 Delete Team Member from Team
 // @Summary		 Remove Team Member from Team
 // @Tags			Participants
 // @Param  memberId  path  string  true  "email of team member"
