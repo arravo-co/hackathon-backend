@@ -40,7 +40,7 @@ type CompleteNewTeamMemberRegistrationDTO struct {
 	State           string   `validate:"min=3" json:"state"`
 	DOB             string   ` json:"dob"`
 	TeamLeadEmail   string   `json:"team_lead_email"`
-	HackathonId     string   `json:"hackathon_id"`
+	HackathonId     string   ` validate="min=2" json:"hackathon_id"`
 }
 
 type RegisterNewParticipantDTO struct {

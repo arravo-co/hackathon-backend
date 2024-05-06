@@ -140,7 +140,7 @@ func (p *Participant) RegisterNewTeamMember(input *CompleteNewTeamMemberRegistra
 		//return nil, errors.New("email is already existing")
 	}
 	_, err = data.AddMemberToParticipatingTeam(&exports.AddMemberToParticipatingTeamData{
-		HackathonId:   config.GetHackathonId(),
+		HackathonId:   dataInput.HackathonId,
 		ParticipantId: dataInput.ParticipantId,
 		Email:         dataInput.Email,
 		Role:          "PARTICIPANT",

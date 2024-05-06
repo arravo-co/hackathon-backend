@@ -104,7 +104,7 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 	}
 	upd := bson.M{
 		"$addToSet": bson.M{"co_participant_emails": dataToSave.Email},
-		"$pull":     bson.M{"invite_list": dataToSave.Email},
+		"$pull":     bson.M{"invite_list": bson.M{"email": dataToSave.Email}},
 	}
 	result, err := participantCol.UpdateOne(ctx, filter, upd, &options.UpdateOptions{})
 	if err != nil {
