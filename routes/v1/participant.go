@@ -103,14 +103,13 @@ type GetTeamMembersSuccessResponse struct {
 // @Success		201	{object}	RegisterTeamParticipantSuccessResponse
 // @Failure		400	{object}	RegisterTeamParticipantFailResponse
 // @Router		/api/v1/participants/{participantId}/members     [post]
-func RegisterNewTeamMember(c echo.Context) error {
+func CompleteNewTeamMemberRegistration(c echo.Context) error {
 	participantId := c.Param("participantId")
-	data := dtos.RegisterNewTeamMemberDTO{}
+	data := dtos.CompleteNewTeamMemberRegistrationDTO{}
 	err := c.Bind(&data)
 	if err != nil {
 		return err
 	}
-	data.ParticipantId = participantId
 	err = validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
@@ -119,7 +118,20 @@ func RegisterNewTeamMember(c echo.Context) error {
 		})
 	}
 	newParticipant := entity.Participant{}
-	resData, err := newParticipant.RegisterNewTeamMember(&data)
+	resData, err := newParticipant.RegisterNewTeamMember(&entity.CompleteNewTeamMemberRegistrationEntityData{
+		FirstName:     data.FirstName,
+		Email:         data.Email,
+		LastName:      data.LastName,
+		Gender:        data.Gender,
+		Password:      data.Password,
+		Skillset:      data.Skillset,
+		State:         data.State,
+		HackathonId:   data.HackathonId,
+		TeamLeadEmail: data.TeamLeadEmail,
+		DOB:           data.DOB,
+		PhoneNumber:   data.PhoneNumber,
+		ParticipantId: participantId,
+	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
 			Code:    echo.ErrBadRequest.Code,

@@ -28,7 +28,7 @@ type InviteToTeamData struct {
 	Role  string `validate:"oneof= TEAM_MEMBER" json:"role"`
 }
 
-type RegisterNewTeamMemberDTO struct {
+type CompleteNewTeamMemberRegistrationDTO struct {
 	FirstName       string   `validate:"min=2" json:"first_name"`
 	LastName        string   `validate:"min=2" json:"last_name"`
 	Email           string   `validate:"email" json:"email"`
@@ -39,8 +39,8 @@ type RegisterNewTeamMemberDTO struct {
 	Skillset        []string `validate:"min=1" json:"skillset"`
 	State           string   `validate:"min=3" json:"state"`
 	DOB             string   ` json:"dob"`
-	ParticipantId   string
-	TeamLeadEmail   string `json:"team_lead_email"`
+	TeamLeadEmail   string   `json:"team_lead_email"`
+	HackathonId     string   `json:"hackathon_id"`
 }
 
 type RegisterNewParticipantDTO struct {

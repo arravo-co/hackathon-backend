@@ -47,6 +47,22 @@ type Participant struct {
 	Solution            exports.SolutionDocument `json:"solution"`
 }
 
+type CompleteNewTeamMemberRegistrationEntityData struct {
+	FirstName       string
+	LastName        string
+	Email           string
+	Password        string
+	PhoneNumber     string
+	ConfirmPassword string
+	Gender          string
+	Skillset        []string
+	State           string
+	DOB             string
+	ParticipantId   string
+	TeamLeadEmail   string
+	HackathonId     string
+}
+
 type TeamMemberAccount struct {
 	Email             string    `json:"email"`
 	FirstName         string    `json:"first_name"`
@@ -94,7 +110,7 @@ func (p Participant) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (i
 	return res, nil
 }
 
-func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO) (*Participant, error) {
+func (p *Participant) RegisterNewTeamMember(input *CompleteNewTeamMemberRegistrationEntityData) (*Participant, error) {
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
@@ -114,7 +130,7 @@ func (p *Participant) RegisterNewTeamMember(input *dtos.RegisterNewTeamMemberDTO
 			State:        input.State,
 			PhoneNumber:  input.PhoneNumber,
 			Role:         "PARTICIPANT",
-			HackathonId:  config.GetHackathonId(),
+			HackathonId:  input.HackathonId,
 			Status:       "VERIFIED",
 		}
 	dataInput.ParticipantId = input.ParticipantId
@@ -261,7 +277,7 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 		//return nil, errors.New("email already exists")
 	}
 
-	dob, err := time.Parse(time.RFC3339, input.DOB)
+	dob, err := time.Parse(time.RubyDate, input.DOB)
 	if err == nil {
 		return nil, err
 	}
@@ -278,6 +294,7 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 			State:        input.State,
 			DOB:          dob,
 			PhoneNumber:  input.PhoneNumber,
+			HackathonId:  config.GetHackathonId(),
 		},
 	})
 
