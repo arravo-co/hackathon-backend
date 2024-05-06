@@ -677,7 +677,8 @@ func ValidateTeamInviteLink(c echo.Context) error {
 		c.HTML(400, err.Error())
 	}
 	return c.Redirect(301,
-		strings.Join([]string{"https://hackathon-dev.onrender.com",
+		strings.Join([]string{
+			strings.Join([]string{config.GetFrontendURL(), "team_member_complete"}, "/"),
 			strings.Join([]string{
 				strings.Join([]string{"participant_id", data.ParticipantId}, "="),
 				strings.Join([]string{"hackathon_id", data.HackathonId}, "="),

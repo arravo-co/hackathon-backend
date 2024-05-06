@@ -148,7 +148,7 @@ func RegisterNewTeamMember(c echo.Context) error {
 // @Produce		json
 // @Success		200	{object}	GetTeamMembersSuccessResponse
 // @Failure		400	{object}	FailResponse
-// @Router			/api/v1/participants/{participantId}/team              [get]
+// @ Router			/api/v1/participants/{participantId}/team              [get]
 func GetTeamMembersInfo(ctx echo.Context) error {
 	participantId := ctx.Param("participantId")
 	participant := &entity.Participant{}
