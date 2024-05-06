@@ -751,14 +751,14 @@ type DeleteTeamMemberSuccessResponse struct {
 }
 
 // @Title Get Team Members Info
-// @Description	 Get Team Members Info
-// @Summary		 Get Team Members Info
+// @Description	 Delete Team Members from Team
+// @Summary		 Remove Team Member from Team
 // @Tags			Participants
 // @Param  memberId  path  string  true  "email of team member"
 // @Produce		json
 // @Success		200	{object}	DeleteTeamMemberSuccessResponse
 // @Failure		400	{object}	FailResponse
-// @Router			/api/v1/auth/team/{memberId}              [delete]
+// @Router			/api/v1/auth/me/team/{memberId}              [delete]
 func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
 	memberId := ctx.Param("memberId")
