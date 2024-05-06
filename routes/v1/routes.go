@@ -73,6 +73,8 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
 	authRoutes.POST("/me/team/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 	authRoutes.GET("/team/invite", ValidateTeamInviteLink)
+	authRoutes.DELETE("/me/team", GetMyTeamMembersInfo, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
+
 	authRoutes.DELETE("/me/team/:team_member_email", RemoveMemberFromMyTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 	authRoutes.GET("/password/recovery/link/verification", ValidatePasswordRecoveryLink)
 }
