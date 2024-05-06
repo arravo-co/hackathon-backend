@@ -305,6 +305,7 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 		CoParticipantEmails: []string{},
 		ParticipantId:       participantId,
 		ParticipantEmail:    input.Email,
+		Type:                "TEAM",
 	}
 
 	particicipantDoc, err := data.CreateParticipantRecord(dataInput)
