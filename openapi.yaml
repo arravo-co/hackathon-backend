@@ -1,5 +1,6 @@
 components:
   schemas:
+    "": {}
     InviteInfo:
       properties:
         Email:
@@ -125,35 +126,6 @@ components:
         team_size:
           type: integer
         type:
-          type: string
-      type: object
-    github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamMemberDTO:
-      properties:
-        ParticipantId:
-          type: string
-        confirm_password:
-          type: string
-        dob:
-          type: string
-        email:
-          type: string
-        first_name:
-          type: string
-        gender:
-          type: string
-        last_name:
-          type: string
-        password:
-          type: string
-        phone_number:
-          type: string
-        skillset:
-          items:
-            type: string
-          type: array
-        state:
-          type: string
-        team_lead_email:
           type: string
       type: object
     github.com.arravoco.hackathon_backend.entity.Participant:
@@ -854,6 +826,32 @@ paths:
                 $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.FailResponse'
           description: ""
       summary: Get Team Members Info
+  /api/v1/auth/me/team/{memberId}:
+    delete:
+      description: ' Delete Team Member from Team'
+      parameters:
+      - description: email of team member
+        in: path
+        name: memberId
+        required: true
+        schema:
+          description: email of team member
+          format: string
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.DeleteTeamMemberSuccessResponse'
+          description: ""
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.FailResponse'
+          description: ""
+      summary: Get Team Members Info
   /api/v1/auth/me/team/invite:
     post:
       description: ' Invite new member'
@@ -995,32 +993,6 @@ paths:
                 type: string
           description: ""
       summary: Validate Password Recovery Link
-  /api/v1/auth/team/{memberId}:
-    delete:
-      description: ' Get Team Members Info'
-      parameters:
-      - description: email of team member
-        in: path
-        name: memberId
-        required: true
-        schema:
-          description: email of team member
-          format: string
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.DeleteTeamMemberSuccessResponse'
-          description: ""
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.FailResponse'
-          description: ""
-      summary: Get Team Members Info
   /api/v1/auth/team/invite:
     get:
       description: ' Validate team invite link'
@@ -1207,7 +1179,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.dtos.RegisterNewTeamMemberDTO'
+              $ref: '#/components/schemas/'
         required: true
       responses:
         "201":
@@ -1223,32 +1195,6 @@ paths:
                 $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.RegisterTeamParticipantFailResponse'
           description: ""
       summary: Fully Register New Team Member
-  /api/v1/participants/{participantId}/team:
-    get:
-      description: ' Get Team Members Info'
-      parameters:
-      - description: participant id of the participating team
-        in: path
-        name: participantId
-        required: true
-        schema:
-          description: participant id of the participating team
-          format: string
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.GetTeamMembersSuccessResponse'
-          description: ""
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.FailResponse'
-          description: ""
-      summary: Get Team Members Info
 servers:
 - description: ' Localhost'
   url: http://localhost:5000
