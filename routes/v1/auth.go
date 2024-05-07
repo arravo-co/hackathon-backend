@@ -629,7 +629,7 @@ func InviteMemberToTeam(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	if participant.Type == "INDIVIDUAL" {
+	if participant.ParticipantType == "INDIVIDUAL" {
 		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
 			Code:    echo.ErrBadRequest.Code,
 			Message: "Only a participating team can invite new members.",
@@ -761,7 +761,8 @@ type DeleteTeamMemberSuccessResponse struct {
 // @Router			/api/v1/auth/me/team/{memberId}              [delete]
 func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
-	memberId := ctx.Param("memberId")
+	memberId := ctx.Param("team_member_email")
+
 	participant := &entity.Participant{}
 	err := participant.FillParticipantInfo(payload.Email)
 

@@ -6,7 +6,6 @@ import (
 
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
-	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/labstack/echo/v4"
 )
 
@@ -65,9 +64,9 @@ func RegisterParticipant(c echo.Context) error {
 }
 
 type RegisterTeamParticipantSuccessResponse struct {
-	Code    int                                      `json:"code"`
-	Message string                                   `json:"message"`
-	Data    exports.CreateTeamParticipantAccountData `json:"data"`
+	Code    int                `json:"code"`
+	Message string             `json:"message"`
+	Data    entity.Participant `json:"data"`
 }
 type RegisterTeamParticipantFailResponse struct {
 	Code    int    `json:"code"`
@@ -117,8 +116,7 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	newParticipant := entity.Participant{}
-	resData, err := newParticipant.RegisterNewTeamMember(&entity.CompleteNewTeamMemberRegistrationEntityData{
+	resData, err := entity.CompleteNewTeamMemberRegistration(&entity.CompleteNewTeamMemberRegistrationEntityData{
 		FirstName:     data.FirstName,
 		Email:         data.Email,
 		LastName:      data.LastName,
@@ -140,15 +138,7 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, &RegisterTeamParticipantSuccessResponse{
 		Code: http.StatusCreated,
-		Data: exports.CreateTeamParticipantAccountData{
-			TeamLeadEmail:       resData.TeamLeadEmail,
-			CoParticipantEmails: resData.CoParticipantEmails,
-			TeamName:            resData.TeamName,
-			HackathonId:         resData.HackathonId,
-			ParticipantId:       resData.ParticipantId,
-			Type:                resData.Type,
-			Role:                resData.Role,
-		},
+		Data: *resData,
 	})
 }
 

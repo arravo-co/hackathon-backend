@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
@@ -27,6 +28,8 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 		GithubAddress:       dataToSave.GithubAddress,
 		ParticipantEmail:    dataToSave.ParticipantEmail,
 		InviteList:          []exports.InviteInfo{},
+		CreatedAt:           time.Now(),
+		UpdatedAt:           time.Now(),
 	}
 	result, err := participantCol.InsertOne(ctx, dat)
 	if err != nil {
@@ -71,6 +74,7 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 	upd := bson.M{
 		"$addToSet": bson.M{"invite_list": exports.InviteInfo{Email: dataToSave.Email,
 			InviterId: dataToSave.InviterEmail, Time: time.Now()}},
+		"$set": bson.M{"updated_at": time.Now()},
 	}
 	fmt.Println(upd)
 
@@ -91,7 +95,8 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 	return result, err
 }
 
-func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (interface{}, error) {
+func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
+	partDoc := &exports.ParticipantDocument{}
 	participantCol, err := Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
@@ -102,17 +107,22 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 		"hackathon_id":      dataToSave.HackathonId,
 		"invite_list.email": dataToSave.Email,
 	}
+
+	fmt.Println("\n\n\n", filter, "\n\n\n")
+
 	upd := bson.M{
 		"$addToSet": bson.M{"co_participant_emails": dataToSave.Email},
 		"$pull":     bson.M{"invite_list": bson.M{"email": dataToSave.Email}},
+		"$set":      bson.M{"updated_at": time.Now()},
 	}
-	result, err := participantCol.UpdateOne(ctx, filter, upd, &options.UpdateOptions{})
+	retDoc := options.After
+	result := participantCol.FindOneAndUpdate(ctx, filter, upd, &options.FindOneAndUpdateOptions{ReturnDocument: &retDoc})
+	err = result.Decode(partDoc)
 	if err != nil {
-		fmt.Printf("%s\n", err.Error())
+		fmt.Printf("%s\n\n\n\n", err.Error())
 		return nil, err
 	}
-	fmt.Printf("%#v", result.ModifiedCount)
-	return participantCol, err
+	return partDoc, err
 }
 
 func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParticipatingTeamData) (interface{}, error) {
@@ -125,14 +135,26 @@ func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParti
 		"participant_id": dataToSave.ParticipantId,
 		"hackathon_id":   dataToSave.HackathonId,
 	}
+
+	fmt.Println("\n\n", dataToSave.MemberEmail, "\n\n")
+
 	upd := bson.M{
 		"$pull": bson.M{"co_participant_emails": dataToSave.MemberEmail},
 	}
 	result, err := participantCol.UpdateOne(ctx, filter, upd, &options.UpdateOptions{})
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
+		if strings.Contains(err.Error(), "mongo") {
+			return nil, fmt.Errorf("Unexpected error")
+		}
 		return nil, err
 	}
 	fmt.Printf("%#v", result.ModifiedCount)
+	if result.MatchedCount == 0 {
+		return nil, fmt.Errorf("No records found")
+	}
+	if result.ModifiedCount == 0 {
+		return nil, fmt.Errorf("No changes made.")
+	}
 	return participantCol, err
 }

@@ -8,6 +8,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
+	accountCol, err := Datasource.GetAccountCollection()
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{
+		"$or", bson.A{
+			bson.D{{"email", identifier}},
+			bson.D{{"username", identifier}},
+		}},
+	}
+	dataFromCol := exports.AccountDocument{}
+	err = accountCol.FindOneAndDelete(context.TODO(), filter).Decode(&dataFromCol)
+	return &dataFromCol, err
+}
+
 func FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) {
 	accountCol, err := Datasource.GetAccountCollection()
 	if err != nil {

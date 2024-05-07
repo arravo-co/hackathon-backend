@@ -21,6 +21,8 @@ type AccountDocument struct {
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 	Status            string    `bson:"status"`
+	CreatedAt         time.Time `bson:"created_at,omitempty"`
+	UpdatedAt         time.Time `bson:"updated_at,omitempty"`
 }
 
 type ParticipantDocument struct {
@@ -36,6 +38,8 @@ type ParticipantDocument struct {
 	InviteList          []InviteInfo     `bson:"invite_list,omitempty"`
 	Status              string           `bson:"status,omitempty"`
 	Solution            SolutionDocument `bson:"solution_document"`
+	CreatedAt           time.Time        `bson:"created_at,omitempty"`
+	UpdatedAt           time.Time        `bson:"updated_at,omitempty"`
 }
 
 type SolutionDocument struct {
@@ -125,7 +129,7 @@ type AddMemberToParticipatingTeamData struct {
 	ParticipantId string `bson:"participant_id"`
 	Email         string `bson:"email"`
 	Role          string `bson:"role"`
-	Type          string `bson:"type,omitempty"`
+	TeamRole      string `bson:"team_role"`
 }
 
 type RemoveMemberFromParticipatingTeamData struct {
