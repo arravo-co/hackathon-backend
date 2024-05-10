@@ -29,3 +29,12 @@ type JudgeAccountCreatedEventData struct {
 }
 
 type JudgeAccountCreatedEventHandler func(*JudgeAccountCreatedEventData)
+
+type TeamMemberDeletedEventData struct {
+	EventData
+	FirstName string
+	LastName  string
+	Email     string
+}
+
+type TeamMemberDeletedEventHandler func(*TeamMemberDeletedEventData)

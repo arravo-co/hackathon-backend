@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
@@ -78,6 +79,29 @@ func GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
 	return accounts, err
 }
 
+func GetAccountsByParticipantIds(participantIds []string) ([]exports.AccountDocument, error) {
+	var accounts []exports.AccountDocument
+	accountCol, err := Datasource.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	var filterStructs bson.A
+	for _, email := range participantIds {
+		filterStructs = append(filterStructs, bson.M{"participant_id": email})
+	}
+	cursor, err := accountCol.Find(ctx, bson.D{{Key: "$or", Value: filterStructs}} /*bson.D{{"$or", filterStructs}}*/)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(context.Background(), &accounts)
+	fmt.Println(accounts)
+	if err != nil {
+		return nil, err
+	}
+	return accounts, err
+}
+
 func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
@@ -93,10 +117,13 @@ func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*
 		HackathonId:     dataToSave.HackathonId,
 		Role:            dataToSave.Role,
 		PhoneNumber:     dataToSave.PhoneNumber,
-		IsEmailVerified: false,
+		IsEmailVerified: true,
 		Skillset:        dataToSave.Skillset,
 		State:           dataToSave.State,
 		ParticipantId:   dataToSave.ParticipantId,
+		Status:          dataToSave.Status,
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
 	}
 	fmt.Printf("Account\n")
 	result, err := accountCol.InsertOne(ctx, acc)
@@ -202,7 +229,10 @@ func CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) 
 		PhoneNumber:     dataToSave.PhoneNumber,
 		IsEmailVerified: false,
 		ParticipantId:   dataToSave.ParticipantId,
-		Status:          "UNREVIEWED",
+		Status:          dataToSave.Status,
+		Skillset:        dataToSave.Skillset,
+		State:           dataToSave.State,
+		DOB:             dataToSave.DOB,
 	}
 	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {

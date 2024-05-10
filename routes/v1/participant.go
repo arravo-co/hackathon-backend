@@ -20,6 +20,18 @@ type RegisterParticipantFailResponse struct {
 	Message string `json:"message"`
 }
 
+type GetParticipantsResponseData struct {
+	Code    int                  `json:"code"`
+	Message string               `json:"message"`
+	Data    []entity.Participant `json:"data"`
+}
+
+type GetParticipantResponseData struct {
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Data    *entity.Participant `json:"data"`
+}
+
 // @Title Register New Participant
 // @Description	Register new participant
 // @Summary		Register new participant
@@ -98,7 +110,7 @@ type GetTeamMembersSuccessResponse struct {
 // @Tags		Participants
 // @Produce		json
 // @Param  participantId  path  string  true  "participant id of the participating team"
-// @Param registerTeam body dtos.RegisterNewTeamMemberDTO true "register new member to participating team"
+// @Param registerTeam body dtos.CompleteNewTeamMemberRegistrationDTO true "register new member to participating team"
 // @Success		201	{object}	RegisterTeamParticipantSuccessResponse
 // @Failure		400	{object}	RegisterTeamParticipantFailResponse
 // @Router		/api/v1/participants/{participantId}/members     [post]
@@ -169,5 +181,49 @@ func GetTeamMembersInfo(ctx echo.Context) error {
 		Message: "",
 		Data:    participants,
 		Code:    200,
+	})
+}
+
+// @Title Get participant info
+// @Summary Get participant info
+// @Description Get participant info
+// @Success 200 object GetParticipantsResponseData "Get participant info"
+// @Failure 400 object RegisterAnotherAdminResponseData "Failed to get participant info"
+// @Router /api/v1/participants [get]
+func GetParticipants(c echo.Context) error {
+	participants, err := entity.GetParticipantsInfo()
+	if err != nil {
+		return c.JSON(400, &FailResponse{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(200, &GetParticipantsResponseData{
+		Code:    200,
+		Message: "List of participants",
+		Data:    participants,
+	})
+}
+
+// @Title Get participant info
+// @Summary Get participant info
+// @Description Register new admin
+// @Param  participantId  path  string  true  "participant id of the participant"
+// @Success 200 object GetParticipantResponseData "Get participant info"
+// @Failure 400 object RegisterAnotherAdminResponseData "Failed to get participant info"
+// @Router /api/v1/participants/{participantId} [get]
+func GetParticipant(c echo.Context) error {
+	participantId := c.Param("participantId")
+	participant, err := entity.GetParticipantInfo(participantId)
+	if err != nil {
+		return c.JSON(400, &FailResponse{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(200, &GetParticipantResponseData{
+		Code:    200,
+		Message: "Participant",
+		Data:    participant,
 	})
 }

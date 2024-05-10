@@ -51,7 +51,9 @@ func setupAdminsRoutes(api *echo.Group) {
 func setupParticipantsRoutes(api *echo.Group) {
 	participantsRoutes = api.Group("/participants")
 	participantsRoutes.POST("/:participantId/members", CompleteNewTeamMemberRegistration)
+	participantsRoutes.GET("/:participantId", GetParticipant)
 	participantsRoutes.POST("", RegisterParticipant)
+	participantsRoutes.GET("", GetParticipants)
 	//participantsRoutes.POST("/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 }
 

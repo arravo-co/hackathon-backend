@@ -26,20 +26,25 @@ type AccountDocument struct {
 }
 
 type ParticipantDocument struct {
-	Id                  interface{}
-	ParticipantId       string           `bson:"participant_id"`
-	HackathonId         string           `bson:"hackathon_id"`
-	Type                string           `bson:"type,omitempty"`
-	TeamLeadEmail       string           `bson:"team_lead_email,omitempty"`
-	TeamName            string           `bson:"team_name,omitempty"`
-	CoParticipantEmails []string         `bson:"co_participant_emails,omitempty"`
-	ParticipantEmail    string           `bson:"participant_email,omitempty"`
-	GithubAddress       string           `bson:"github_address,omitempty"`
-	InviteList          []InviteInfo     `bson:"invite_list,omitempty"`
-	Status              string           `bson:"status,omitempty"`
-	Solution            SolutionDocument `bson:"solution_document"`
-	CreatedAt           time.Time        `bson:"created_at,omitempty"`
-	UpdatedAt           time.Time        `bson:"updated_at,omitempty"`
+	Id               interface{}
+	ParticipantId    string           `bson:"participant_id"`
+	HackathonId      string           `bson:"hackathon_id"`
+	Type             string           `bson:"type,omitempty"`
+	TeamLeadEmail    string           `bson:"team_lead_email,omitempty"`
+	TeamName         string           `bson:"team_name,omitempty"`
+	CoParticipants   []CoParticipant  `bson:"co_participants,omitempty"`
+	ParticipantEmail string           `bson:"participant_email,omitempty"`
+	GithubAddress    string           `bson:"github_address,omitempty"`
+	InviteList       []InviteInfo     `bson:"invite_list,omitempty"`
+	Status           string           `bson:"status,omitempty"`
+	Solution         SolutionDocument `bson:"solution_document"`
+	CreatedAt        time.Time        `bson:"created_at,omitempty"`
+	UpdatedAt        time.Time        `bson:"updated_at,omitempty"`
+}
+
+type CoParticipant struct {
+	Email string `bson:"email,omitempty"`
+	Role  string `bson:"role,omitempty"`
 }
 
 type SolutionDocument struct {
@@ -50,9 +55,9 @@ type SolutionDocument struct {
 }
 
 type InviteInfo struct {
-	Email     string    `bson:"email,omitempty"`
-	Time      time.Time `bson:"time,omitempty"`
-	InviterId string    `bson:"inviter_id,omitempty"`
+	Email     string    `bson:"email,omitempty" json:"email,omitempty"`
+	Time      time.Time `bson:"time,omitempty" json:"time,omitempty"`
+	InviterId string    `bson:"inviter_id,omitempty" json:"inviter_id,omitempty"`
 }
 
 type ParticipantScoreDocument struct {
@@ -93,29 +98,30 @@ type CreateAdminAccountData struct {
 }
 
 type CreateAccountData struct {
-	Email        string    `bson:"email"`
-	PasswordHash string    `bson:"password_hash"`
-	FirstName    string    `bson:"first_name"`
-	LastName     string    `bson:"last_name"`
-	Gender       string    `bson:"gender"`
-	State        string    `bson:"state"`
-	Role         string    `bson:"role"`
-	PhoneNumber  string    `bson:"phone_number"`
-	DOB          time.Time `bson:"dob"`
-	HackathonId  string    `bson:"hackathon_id"`
-	Status       string    `bson:"status"`
+	Email        string `bson:"email"`
+	PasswordHash string `bson:"password_hash"`
+	FirstName    string `bson:"first_name"`
+	LastName     string `bson:"last_name"`
+	Gender       string `bson:"gender"`
+	State        string `bson:"state"`
+	Role         string `bson:"role"`
+	PhoneNumber  string `bson:"phone_number"`
+	HackathonId  string `bson:"hackathon_id"`
+	Status       string `bson:"status"`
 }
 
 type CreateParticipantAccountData struct {
 	CreateAccountData
-	ParticipantId string   `bson:"participant_id"`
-	Skillset      []string `bson:"skillset"`
+	ParticipantId string    `bson:"participant_id"`
+	Skillset      []string  `bson:"skillset"`
+	DOB           time.Time `bson:"dob"`
 }
 
 type CreateTeamMemberAccountData struct {
 	CreateAccountData
-	ParticipantId string   `bson:"participant_id"`
-	Skillset      []string `bson:"skillset"`
+	ParticipantId string    `bson:"participant_id"`
+	Skillset      []string  `bson:"skillset"`
+	DOB           time.Time `bson:"dob"`
 }
 
 type RemoveTeamMemberAccountData struct {
@@ -158,14 +164,14 @@ type CreateTeamParticipantAccountData struct {
 }
 
 type CreateParticipantRecordData struct {
-	ParticipantId       string   `bson:"participant_id"`
-	ParticipantEmail    string   `bson:"participant_email,omitempty"`
-	TeamLeadEmail       string   `bson:"team_lead_email,omitempty"`
-	TeamName            string   `bson:"team_name,omitempty"`
-	CoParticipantEmails []string `bson:"co_participant_emails,omitempty"`
-	Type                string   `bson:"type"`
-	HackathonId         string   `bson:"hackathon_id"`
-	GithubAddress       string   `bson:"github_address,omitempty"`
+	ParticipantId    string          `bson:"participant_id"`
+	ParticipantEmail string          `bson:"participant_email,omitempty"`
+	TeamLeadEmail    string          `bson:"team_lead_email,omitempty"`
+	TeamName         string          `bson:"team_name,omitempty"`
+	CoParticipants   []CoParticipant `bson:"co_participants,omitempty"`
+	Type             string          `bson:"type"`
+	HackathonId      string          `bson:"hackathon_id"`
+	GithubAddress    string          `bson:"github_address,omitempty"`
 }
 
 type TeamParticipantRecordCreatedData struct {

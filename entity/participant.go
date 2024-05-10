@@ -22,10 +22,9 @@ var wg sync.WaitGroup
 
 // AddMemberToParticipatingTeam
 type Participant struct {
-	FirstName           string `json:"first_name"`
-	LastName            string `json:"last_name"`
-	Email               string `json:"email"`
-	passwordHash        string
+	FirstName           string                   `json:"first_name"`
+	LastName            string                   `json:"last_name"`
+	Email               string                   `json:"email"`
 	Gender              string                   `json:"gender"`
 	State               string                   `json:"state"`
 	Age                 int                      `json:"age"`
@@ -37,7 +36,7 @@ type Participant struct {
 	TeamRole            string                   `json:"team_role"`
 	HackathonId         string                   `json:"hackathon_id"`
 	ParticipantType     string                   `json:"type"`
-	CoParticipantEmails []string                 `json:"co_participant_emails"`
+	CoParticipants      []CoParticipantInfo      `json:"co_participants"`
 	ParticipantEmail    string                   `json:"participant_email"`
 	InviteList          []exports.InviteInfo     `json:"invite_list"`
 	AccountStatus       string                   `json:"account_status"`
@@ -47,6 +46,25 @@ type Participant struct {
 	Solution            exports.SolutionDocument `json:"solution"`
 	CreatedAt           time.Time                `json:"created_at"`
 	UpdatedAt           time.Time                `json:"updated_at"`
+}
+
+type CoParticipantInfo struct {
+	FirstName     string    `json:"first_name"`
+	LastName      string    `json:"last_name"`
+	Email         string    `json:"email"`
+	Gender        string    `json:"gender"`
+	State         string    `json:"state"`
+	Age           int       `json:"age"`
+	DOB           time.Time `json:"dob"`
+	AccountStatus string    `json:"account_status"`
+	AccountRole   string    `json:"account_role"`
+	TeamRole      string    `json:"team_role"`
+	ParticipantId string    `json:"participant_id"`
+	HackathonId   string    `json:"hackathon_id"`
+	Skillset      []string  `json:"skillset"`
+	PhoneNumber   string    `json:"phone_number"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type CompleteNewTeamMemberRegistrationEntityData struct {
@@ -119,7 +137,7 @@ func CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationE
 	if err != nil {
 		return nil, err
 	}
-	dob, err := time.Parse("2006-01-02", input.DOB)
+	dob, err := time.Parse("2006-Jan-02", input.DOB)
 	if err != nil {
 		return nil, err
 	}
@@ -146,11 +164,11 @@ func CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationE
 			Gender:       input.Gender,
 			Role:         "PARTICIPANT",
 			PhoneNumber:  input.PhoneNumber,
-			DOB:          dob,
 			HackathonId:  input.HackathonId,
 			State:        input.State,
-			Status:       "REVIEWED",
+			Status:       "EMAIL_VERIFIED",
 		},
+		DOB:           dob,
 		ParticipantId: input.ParticipantId,
 		Skillset:      input.Skillset,
 	})
@@ -212,8 +230,10 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (
 			Gender:       input.Gender,
 			State:        input.State,
 			Role:         "PARTICIPANT",
-			DOB:          dob,
+			HackathonId:  config.GetHackathonId(),
+			Status:       "EMAIL_UNVERIFIED",
 		},
+		DOB:           dob,
 		Skillset:      input.Skillset,
 		ParticipantId: participantId}
 	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
@@ -293,13 +313,14 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 		//return nil, errors.New("email already exists")
 	}
 
-	dob, err := time.Parse(time.RubyDate, input.DOB)
+	dob, err := time.Parse("2006-Jan-06", input.DOB)
 	if err == nil {
 		return nil, err
 	}
 	acc, err := data.CreateParticipantAccount(&exports.CreateParticipantAccountData{
 		ParticipantId: participantId,
 		Skillset:      input.Skillset,
+		DOB:           dob,
 		CreateAccountData: exports.CreateAccountData{
 			Email:        input.Email,
 			FirstName:    input.FirstName,
@@ -308,22 +329,22 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 			Gender:       input.Gender,
 			PasswordHash: passwordHash,
 			State:        input.State,
-			DOB:          dob,
 			PhoneNumber:  input.PhoneNumber,
 			HackathonId:  config.GetHackathonId(),
+			Status:       "EMAIL_UNVERIFIED",
 		},
 	})
 	if err != nil {
 		return nil, err
 	}
 	dataInput := &exports.CreateParticipantRecordData{
-		TeamLeadEmail:       input.Email,
-		HackathonId:         config.GetHackathonId(),
-		TeamName:            input.TeamName,
-		CoParticipantEmails: []string{},
-		ParticipantId:       participantId,
-		ParticipantEmail:    input.Email,
-		Type:                "TEAM",
+		TeamLeadEmail:    input.Email,
+		HackathonId:      config.GetHackathonId(),
+		TeamName:         input.TeamName,
+		CoParticipants:   []exports.CoParticipant{},
+		ParticipantId:    participantId,
+		ParticipantEmail: input.Email,
+		Type:             "TEAM",
 	}
 
 	particicipantDoc, err := data.CreateParticipantRecord(dataInput)
@@ -361,7 +382,7 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 		ParticipantId:       participantId,
 		ParticipantEmail:    particicipantDoc.ParticipantEmail,
 		TeamRole:            "TEAM_LEAD",
-		CoParticipantEmails: []string{},
+		CoParticipants:      []CoParticipantInfo{},
 		CreatedAt:           acc.CreatedAt,
 		UpdatedAt:           acc.UpdatedAt,
 	}, err
@@ -386,7 +407,6 @@ func (p *Participant) FillParticipantInfo(input string) error {
 	p.AccountStatus = accountData.Status
 	p.ParticipationStatus = particicipantDocData.Status
 	p.AccountRole = accountData.Role
-	p.passwordHash = accountData.PasswordHash
 	p.FirstName = accountData.FirstName
 	p.LastName = accountData.LastName
 	p.Gender = accountData.Gender
@@ -396,7 +416,6 @@ func (p *Participant) FillParticipantInfo(input string) error {
 	p.HackathonId = particicipantDocData.HackathonId
 	p.ParticipantType = particicipantDocData.Type
 	p.ParticipantEmail = particicipantDocData.ParticipantEmail
-	p.CoParticipantEmails = particicipantDocData.CoParticipantEmails
 	p.Solution = particicipantDocData.Solution
 	p.ParticipantId = particicipantDocData.ParticipantId
 	p.Age = time.Now().Year() - accountData.DOB.Year()
@@ -406,7 +425,32 @@ func (p *Participant) FillParticipantInfo(input string) error {
 		} else {
 			p.TeamRole = "TEAM_MEMBER"
 		}
-		p.CoParticipantEmails = particicipantDocData.CoParticipantEmails
+		partAccs, err := data.GetAccountsByParticipantIds([]string{p.ParticipantId})
+		if err != nil {
+			fmt.Println(err)
+		}
+		for _, part := range particicipantDocData.CoParticipants {
+			for _, acc := range partAccs {
+				if acc.Email == part.Email {
+					p.CoParticipants = append(p.CoParticipants, CoParticipantInfo{
+						Email:         part.Email,
+						TeamRole:      part.Role,
+						FirstName:     acc.FirstName,
+						LastName:      acc.LastName,
+						DOB:           acc.DOB,
+						Age:           time.Now().Year() - acc.DOB.Year(),
+						Gender:        acc.Gender,
+						AccountStatus: acc.Status,
+						PhoneNumber:   acc.PhoneNumber,
+						AccountRole:   acc.Role,
+						State:         acc.Role,
+						Skillset:      acc.Skillset,
+						HackathonId:   acc.HackathonId,
+					})
+
+				}
+			}
+		}
 	}
 	// emit created event
 
@@ -500,12 +544,156 @@ func (p *Participant) RemoveMemberFromTeam(dataInput *RemoveMemberFromTeamData) 
 
 func (p *Participant) GetTeamMembersInfo() ([]TeamMemberAccount, error) {
 	team := []TeamMemberAccount{}
-	fmt.Println(p.CoParticipantEmails)
-	accounts, err := data.GetAccountsByEmails(p.CoParticipantEmails)
+	fmt.Println(p.CoParticipants)
+	var emails []string
+	emails = []string{}
+	for _, obj := range p.CoParticipants {
+		emails = append(emails, obj.Email)
+	}
+	accounts, err := data.GetAccountsByEmails(emails)
 	fmt.Println(accounts)
 	for _, acc := range accounts {
 		oo := FillTeamMemberInfo(&acc)
 		team = append(team, *oo)
 	}
 	return team, err
+}
+
+func GetParticipantsInfo() ([]Participant, error) {
+	participants, err := data.GetParticipantsRecords()
+	if err != nil {
+		return nil, err
+	}
+	partIds := []string{}
+
+	for _, part := range participants {
+		partIds = append(partIds, part.ParticipantId)
+	}
+
+	accs, err := data.GetAccountsByParticipantIds(partIds)
+	if err != nil {
+		return nil, err
+	}
+	pEs := []Participant{}
+	for _, p := range participants {
+		pE := Participant{}
+		cs := []CoParticipantInfo{}
+		for _, a := range accs {
+			if p.TeamLeadEmail == a.Email {
+				pE.FirstName = a.FirstName
+				pE.LastName = a.LastName
+				pE.Email = a.Email
+				pE.ParticipationStatus = p.Status
+				pE.AccountRole = a.Role
+				pE.DOB = a.DOB
+				pE.Age = time.Now().Year() - a.DOB.Year()
+				pE.Gender = a.Gender
+				pE.HackathonId = a.HackathonId
+				pE.TeamName = p.TeamName
+				pE.ParticipantType = p.Type
+				pE.InviteList = p.InviteList
+				pE.State = a.State
+				pE.ParticipantId = a.ParticipantId
+				pE.TeamLeadEmail = p.TeamLeadEmail
+				pE.TeamRole = "TEAM_LEAD"
+				pE.AccountStatus = a.Status
+				pE.PhoneNumber = a.PhoneNumber
+				pE.Skillset = a.Skillset
+			} else {
+				for _, c := range p.CoParticipants {
+					if c.Email == a.Email {
+						cs = append(cs, CoParticipantInfo{
+							FirstName:     a.FirstName,
+							LastName:      a.LastName,
+							Email:         a.Email,
+							AccountRole:   a.Role,
+							Gender:        a.Gender,
+							State:         a.State,
+							DOB:           a.DOB,
+							Age:           time.Now().Year() - a.DOB.Year(),
+							AccountStatus: a.Status,
+							Skillset:      a.Skillset,
+							PhoneNumber:   a.PhoneNumber,
+							HackathonId:   a.HackathonId,
+							ParticipantId: a.ParticipantId,
+							TeamRole:      c.Email,
+							CreatedAt:     a.CreatedAt,
+							UpdatedAt:     a.UpdatedAt,
+						})
+					}
+				}
+			}
+		}
+		fmt.Println(p.ParticipantId)
+		pE.CoParticipants = cs
+		pEs = append(pEs, pE)
+	}
+	return pEs, err
+}
+
+func GetParticipantInfo(participantId string) (*Participant, error) {
+	participant, err := data.GetParticipantRecord(participantId)
+	if err != nil {
+		return nil, err
+	}
+	partIds := []string{participant.ParticipantId}
+
+	accs, err := data.GetAccountsByParticipantIds(partIds)
+	if err != nil {
+		return nil, err
+	}
+	pE := Participant{}
+	cs := []CoParticipantInfo{}
+
+	for _, a := range accs {
+		if a.Email == participant.TeamLeadEmail {
+			pE.FirstName = a.FirstName
+			pE.LastName = a.LastName
+			pE.Email = a.Email
+			pE.ParticipationStatus = participant.Status
+			pE.AccountRole = a.Role
+			pE.TeamLeadEmail = participant.TeamLeadEmail
+			pE.TeamName = participant.TeamName
+			pE.State = a.State
+			pE.DOB = a.DOB
+			pE.Age = time.Now().Year() - a.DOB.Year()
+			pE.Gender = a.Gender
+			pE.HackathonId = a.HackathonId
+			pE.AccountStatus = a.Status
+			pE.InviteList = participant.InviteList
+			pE.Skillset = a.Skillset
+			pE.PhoneNumber = a.PhoneNumber
+			pE.ParticipantId = participant.ParticipantId
+			pE.ParticipantType = participant.Type
+			pE.CreatedAt = a.CreatedAt
+			pE.UpdatedAt = a.UpdatedAt
+			pE.TeamRole = "TEAM_LEAD"
+		} else {
+			for _, c := range participant.CoParticipants {
+				if c.Email == a.Email {
+					cs = append(cs, CoParticipantInfo{
+						FirstName:     a.FirstName,
+						Email:         c.Email,
+						LastName:      a.LastName,
+						PhoneNumber:   a.PhoneNumber,
+						Gender:        a.Gender,
+						State:         a.State,
+						DOB:           a.DOB,
+						Age:           time.Now().Year() - a.DOB.Year(),
+						AccountStatus: a.Status,
+						ParticipantId: a.ParticipantId,
+						HackathonId:   a.HackathonId,
+						TeamRole:      c.Role,
+						AccountRole:   a.Role,
+						Skillset:      a.Skillset,
+						CreatedAt:     a.CreatedAt,
+						UpdatedAt:     a.UpdatedAt,
+					})
+				}
+			}
+		}
+	}
+	pE.CoParticipants = cs
+
+	return &pE, err
 }

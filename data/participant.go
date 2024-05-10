@@ -19,17 +19,18 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 		return nil, err
 	}
 	dat := exports.ParticipantDocument{
-		ParticipantId:       dataToSave.ParticipantId,
-		HackathonId:         dataToSave.HackathonId,
-		Type:                dataToSave.Type,
-		TeamLeadEmail:       dataToSave.TeamLeadEmail,
-		TeamName:            dataToSave.TeamName,
-		CoParticipantEmails: dataToSave.CoParticipantEmails,
-		GithubAddress:       dataToSave.GithubAddress,
-		ParticipantEmail:    dataToSave.ParticipantEmail,
-		InviteList:          []exports.InviteInfo{},
-		CreatedAt:           time.Now(),
-		UpdatedAt:           time.Now(),
+		ParticipantId:    dataToSave.ParticipantId,
+		HackathonId:      dataToSave.HackathonId,
+		Type:             dataToSave.Type,
+		TeamLeadEmail:    dataToSave.TeamLeadEmail,
+		TeamName:         dataToSave.TeamName,
+		CoParticipants:   dataToSave.CoParticipants,
+		GithubAddress:    dataToSave.GithubAddress,
+		ParticipantEmail: dataToSave.ParticipantEmail,
+		InviteList:       []exports.InviteInfo{},
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+		Status:           "UNREVIEWED",
 	}
 	result, err := participantCol.InsertOne(ctx, dat)
 	if err != nil {
@@ -38,6 +39,29 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 	}
 	dat.Id = result.InsertedID
 	return &dat, nil
+}
+
+func GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
+	participantCol, err := Datasource.GetParticipantCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	dat := &[]exports.ParticipantDocument{}
+	result, err := participantCol.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	if result.Err() != nil {
+		fmt.Printf("\n%s\n", result.Err())
+		return nil, result.Err()
+	}
+	err = result.All(context.Background(), dat)
+	if err != nil {
+		fmt.Printf("\n%s\n", err.Error())
+		return nil, err
+	}
+	return *dat, nil
 }
 
 func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
@@ -111,7 +135,7 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 	fmt.Println("\n\n\n", filter, "\n\n\n")
 
 	upd := bson.M{
-		"$addToSet": bson.M{"co_participant_emails": dataToSave.Email},
+		"$addToSet": bson.M{"co_participants": bson.M{"email": dataToSave.Email, "role": dataToSave.TeamRole}},
 		"$pull":     bson.M{"invite_list": bson.M{"email": dataToSave.Email}},
 		"$set":      bson.M{"updated_at": time.Now()},
 	}
@@ -139,7 +163,7 @@ func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParti
 	fmt.Println("\n\n", dataToSave.MemberEmail, "\n\n")
 
 	upd := bson.M{
-		"$pull": bson.M{"co_participant_emails": dataToSave.MemberEmail},
+		"$pull": bson.M{"co_participants.email": dataToSave.MemberEmail},
 	}
 	result, err := participantCol.UpdateOne(ctx, filter, upd, &options.UpdateOptions{})
 	if err != nil {
@@ -151,10 +175,10 @@ func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParti
 	}
 	fmt.Printf("%#v", result.ModifiedCount)
 	if result.MatchedCount == 0 {
-		return nil, fmt.Errorf("No records found")
+		return nil, fmt.Errorf("no records found")
 	}
 	if result.ModifiedCount == 0 {
-		return nil, fmt.Errorf("No changes made.")
+		return nil, fmt.Errorf("no changes made.")
 	}
 	return participantCol, err
 }
