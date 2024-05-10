@@ -648,7 +648,7 @@ func GetParticipantInfo(participantId string) (*Participant, error) {
 	cs := []CoParticipantInfo{}
 
 	for _, a := range accs {
-		if a.Email == participant.TeamLeadEmail {
+		if participant.TeamLeadEmail == a.Email || participant.ParticipantEmail == a.Email {
 			pE.FirstName = a.FirstName
 			pE.LastName = a.LastName
 			pE.Email = a.Email
@@ -669,7 +669,9 @@ func GetParticipantInfo(participantId string) (*Participant, error) {
 			pE.ParticipantType = participant.Type
 			pE.CreatedAt = a.CreatedAt
 			pE.UpdatedAt = a.UpdatedAt
-			pE.TeamRole = "TEAM_LEAD"
+			if participant.Type == "TEAM" {
+				pE.TeamRole = "TEAM_LEAD"
+			}
 		} else {
 			for _, c := range participant.CoParticipants {
 				if c.Email == a.Email {
