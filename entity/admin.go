@@ -37,14 +37,16 @@ func (ad *Admin) FillAdminEntity(email string) error {
 }
 
 func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
+
+	passwordHash, _ := exports.GenerateHashPassword(dataInput.Password)
 	acc, err := data.CreateAdminAccount(&exports.CreateAdminAccountData{
-		Role:        "ADMIN",
-		Email:       dataInput.Email,
-		FirstName:   dataInput.FirstName,
-		LastName:    dataInput.LastName,
-		Gender:      dataInput.Gender,
-		PhoneNumber: dataInput.PhoneNumber,
-		HackathonId: config.GetHackathonId(),
+		Role:         "ADMIN",
+		Email:        dataInput.Email,
+		FirstName:    dataInput.FirstName,
+		LastName:     dataInput.LastName,
+		PasswordHash: passwordHash,
+		PhoneNumber:  dataInput.PhoneNumber,
+		HackathonId:  config.GetHackathonId(),
 	})
 	if err != nil {
 		return err
@@ -68,7 +70,7 @@ func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
 	return nil
 }
 
-func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminDTO) error {
+func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminByAuthAdminDTO) error {
 	password := exports.GeneratePassword()
 	passwordHash, err := exports.GenerateHashPassword(password)
 	if err != nil {

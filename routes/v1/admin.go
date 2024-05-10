@@ -17,6 +17,30 @@ type RegisterJudgeByAdminResponseData struct {
 	Message string `json:"message"`
 }
 
+func RegisterAdmin(c echo.Context) error {
+	dataInput := dtos.CreateNewAdminDTO{}
+	c.Bind(&dataInput)
+	validate.Struct(dataInput)
+	authAdmin := entity.Admin{}
+	err := authAdmin.RegisterNewAdmin(&dtos.CreateNewAdminDTO{
+		Email:       dataInput.Email,
+		LastName:    dataInput.LastName,
+		FirstName:   dataInput.FirstName,
+		PhoneNumber: dataInput.PhoneNumber,
+		Password:    dataInput.Password,
+	})
+	if err != nil {
+		return c.JSON(400, &RegisterAnotherAdminResponseData{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(201, &RegisterAnotherAdminResponseData{
+		Code:    201,
+		Message: "Invite sent!!!",
+	})
+}
+
 // @Title Register A New Admin
 // @Security AuthorizationHeader read write
 // @SecurityScheme AuthorizationHeader http bearer Input your token
@@ -28,7 +52,7 @@ type RegisterJudgeByAdminResponseData struct {
 // @Router /api/v1/admin/register_admin [post]
 func RegisterAnotherAdmin(c echo.Context) error {
 	authPayload := exports.GetPayload(c)
-	dataInput := dtos.CreateNewAdminDTO{}
+	dataInput := dtos.CreateNewAdminByAuthAdminDTO{}
 	c.Bind(&dataInput)
 	validate.Struct(dataInput)
 	authAdmin := entity.Admin{}
@@ -38,7 +62,7 @@ func RegisterAnotherAdmin(c echo.Context) error {
 			Code:    400,
 			Message: "Failed at fully authenticating admin"})
 	}
-	err = authAdmin.AdminCreateNewAdminProlife(&dtos.CreateNewAdminDTO{
+	err = authAdmin.AdminCreateNewAdminProlife(&dtos.CreateNewAdminByAuthAdminDTO{
 		Email:       dataInput.Email,
 		LastName:    dataInput.LastName,
 		FirstName:   dataInput.FirstName,
