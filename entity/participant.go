@@ -137,7 +137,7 @@ func CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationE
 	if err != nil {
 		return nil, err
 	}
-	dob, err := time.Parse("2006-Jan-02", input.DOB)
+	dob, err := time.Parse("2006-04-02", input.DOB)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +217,7 @@ func (p *Participant) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (
 	if err != nil {
 		return nil, err
 	}
-	dob, err := time.Parse("2006-Jan-02", input.DOB)
+	dob, err := time.Parse("2006-01-02", input.DOB)
 	if err == nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func (p *Participant) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*P
 		//return nil, errors.New("email already exists")
 	}
 
-	dob, err := time.Parse("2006-Jan-06", input.DOB)
+	dob, err := time.Parse("2006-04-02", input.DOB)
 	if err == nil {
 		return nil, err
 	}
