@@ -25,6 +25,9 @@ type Mongo struct {
 }
 
 func GetMongoConn() (*mongo.Client, error) {
+	if MongoClient != nil {
+		return MongoClient, nil
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
