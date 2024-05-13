@@ -412,6 +412,7 @@ func (p *Participant) FillParticipantInfo(input string) error {
 	p.Gender = accountData.Gender
 	p.State = accountData.State
 	p.TeamName = particicipantDocData.TeamName
+	p.Skillset = accountData.Skillset
 	p.TeamLeadEmail = particicipantDocData.TeamLeadEmail
 	p.HackathonId = particicipantDocData.HackathonId
 	p.ParticipantType = particicipantDocData.Type
