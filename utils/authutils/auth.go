@@ -39,10 +39,13 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 		Role:        accountDoc.Role,
 		HackathonId: accountDoc.HackathonId,
 	}
-	if participantDoc.ParticipantId != "" {
-		rr.IsParticipant = true
-		rr.ParticipantType = participantDoc.Type
-		rr.ParticipantId = participantDoc.ParticipantId
+	if participantDoc != nil {
+
+		if participantDoc.ParticipantId != "" {
+			rr.IsParticipant = true
+			rr.ParticipantType = participantDoc.Type
+			rr.ParticipantId = participantDoc.ParticipantId
+		}
 	}
 	accessToken, err := GenerateAccessToken(rr)
 
