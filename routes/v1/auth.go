@@ -233,7 +233,8 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 		Subject: "Email Verification Success",
 	})
 	redirectUrl := payload.RedirectUrl
-	if redirectUrl != "" {
+	fmt.Println(payload)
+	if redirectUrl == "" {
 		redirectUrl = strings.Join([]string{config.GetFrontendURL(), "verify"}, "/")
 	}
 	return c.Redirect(302, redirectUrl)

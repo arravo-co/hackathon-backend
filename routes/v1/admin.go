@@ -41,8 +41,8 @@ func RegisterAdmin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	return c.JSON(201, &RegisterAnotherAdminResponseData{
-		Code:    201,
+	return c.JSON(200, &RegisterAnotherAdminResponseData{
+		Code:    200,
 		Message: "Invite sent!!!",
 	})
 }
@@ -81,8 +81,8 @@ func RegisterAnotherAdmin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	return c.JSON(201, &RegisterAnotherAdminResponseData{
-		Code:    201,
+	return c.JSON(200, &RegisterAnotherAdminResponseData{
+		Code:    200,
 		Message: "Invite sent!!!",
 	})
 }

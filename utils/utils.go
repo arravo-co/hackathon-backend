@@ -46,6 +46,7 @@ func GenerateEmailVerificationLink(payload *exports.EmailVerificationLinkPayload
 		fmt.Println(err)
 		return "", err
 	}
+
 	linkPayload, err := EncryptAndSignPayload(payloadStr)
 	return strings.Join([]string{strings.Join([]string{url, "api/v1/auth/verification/email/completion"}, "/"),
 		strings.Join([]string{"token", linkPayload}, "=")}, "?"), err
