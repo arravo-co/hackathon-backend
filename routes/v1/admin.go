@@ -20,9 +20,15 @@ type RegisterJudgeByAdminResponseData struct {
 func RegisterAdmin(c echo.Context) error {
 	dataInput := dtos.CreateNewAdminDTO{}
 	c.Bind(&dataInput)
-	validate.Struct(dataInput)
+	err := validate.Struct(dataInput)
+	if err != nil {
+		return c.JSON(400, &RegisterAnotherAdminResponseData{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
 	authAdmin := entity.Admin{}
-	err := authAdmin.RegisterNewAdmin(&dtos.CreateNewAdminDTO{
+	err = authAdmin.RegisterNewAdmin(&dtos.CreateNewAdminDTO{
 		Email:       dataInput.Email,
 		LastName:    dataInput.LastName,
 		FirstName:   dataInput.FirstName,

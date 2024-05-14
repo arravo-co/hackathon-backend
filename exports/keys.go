@@ -3,9 +3,11 @@ package exports
 import "time"
 
 type EmailVerificationLinkPayload struct {
-	Email string    `json:"email"`
-	Token string    `json:"token"`
-	TTL   time.Time `json:"ttl"`
+	Email       string    `json:"email"`
+	Token       string    `json:"token"`
+	TTL         time.Time `json:"ttl"`
+	ServerUrl   string
+	RedirectUrl string
 }
 
 type TeamInviteLinkPayload struct {

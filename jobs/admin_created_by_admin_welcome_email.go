@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"github.com/adjust/rmq/v5"
+	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/queue"
 	"github.com/arravoco/hackathon_backend/utils"
+	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
 )
 
@@ -45,25 +47,44 @@ func (c *AdminCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		}
 		return
 	}
-	fmt.Println("email tokens prepared to be sent")
-	fmt.Println(payloadStruct)
-	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
-		Token: payloadStruct.Token,
-		TTL:   payloadStruct.TTL,
+	ttl := time.Now().AddDate(0, 0, 7)
+	dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		Email: payloadStruct.Email,
+		TTL:   ttl,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return
+	}
+	fmt.Println("email tokens prepared to be sent")
+	serverUrl, err := config.GetRemoteServerURL()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	redirectUrl := "https://hackathon-admin-frontend.onrender.com"
+	if err != nil {
+
+	}
+	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
+		Token:       dataToken.Token,
+		TTL:         dataToken.TTL,
+		Email:       payloadStruct.Email,
+		ServerUrl:   serverUrl,
+		RedirectUrl: redirectUrl,
 	})
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println("Preparing to send email to new admin created by %s...", payloadStruct.InviterName)
+	fmt.Printf("\nPreparing to send email to new admin created by %s...\n", payloadStruct.InviterName)
 	err = email.SendAdminCreatedByAdminWelcomeEmail(&email.SendAdminCreatedByAdminWelcomeEmailData{
 		Email:       payloadStruct.Email,
 		InviterName: payloadStruct.InviterName,
 		AdminName:   payloadStruct.AdminName,
 		Subject:     "Welcome to Arravo's Hackathon - Confirm Your Email Address",
-		Token:       payloadStruct.Token,
-		TTL:         payloadStruct.TTL.Minute(),
+		Token:       dataToken.Token,
+		TTL:         7,
 		Link:        link,
 		Password:    payloadStruct.Password,
 	})

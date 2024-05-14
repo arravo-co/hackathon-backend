@@ -232,7 +232,11 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 		Email:   payload.Email,
 		Subject: "Email Verification Success",
 	})
-	return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(), "verify"}, "/"))
+	redirectUrl := payload.RedirectUrl
+	if redirectUrl != "" {
+		redirectUrl = strings.Join([]string{config.GetFrontendURL(), "verify"}, "/")
+	}
+	return c.Redirect(302, redirectUrl)
 }
 
 // @Title Verify Email Via Token

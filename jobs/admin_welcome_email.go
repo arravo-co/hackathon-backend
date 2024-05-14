@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/adjust/rmq/v5"
+	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/queue"
 	"github.com/arravoco/hackathon_backend/utils"
@@ -61,10 +62,16 @@ func (c *AdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		}
 		return
 	}
+	url, err := config.GetRemoteServerURL()
+	if err != nil {
+
+		return
+	}
 	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
-		Token: dataToken.Token,
-		TTL:   dataToken.TTL,
-		Email: dataToken.TokenTypeValue,
+		Token:     dataToken.Token,
+		TTL:       dataToken.TTL,
+		Email:     dataToken.TokenTypeValue,
+		ServerUrl: url,
 	})
 	if err != nil {
 		fmt.Println(err.Error())

@@ -35,13 +35,19 @@ func EncryptAndSignPayload(payloadStr []byte) (string, error) {
 }
 
 func GenerateEmailVerificationLink(payload *exports.EmailVerificationLinkPayload) (string, error) {
+	url := ""
+	if payload.ServerUrl != "" {
+		url = payload.ServerUrl
+	} else {
+		url = config.GetServerURL()
+	}
 	payloadStr, err := json.Marshal(payload)
 	if err != nil {
 		fmt.Println(err)
 		return "", err
 	}
 	linkPayload, err := EncryptAndSignPayload(payloadStr)
-	return strings.Join([]string{strings.Join([]string{config.GetServerURL(), "api/v1/auth/verification/email/completion"}, "/"),
+	return strings.Join([]string{strings.Join([]string{url, "api/v1/auth/verification/email/completion"}, "/"),
 		strings.Join([]string{"token", linkPayload}, "=")}, "?"), err
 }
 

@@ -39,6 +39,14 @@ func GetMongoDBURL() string {
 	return url
 }
 
+func GetRemoteServerURL() (string, error) {
+	url, found := os.LookupEnv("REMOTE_SERVER_URL")
+	if !found {
+		return "", errors.New("Remote Server URL not found")
+	}
+	return url, nil
+}
+
 func GetServerURL() string {
 	url, notFound := os.LookupEnv("SERVER_URL")
 	if !notFound {

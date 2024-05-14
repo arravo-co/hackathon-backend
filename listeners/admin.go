@@ -3,11 +3,9 @@ package listeners
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/queue"
-	"github.com/arravoco/hackathon_backend/utils/authutils"
 )
 
 func HandleAdminCreatedEvent(eventDTOData *exports.AdminAccountCreatedEventData, otherParams ...interface{}) {
@@ -59,15 +57,8 @@ func HandleAdminCreatedEvent(eventDTOData *exports.AdminAccountCreatedEventData,
 
 func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByAdminEventData, otherParams ...interface{}) {
 	fmt.Println("listener has recieved admin_created_by_admin_event")
-	ttl := time.Now().Add(time.Minute * 15)
-	dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
-		Email: eventDTOData.Email,
-		TTL:   ttl,
-	})
-	if err != nil {
-		exports.MySugarLogger.Error(err)
-		return
-	}
+	/*
+	 */
 	queue, err := queue.GetQueue("send_admin_created_by_admin_welcome_email")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -79,8 +70,6 @@ func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByA
 		AdminName:   eventDTOData.AdminName,
 		InviterName: eventDTOData.InviterName,
 		Password:    eventDTOData.Password,
-		TTL:         dataToken.TTL,
-		Token:       dataToken.Token,
 	}
 	byt, err := json.Marshal(payload)
 	if err != nil {

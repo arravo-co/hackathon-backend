@@ -19,13 +19,10 @@ type AdminWelcomeEmailQueuePayload struct {
 }
 
 type AdminCreatedByAdminWelcomeEmailQueuePayload struct {
-	Email       string    `json:"email"`
-	AdminName   string    `json:"admin_name"`
-	InviterName string    `json:"last_name"`
-	Password    string    `json:"password"`
-	TTL         time.Time `json:"ttl"`
-	Link        string    `json:"link"`
-	Token       string    `json:"token"`
+	Email       string `json:"email"`
+	AdminName   string `json:"admin_name"`
+	InviterName string `json:"last_name"`
+	Password    string `json:"password"`
 }
 
 type JudgeCreatedByAdminWelcomeEmailQueuePayload struct {

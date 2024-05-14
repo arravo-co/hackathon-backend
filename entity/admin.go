@@ -47,6 +47,7 @@ func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
 		PasswordHash: passwordHash,
 		PhoneNumber:  dataInput.PhoneNumber,
 		HackathonId:  config.GetHackathonId(),
+		Status:       "EMAIL_UNVERIFIED",
 	})
 	if err != nil {
 		return err
