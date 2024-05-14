@@ -48,7 +48,7 @@ func (c *AdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		return
 	}
 	fmt.Println(payloadStruct)
-	ttl := time.Now().Add(time.Minute * 15)
+	ttl := time.Now().AddDate(0, 0, 7)
 	dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		Email: payloadStruct.Email,
 		TTL:   ttl,
@@ -75,7 +75,7 @@ func (c *AdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		LastName:  payloadStruct.LastName,
 		Email:     payloadStruct.Email,
 		Subject:   "Invitation to Join Arravo Hackathon Link As An Administrator",
-		TTL:       int(time.Now().Sub(ttl).Minutes()),
+		TTL:       7,
 		Token:     dataToken.Token,
 		Link:      link,
 	})

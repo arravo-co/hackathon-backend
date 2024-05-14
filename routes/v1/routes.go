@@ -46,6 +46,10 @@ func setupAdminsRoutes(api *echo.Group) {
 	adminsRoutes := api.Group("/admin")
 	adminsRoutes.POST("/register_admin", RegisterAnotherAdmin, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
 	adminsRoutes.POST("/register_judge", RegisterJudgeByAdmin, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
+	adminsRoutes.POST("", RegisterAdmin, middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"localhost"},
+		AllowMethods: []string{"POST"},
+	}))
 }
 
 func setupParticipantsRoutes(api *echo.Group) {
