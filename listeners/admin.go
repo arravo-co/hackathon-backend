@@ -73,7 +73,8 @@ func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByA
 	}
 	byt, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Println("Go to")
+		fmt.Println(err)
+		return
 	}
 	fmt.Println("Queue payload published")
 	queue.PublishBytes(byt)

@@ -1,17 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/arravoco/hackathon_backend/config"
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
-	_ "github.com/arravoco/hackathon_backend/jobs"
+	"github.com/arravoco/hackathon_backend/jobs"
+
+	//"github.com/arravoco/hackathon_backend/jobs"
 
 	_ "net/http/pprof"
 
-	_ "github.com/arravoco/hackathon_backend/nsq/consumer"
+	//_ "github.com/arravoco/hackathon_backend/nsq/consumer"
 	routes_v1 "github.com/arravoco/hackathon_backend/routes/v1"
 	"github.com/arravoco/hackathon_backend/security"
 	"github.com/labstack/echo/v4"
@@ -54,18 +57,70 @@ func main() {
 		handler.ServeHTTP(c.Response().Writer, c.Request())
 		return nil
 	})
-
+	fmt.Println("Starting metrics")
 	e.Logger.Info(port)
-	e.Logger.Fatal(e.Start(getURL(port)))
-
 	/*
-		select {
-		case <-ctx.Done():
-			stop()
+	 */
+	/*
+		q, err := queue.GetQueue("play_list")
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		byt, err := json.Marshal(exports.PlayQueuePayload{Time: time.Now()})
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		err = q.PublishBytes(byt)
+		if err != nil {
+			fmt.Println(err.Error())
 		}
 	*/
+
+	//go jobs.StartConsumingPlayQueue()
+
+	go startAllJobs()
+	//panic("Intentionally crashed")
+	e.Logger.Fatal(e.Start(getURL(port)))
 }
 
 func getURL(port int) string {
 	return strings.Join([]string{"", strconv.Itoa(port)}, ":")
+}
+
+func startAllJobs() {
+
+	judgeCreatedByAdminWelcomeEmailTaskConsumer, err := jobs.StartConsumingJudgeCreatedByAdminWelcomeEmailQueue()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	adminCreatedByAdminWelcomeEmailTaskConsumer, err := jobs.StartConsumingAdminCreatedByAdminWelcomeEmailQueue()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	adminWelcomeEmailTaskConsumer, err := jobs.StartAdminWelcomeEmailQueue()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	invitelistTaskConsumer, err := jobs.StartConsumingInviteTaskQueue()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	for {
+		select {
+		case <-adminCreatedByAdminWelcomeEmailTaskConsumer.Ch:
+			fmt.Println("'adminCreatedByAdminWelcomeEmailTaskConsumer' task completed successfully")
+		case <-adminWelcomeEmailTaskConsumer.Ch:
+			fmt.Println("'adminWelcomeEmailTaskConsumer' Task completed")
+		case <-judgeCreatedByAdminWelcomeEmailTaskConsumer.Ch:
+			fmt.Println("mail to judge created by admin list task completed successfully")
+		case <-invitelistTaskConsumer.Ch:
+			fmt.Println("Invite list task completed successfully")
+		}
+	}
 }

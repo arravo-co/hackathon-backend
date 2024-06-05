@@ -140,7 +140,9 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 		TeamLeadEmail: data.TeamLeadEmail,
 		DOB:           data.DOB,
 		PhoneNumber:   data.PhoneNumber,
-		ParticipantId: participantId,
+		ParticipantId: participantId, Motivation: data.Motivation,
+		EmploymentStatus: data.EmploymentStatus,
+		ExperienceLevel:  data.ExperienceLevel,
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{

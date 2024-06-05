@@ -18,6 +18,9 @@ type AccountDocument struct {
 	State             string    `bson:"state,omitempty"`
 	Role              string    `bson:"role,omitempty"`
 	DOB               time.Time `bson:"dob,omitempty"`
+	EmploymentStatus  string    `bson:"employment_status"`
+	ExperienceLevel   string    `bson:"experience_level"`
+	Motivation        string    `bson:"motivation"`
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 	Status            string    `bson:"status"`
@@ -112,16 +115,22 @@ type CreateAccountData struct {
 
 type CreateParticipantAccountData struct {
 	CreateAccountData
-	ParticipantId string    `bson:"participant_id"`
-	Skillset      []string  `bson:"skillset"`
-	DOB           time.Time `bson:"dob"`
+	ParticipantId    string    `bson:"participant_id"`
+	Skillset         []string  `bson:"skillset"`
+	DOB              time.Time `bson:"dob"`
+	EmploymentStatus string    `bson:"employment_status"`
+	ExperienceLevel  string    `bson:"experience_level"`
+	Motivation       string    `bson:"motivation"`
 }
 
 type CreateTeamMemberAccountData struct {
 	CreateAccountData
-	ParticipantId string    `bson:"participant_id"`
-	Skillset      []string  `bson:"skillset"`
-	DOB           time.Time `bson:"dob"`
+	ParticipantId    string    `bson:"participant_id"`
+	Skillset         []string  `bson:"skillset"`
+	DOB              time.Time `bson:"dob"`
+	EmploymentStatus string    `bson:"employment_status"`
+	ExperienceLevel  string    `bson:"experience_level"`
+	Motivation       string    `bson:"motivation"`
 }
 
 type RemoveTeamMemberAccountData struct {

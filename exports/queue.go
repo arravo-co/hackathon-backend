@@ -34,3 +34,7 @@ type JudgeCreatedByAdminWelcomeEmailQueuePayload struct {
 	Token       string    `json:"token"`
 	InviterName string    `json:"inviter_name"`
 }
+
+type PlayQueuePayload struct {
+	Time time.Time
+}

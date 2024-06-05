@@ -15,22 +15,29 @@ import (
 )
 
 type AdminCreatedByAdminWelcomeEmailTaskConsumer struct {
+	Ch chan interface{}
 }
 
-func init() {
+func StartConsumingAdminCreatedByAdminWelcomeEmailQueue() (*AdminCreatedByAdminWelcomeEmailTaskConsumer, error) {
+	fmt.Println("send_admin_created_by_admin_welcome_email started")
 	queue, err := queue.GetQueue("send_admin_created_by_admin_welcome_email")
 	if err != nil {
 		fmt.Println("Error getting queue")
-		fmt.Println()
+		return nil, err
 	}
-	adminWelcomeEmailQueue = queue
-	err = adminWelcomeEmailQueue.StartConsuming(1, time.Second)
+	err = queue.StartConsuming(1, time.Second)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println()
+		return nil, err
 	}
 	taskConsumer := &AdminCreatedByAdminWelcomeEmailTaskConsumer{}
-	adminWelcomeEmailQueue.AddConsumer("admin_welcome_email_list", taskConsumer)
+	str, err := queue.AddConsumer("admin_welcome_email_list", taskConsumer)
+	if err != nil {
+		println(err.Error())
+		return nil, err
+	}
+	fmt.Println(str)
+	return taskConsumer, nil
 }
 
 func (c *AdminCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
@@ -93,4 +100,5 @@ func (c *AdminCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		return
 	}
 	d.Ack()
+	c.Ch <- struct{}{}
 }

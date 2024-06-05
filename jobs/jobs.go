@@ -17,22 +17,28 @@ import (
 var inviteListQueue rmq.Queue
 
 type InvitelistTaskConsumer struct {
+	Ch chan interface{}
 }
 
-func init() {
+func StartConsumingInviteTaskQueue() (*InvitelistTaskConsumer, error) {
 	queue, err := queue.GetQueue("invite_list")
 	if err != nil {
 		fmt.Println("Error getting queue")
-		fmt.Println()
+		return nil, err
 	}
 	inviteListQueue = queue
 	err = inviteListQueue.StartConsuming(1, time.Second)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println()
+		return nil, err
 	}
 	taskConsumer := &InvitelistTaskConsumer{}
-	inviteListQueue.AddConsumer("inviteList", taskConsumer)
+	str, err := inviteListQueue.AddConsumer("inviteList", taskConsumer)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(str)
+	return taskConsumer, nil
 }
 
 func (c *InvitelistTaskConsumer) Consume(d rmq.Delivery) {
@@ -83,4 +89,5 @@ func (c *InvitelistTaskConsumer) Consume(d rmq.Delivery) {
 		return
 	}
 	d.Ack()
+	c.Ch <- struct{}{}
 }

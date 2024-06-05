@@ -14,25 +14,31 @@ import (
 	"github.com/arravoco/hackathon_backend/utils/email"
 )
 
-var adminWelcomeEmailQueue rmq.Queue
-
 type AdminWelcomeEmailTaskConsumer struct {
+	Ch chan interface{}
 }
 
-func init() {
+func StartAdminWelcomeEmailQueue() (*AdminWelcomeEmailTaskConsumer, error) {
 	queue, err := queue.GetQueue("send_admin_welcome_email")
 	if err != nil {
 		fmt.Println("Error getting queue")
-		fmt.Println()
+		return nil, err
 	}
-	adminWelcomeEmailQueue = queue
+	var adminWelcomeEmailQueue rmq.Queue = queue
 	err = adminWelcomeEmailQueue.StartConsuming(1, time.Second)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println()
+		return nil, err
 	}
 	taskConsumer := &AdminWelcomeEmailTaskConsumer{}
-	adminWelcomeEmailQueue.AddConsumer("admin_welcome_email_list", taskConsumer)
+	str, err := adminWelcomeEmailQueue.AddConsumer("admin_welcome_email_list", taskConsumer)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	fmt.Println("send_admin_welcome_email queue consuming")
+	fmt.Println(str)
+	return taskConsumer, nil
 }
 
 func (c *AdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
@@ -91,4 +97,5 @@ func (c *AdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		return
 	}
 	d.Ack()
+	c.Ch <- struct{}{}
 }

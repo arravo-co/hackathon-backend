@@ -219,20 +219,23 @@ func CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) 
 		return nil, err
 	}
 	acc := exports.AccountDocument{
-		Email:           dataToSave.Email,
-		PasswordHash:    dataToSave.PasswordHash,
-		FirstName:       dataToSave.FirstName,
-		LastName:        dataToSave.LastName,
-		Gender:          dataToSave.Gender,
-		HackathonId:     dataToSave.HackathonId,
-		Role:            dataToSave.Role,
-		PhoneNumber:     dataToSave.PhoneNumber,
-		IsEmailVerified: false,
-		ParticipantId:   dataToSave.ParticipantId,
-		Status:          dataToSave.Status,
-		Skillset:        dataToSave.Skillset,
-		State:           dataToSave.State,
-		DOB:             dataToSave.DOB,
+		Email:            dataToSave.Email,
+		PasswordHash:     dataToSave.PasswordHash,
+		FirstName:        dataToSave.FirstName,
+		LastName:         dataToSave.LastName,
+		Gender:           dataToSave.Gender,
+		HackathonId:      dataToSave.HackathonId,
+		Role:             dataToSave.Role,
+		PhoneNumber:      dataToSave.PhoneNumber,
+		IsEmailVerified:  false,
+		ParticipantId:    dataToSave.ParticipantId,
+		Status:           dataToSave.Status,
+		Skillset:         dataToSave.Skillset,
+		State:            dataToSave.State,
+		DOB:              dataToSave.DOB,
+		Motivation:       dataToSave.Motivation,
+		ExperienceLevel:  dataToSave.ExperienceLevel,
+		EmploymentStatus: dataToSave.EmploymentStatus,
 	}
 	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {

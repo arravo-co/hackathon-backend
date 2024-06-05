@@ -29,34 +29,40 @@ type InviteToTeamData struct {
 }
 
 type CompleteNewTeamMemberRegistrationDTO struct {
-	FirstName       string   `validate:"min=2" json:"first_name"`
-	LastName        string   `validate:"min=2" json:"last_name"`
-	Email           string   `validate:"email" json:"email"`
-	Password        string   `validate:"min=7" json:"password"`
-	PhoneNumber     string   `validate:"e164" json:"phone_number"`
-	ConfirmPassword string   `validate:"eqfield=Password" json:"confirm_password"`
-	Gender          string   `validate:"oneof=MALE FEMALE" json:"gender"`
-	Skillset        []string `validate:"min=1" json:"skillset"`
-	State           string   `validate:"min=3" json:"state"`
-	DOB             string   ` json:"dob"`
-	TeamLeadEmail   string   `json:"team_lead_email"`
-	HackathonId     string   `validate:"min=2" json:"hackathon_id"`
+	FirstName        string   `validate:"min=2" json:"first_name"`
+	LastName         string   `validate:"min=2" json:"last_name"`
+	Email            string   `validate:"email" json:"email"`
+	Password         string   `validate:"min=7" json:"password"`
+	PhoneNumber      string   `validate:"e164" json:"phone_number"`
+	ConfirmPassword  string   `validate:"eqfield=Password" json:"confirm_password"`
+	Gender           string   `validate:"oneof=MALE FEMALE" json:"gender"`
+	Skillset         []string `validate:"min=1" json:"skillset"`
+	State            string   `validate:"min=3" json:"state"`
+	DOB              string   ` json:"dob"`
+	TeamLeadEmail    string   `json:"team_lead_email"`
+	HackathonId      string   `validate:"min=2" json:"hackathon_id"`
+	EmploymentStatus string   `validate:"oneof=STUDENT EMPLOYED UNEMPLOYED FREELANCER" json:"employment_status"`
+	ExperienceLevel  string   `validate:"oneof=JUNIOR MID SENIOR" json:"experience_level"`
+	Motivation       string   `validate:"min=100" json:"motivation"`
 }
 
 type RegisterNewParticipantDTO struct {
-	FirstName       string   `validate:"min=2" json:"first_name"`
-	LastName        string   `validate:"min=2" json:"last_name"`
-	Email           string   `validate:"email" json:"email"`
-	Password        string   `validate:"min=7" json:"password"`
-	PhoneNumber     string   `validate:"e164" json:"phone_number"`
-	ConfirmPassword string   `validate:"eqfield=Password" json:"confirm_password"`
-	Gender          string   `validate:"oneof=MALE FEMALE" json:"gender"`
-	Skillset        []string `validate:"min=1" json:"skillset"`
-	State           string   `validate:"min=3" json:"state"`
-	Type            string   `validate:"oneof=INDIVIDUAL TEAM" json:"type"`
-	TeamSize        int      `json:"team_size"`
-	DOB             string   ` json:"dob"`
-	TeamName        string   `validate:"omitempty" json:"team_name"`
+	FirstName        string   `validate:"min=2" json:"first_name"`
+	LastName         string   `validate:"min=2" json:"last_name"`
+	Email            string   `validate:"email" json:"email"`
+	Password         string   `validate:"min=7" json:"password"`
+	PhoneNumber      string   `validate:"e164" json:"phone_number"`
+	ConfirmPassword  string   `validate:"eqfield=Password" json:"confirm_password"`
+	Gender           string   `validate:"oneof=MALE FEMALE" json:"gender"`
+	Skillset         []string `validate:"min=1" json:"skillset"`
+	State            string   `validate:"min=3" json:"state"`
+	Type             string   `validate:"oneof=INDIVIDUAL TEAM" json:"type"`
+	TeamSize         int      `json:"team_size"`
+	DOB              string   ` json:"dob"`
+	TeamName         string   `validate:"omitempty" json:"team_name"`
+	EmploymentStatus string   `validate:"oneof=STUDENT EMPLOYED UNEMPLOYED FREELANCER" json:"employment_status"`
+	ExperienceLevel  string   `validate:"oneof=JUNIOR MID SENIOR" json:"experience_level"`
+	Motivation       string   `validate:"min=100" json:"motivation"`
 }
 
 type ParticipantCreatedResponseDTO struct {

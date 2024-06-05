@@ -13,22 +13,29 @@ import (
 )
 
 type JudgeCreatedByAdminWelcomeEmailTaskConsumer struct {
+	Ch chan interface{}
 }
 
-func init() {
+func StartConsumingJudgeCreatedByAdminWelcomeEmailQueue() (*JudgeCreatedByAdminWelcomeEmailTaskConsumer, error) {
+	fmt.Println("send_judge_created_by_admin_welcome_email started")
 	queue, err := queue.GetQueue("send_judge_created_by_admin_welcome_email")
 	if err != nil {
 		fmt.Println("Error getting queue")
-		fmt.Println()
+		return nil, err
 	}
-	adminWelcomeEmailQueue = queue
-	err = adminWelcomeEmailQueue.StartConsuming(1, time.Second)
+	err = queue.StartConsuming(1, time.Second)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Println()
+		return nil, err
 	}
 	taskConsumer := &JudgeCreatedByAdminWelcomeEmailTaskConsumer{}
-	adminWelcomeEmailQueue.AddConsumer("judge_created_by_admin_welcome_email_list", taskConsumer)
+	str, err := queue.AddConsumer("judge_created_by_admin_welcome_email_list", taskConsumer)
+	if err != nil {
+		println(err.Error())
+		return nil, err
+	}
+	fmt.Println(str)
+	return taskConsumer, nil
 }
 
 func (c *JudgeCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
@@ -69,4 +76,5 @@ func (c *JudgeCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		return
 	}
 	d.Ack()
+	c.Ch <- struct{}{}
 }
