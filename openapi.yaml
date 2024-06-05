@@ -16,6 +16,10 @@ components:
           type: string
         email:
           type: string
+        employment_status:
+          type: string
+        experience_level:
+          type: string
         first_name:
           type: string
         gender:
@@ -23,6 +27,8 @@ components:
         hackathon_id:
           type: string
         last_name:
+          type: string
+        motivation:
           type: string
         participant_id:
           type: string
@@ -102,6 +108,10 @@ components:
           type: string
         email:
           type: string
+        employment_status:
+          type: string
+        experience_level:
+          type: string
         first_name:
           type: string
         gender:
@@ -109,6 +119,8 @@ components:
         hackathon_id:
           type: string
         last_name:
+          type: string
+        motivation:
           type: string
         password:
           type: string
@@ -134,13 +146,15 @@ components:
       type: object
     github.com.arravoco.hackathon_backend.dtos.CreateNewAdminDTO:
       properties:
+        confirm_password:
+          type: string
         email:
           type: string
         first_name:
           type: string
-        gender:
-          type: string
         last_name:
+          type: string
+        password:
           type: string
         phone_number:
           type: string
@@ -173,11 +187,17 @@ components:
           type: string
         email:
           type: string
+        employment_status:
+          type: string
+        experience_level:
+          type: string
         first_name:
           type: string
         gender:
           type: string
         last_name:
+          type: string
+        motivation:
           type: string
         password:
           type: string
@@ -219,6 +239,10 @@ components:
                 type: string
               email:
                 type: string
+              employment_status:
+                type: string
+              experience_level:
+                type: string
               first_name:
                 type: string
               gender:
@@ -226,6 +250,8 @@ components:
               hackathon_id:
                 type: string
               last_name:
+                type: string
+              motivation:
                 type: string
               participant_id:
                 type: string
@@ -252,6 +278,10 @@ components:
           type: string
         email:
           type: string
+        employment_status:
+          type: string
+        experience_level:
+          type: string
         first_name:
           type: string
         gender:
@@ -272,6 +302,8 @@ components:
           type: array
         last_name:
           type: string
+        motivation:
+          type: string
         participant_email:
           type: string
         participant_id:
@@ -288,7 +320,6 @@ components:
           type: array
         solution:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.SolutionDocument'
-          type: object
         state:
           type: string
         team_lead_email:
@@ -366,7 +397,15 @@ components:
           type: string
         invite_list:
           items:
-            $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.InviteInfo'
+            properties:
+              email:
+                type: string
+              inviter_id:
+                type: string
+              time:
+                format: date-time
+                type: string
+            type: object
           type: array
         last_name:
           type: string
@@ -492,7 +531,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.AuthUtilsBasicLoginSuccessData'
-          type: object
         message:
           type: string
       type: object
@@ -509,7 +547,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.CompleteEmailVerificationSuccessResponseData'
-          type: object
         message:
           type: string
       type: object
@@ -531,7 +568,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.CompleteEmailVerificationSuccessResponseData'
-          type: object
         message:
           type: string
       type: object
@@ -541,7 +577,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.entity.TeamMemberAccount'
-          type: object
         message:
           type: string
       type: object
@@ -558,7 +593,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.entity.Participant'
-          type: object
         message:
           type: string
       type: object
@@ -575,7 +609,7 @@ components:
                 type: integer
               co_participants:
                 items:
-                  $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.entity.CoParticipantInfo'
+                  $ref: '#/components/schemas/CoParticipantInfo'
                 type: array
               created_at:
                 format: date-time
@@ -584,6 +618,10 @@ components:
                 format: date-time
                 type: string
               email:
+                type: string
+              employment_status:
+                type: string
+              experience_level:
                 type: string
               first_name:
                 type: string
@@ -605,6 +643,8 @@ components:
                 type: array
               last_name:
                 type: string
+              motivation:
+                type: string
               participant_email:
                 type: string
               participant_id:
@@ -621,7 +661,6 @@ components:
                 type: array
               solution:
                 $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.SolutionDocument'
-                type: object
               state:
                 type: string
               team_lead_email:
@@ -699,7 +738,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.InitiateEmailVerificationSuccessResponseData'
-          type: object
         message:
           type: string
       type: object
@@ -735,7 +773,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.routes.v1.PasswordChangeSuccessResponseData'
-          type: object
         message:
           type: string
       type: object
@@ -777,7 +814,6 @@ components:
       properties:
         Data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.exports.CreateJudgeAccountData'
-          type: object
         code:
           type: integer
         message:
@@ -794,7 +830,6 @@ components:
       properties:
         Data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.entity.Participant'
-          type: object
         code:
           type: integer
         message:
@@ -813,7 +848,6 @@ components:
           type: integer
         data:
           $ref: '#/components/schemas/github.com.arravoco.hackathon_backend.entity.Participant'
-          type: object
         message:
           type: string
       type: object
