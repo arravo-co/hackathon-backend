@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/queue"
+	"github.com/arravoco/hackathon_backend/rmqUtils"
 )
 
 func HandleAdminCreatedEvent(eventDTOData *exports.AdminAccountCreatedEventData, otherParams ...interface{}) {
@@ -20,7 +20,7 @@ func HandleAdminCreatedEvent(eventDTOData *exports.AdminAccountCreatedEventData,
 			return
 		}
 	*/
-	queue, err := queue.GetQueue("send_admin_welcome_email")
+	queue, err := rmqUtils.GetQueue("send_admin_welcome_email")
 	if err != nil {
 		return
 	}
@@ -59,7 +59,7 @@ func HandleAdminCreatedByAdminEvent(eventDTOData *exports.AdminAccountCreatedByA
 	fmt.Println("listener has recieved admin_created_by_admin_event")
 	/*
 	 */
-	queue, err := queue.GetQueue("send_admin_created_by_admin_welcome_email")
+	queue, err := rmqUtils.GetQueue("send_admin_created_by_admin_welcome_email")
 	if err != nil {
 		fmt.Println(err.Error())
 		return

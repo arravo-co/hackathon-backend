@@ -7,14 +7,14 @@ import (
 
 	"github.com/adjust/rmq/v5"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/queue"
+	"github.com/arravoco/hackathon_backend/rmqUtils"
 )
 
 type PlayConsumer struct {
 }
 
 func StartConsumingPlayQueue() {
-	queue, err := queue.GetQueue("play_list")
+	queue, err := rmqUtils.GetQueue("play_list")
 	if err != nil {
 		fmt.Println("Error getting queue")
 		return

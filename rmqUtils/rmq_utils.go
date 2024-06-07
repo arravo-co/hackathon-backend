@@ -1,4 +1,4 @@
-package queue
+package rmqUtils
 
 import (
 	"fmt"
@@ -8,10 +8,11 @@ import (
 )
 
 var Rmq rmq.Connection
+var ErrCh chan error
 
 func init() {
-	errChan := make(chan error)
-	conn, err := rmq.OpenConnectionWithRedisClient("my queue", db.RedisClient, errChan)
+	ErrCh = make(chan error)
+	conn, err := rmq.OpenConnectionWithRedisClient("my queue", db.RedisClient, ErrCh)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

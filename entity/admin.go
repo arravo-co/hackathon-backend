@@ -126,7 +126,9 @@ func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewJudgeByAdmi
 			Gender:       dataInput.Gender,
 			PhoneNumber:  dataInput.PhoneNumber,
 			HackathonId:  config.GetHackathonId(),
-			PasswordHash: passwordHash, Status: "INVITED"},
+			PasswordHash: passwordHash,
+			Status:       "INVITED",
+		},
 	})
 	if err != nil {
 		return err
@@ -134,8 +136,8 @@ func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewJudgeByAdmi
 	// raise event
 	events.EmitJudgeAccountCreatedByAdmin(&exports.JudgeAccountCreatedByAdminEventData{
 		InviteeEmail: acc.Email,
-		JudgeName:    dataInput.FirstName,
-		JudgeEmail:   dataInput.Email,
+		JudgeName:    acc.FirstName,
+		JudgeEmail:   acc.Email,
 		InviterName:  acc.FirstName,
 		EventData:    exports.EventData{EventName: string(events.JudgeAccountCreatedByAdminEvent)},
 		Password:     password,

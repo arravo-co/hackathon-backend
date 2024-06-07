@@ -4,7 +4,7 @@ import (
 	"github.com/adjust/rmq/v5"
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/queue"
+	"github.com/arravoco/hackathon_backend/rmqUtils"
 )
 
 var Datasource exports.DBInterface
@@ -21,5 +21,5 @@ func GetDatasource() exports.DBInterface {
 }
 
 func GetQueue(name string) (rmq.Queue, error) {
-	return queue.GetQueue(name)
+	return rmqUtils.GetQueue(name)
 }

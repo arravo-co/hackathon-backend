@@ -24,6 +24,7 @@ type AccountDocument struct {
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 	Status            string    `bson:"status"`
+	ProfilePictureUrl string    `json:"profile_picture_url"`
 	CreatedAt         time.Time `bson:"created_at,omitempty"`
 	UpdatedAt         time.Time `bson:"updated_at,omitempty"`
 }
@@ -86,6 +87,7 @@ type UpdateAccountDocument struct {
 	State             string    `bson:"state,omitempty"`
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
+	ProfilePictureUrl string    `bson:"profile_picture_url"`
 }
 
 type CreateAdminAccountData struct {
@@ -101,16 +103,17 @@ type CreateAdminAccountData struct {
 }
 
 type CreateAccountData struct {
-	Email        string `bson:"email"`
-	PasswordHash string `bson:"password_hash"`
-	FirstName    string `bson:"first_name"`
-	LastName     string `bson:"last_name"`
-	Gender       string `bson:"gender"`
-	State        string `bson:"state"`
-	Role         string `bson:"role"`
-	PhoneNumber  string `bson:"phone_number"`
-	HackathonId  string `bson:"hackathon_id"`
-	Status       string `bson:"status"`
+	Email             string `bson:"email"`
+	PasswordHash      string `bson:"password_hash"`
+	FirstName         string `bson:"first_name"`
+	LastName          string `bson:"last_name"`
+	Gender            string `bson:"gender"`
+	State             string `bson:"state"`
+	Role              string `bson:"role"`
+	PhoneNumber       string `bson:"phone_number"`
+	HackathonId       string `bson:"hackathon_id"`
+	Status            string `bson:"status"`
+	ProfilePictureUrl string `bson:"profile_picture_url"`
 }
 
 type CreateParticipantAccountData struct {
@@ -196,4 +199,15 @@ type TeamParticipantRecordCreatedData struct {
 
 type CreateJudgeAccountData struct {
 	CreateAccountData
+}
+
+type UpdateAccountData struct {
+	FirstName         string `bson:"first_name"`
+	LastName          string `bson:"last_name"`
+	Gender            string `bson:"gender"`
+	State             string `bson:"state"`
+	Role              string `bson:"role"`
+	PhoneNumber       string `bson:"phone_number"`
+	Status            string `bson:"status"`
+	ProfilePictureUrl string `bson:"profile_picture_url"`
 }

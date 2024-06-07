@@ -9,6 +9,7 @@ import (
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/jobs"
+	"github.com/arravoco/hackathon_backend/rmqUtils"
 
 	//"github.com/arravoco/hackathon_backend/jobs"
 
@@ -111,16 +112,26 @@ func startAllJobs() {
 		fmt.Println(err.Error())
 	}
 
+	uploadPicConsumer, err := jobs.CreateUploadPicToCloudinaryConsumer()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	for {
 		select {
+		case err := <-rmqUtils.ErrCh:
+			fmt.Println(err.Error())
 		case <-adminCreatedByAdminWelcomeEmailTaskConsumer.Ch:
 			fmt.Println("'adminCreatedByAdminWelcomeEmailTaskConsumer' task completed successfully")
+
 		case <-adminWelcomeEmailTaskConsumer.Ch:
 			fmt.Println("'adminWelcomeEmailTaskConsumer' Task completed")
 		case <-judgeCreatedByAdminWelcomeEmailTaskConsumer.Ch:
 			fmt.Println("mail to judge created by admin list task completed successfully")
 		case <-invitelistTaskConsumer.Ch:
 			fmt.Println("Invite list task completed successfully")
+
+		case <-uploadPicConsumer.Ch:
+			fmt.Println("Invite upload pic task completed successfully")
 		}
 	}
 }

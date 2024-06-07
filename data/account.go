@@ -7,6 +7,7 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
@@ -270,6 +271,25 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 	}
 	fmt.Printf("%#v", result.InsertedID)
 	return dataToSave, err
+}
+
+func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+	accountCol, err := Datasource.GetAccountCollection()
+	fmt.Printf("%+v", filter)
+	accountDoc := exports.AccountDocument{}
+	ctx := context.Context(context.Background())
+	defer ctx.Done()
+	if err != nil {
+		return nil, err
+	}
+	updateDoc := bson.M{"$set": dataInput}
+	after := options.After
+	opts := []*options.FindOneAndUpdateOptions{&options.FindOneAndUpdateOptions{
+		ReturnDocument: &after,
+	}}
+	result := accountCol.FindOneAndUpdate(ctx, bson.M{"email": filter.Email}, &updateDoc, opts...)
+	err = result.Decode(&accountDoc)
+	return &accountDoc, err
 }
 
 func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {

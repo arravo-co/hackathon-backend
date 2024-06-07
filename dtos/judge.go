@@ -15,5 +15,13 @@ type CreateNewJudgeByAdminDTO struct {
 	LastName    string `validate:"min=2,required" json:"last_name"`
 	Email       string `validate:"email,required" json:"email"`
 	Gender      string `validate:"oneof=MALE FEMALE" json:"gender"`
-	PhoneNumber string `validate:"min=2,required" json:"phone_number"`
+	PhoneNumber string `validate:"omitempty,e164" json:"phone_number"`
+}
+
+type UpdateJudgeDTO struct {
+	FirstName         string `validate:"omitempty,min=2" json:"first_name"`
+	LastName          string `validate:"omitempty,min=2" json:"last_name"`
+	Gender            string `validate:"omitempty, oneof=MALE FEMALE" json:"gender"`
+	State             string `json:"state"`
+	ProfilePictureUrl string `json:"profile_picture_url"`
 }

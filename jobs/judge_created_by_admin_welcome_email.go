@@ -7,7 +7,7 @@ import (
 
 	"github.com/adjust/rmq/v5"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/queue"
+	"github.com/arravoco/hackathon_backend/rmqUtils"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/email"
 )
@@ -18,7 +18,7 @@ type JudgeCreatedByAdminWelcomeEmailTaskConsumer struct {
 
 func StartConsumingJudgeCreatedByAdminWelcomeEmailQueue() (*JudgeCreatedByAdminWelcomeEmailTaskConsumer, error) {
 	fmt.Println("send_judge_created_by_admin_welcome_email started")
-	queue, err := queue.GetQueue("send_judge_created_by_admin_welcome_email")
+	queue, err := rmqUtils.GetQueue("send_judge_created_by_admin_welcome_email")
 	if err != nil {
 		fmt.Println("Error getting queue")
 		return nil, err

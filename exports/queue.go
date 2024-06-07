@@ -2,6 +2,11 @@ package exports
 
 import "time"
 
+type UploadPicQueuePayload struct {
+	Email    string `json:"account_email"`
+	FilePath string `json:"file_path"`
+}
+
 type InvitelistQueuePayload struct {
 	ParticipantId      string    `json:"participant_id"`
 	HackathonId        string    `json:"hackathon_id"`

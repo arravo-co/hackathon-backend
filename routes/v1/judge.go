@@ -32,6 +32,36 @@ func RegisterJudge(c echo.Context) error {
 	data := dtos.RegisterNewJudgeDTO{}
 	err := c.Bind(&data)
 	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: err.Error(),
+		})
+	}
+	newJudge := entity.Judge{}
+	err = validate.Struct(data)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: err.Error(),
+		})
+	}
+	responseData, err := newJudge.Register(data)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusCreated, &RegisterJudgeSuccessResponse{
+		Code: http.StatusCreated,
+		Data: *responseData,
+	})
+}
+
+func UpdateJudge(c echo.Context) error {
+	data := dtos.RegisterNewJudgeDTO{}
+	err := c.Bind(&data)
+	if err != nil {
 		return err
 	}
 	newJudge := entity.Judge{}

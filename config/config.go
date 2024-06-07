@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -100,4 +101,12 @@ func GetRedisPassword() (string, error) {
 		return "", errors.New("password must be set")
 	}
 	return username, nil
+}
+
+func GetCloudinaryURL() (string, error) {
+	str := os.Getenv("CLOUDINARY_URL")
+	if str == "" {
+		return "", fmt.Errorf("'CLOUDINARY_URL' not set")
+	}
+	return str, nil
 }
