@@ -71,7 +71,7 @@ func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
 	return nil
 }
 
-func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminByAuthAdminDTO) error {
+func (ad *Admin) AdminCreateNewAdminProfile(dataInput *dtos.CreateNewAdminByAuthAdminDTO) error {
 	password := exports.GeneratePassword()
 	passwordHash, err := exports.GenerateHashPassword(password)
 	if err != nil {
@@ -111,7 +111,7 @@ func (ad *Admin) AdminCreateNewAdminProlife(dataInput *dtos.CreateNewAdminByAuth
 	return nil
 }
 
-func (ad *Admin) AdminCreateNewJudgeProlife(dataInput *dtos.CreateNewJudgeByAdminDTO) error {
+func (ad *Admin) AdminCreateNewJudgeProfile(dataInput *dtos.CreateNewJudgeByAdminDTO) error {
 	password := exports.GeneratePassword()
 	passwordHash, err := exports.GenerateHashPassword(password)
 	if err != nil {

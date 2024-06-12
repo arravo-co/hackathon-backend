@@ -7,7 +7,7 @@ import (
 
 	"github.com/adjust/rmq/v5"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/rmqUtils"
+	"github.com/arravoco/hackathon_backend/publish"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
@@ -66,13 +66,6 @@ func HandleJudgeCreatedByAdminEvent(eventDTOData *exports.JudgeAccountCreatedByA
 		fmt.Println(err.Error())
 		return
 	}
-	//
-
-	queue, err := rmqUtils.GetQueue("send_judge_created_by_admin_welcome_email")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
 	payload := exports.JudgeCreatedByAdminWelcomeEmailQueuePayload{
 		Email:       eventDTOData.JudgeEmail,
 		Name:        eventDTOData.JudgeName,
@@ -87,13 +80,41 @@ func HandleJudgeCreatedByAdminEvent(eventDTOData *exports.JudgeAccountCreatedByA
 		fmt.Println(err.Error())
 		return
 	}
-	err = queue.StartConsuming(1, time.Second)
-	queue.AddConsumer("judge_created_by_admin_welcome_email_list", &JudgeCreatedByAdminWelcomeEmailTaskConsumer{})
-	err = queue.PublishBytes(byt)
+	err = publish.Publish(&exports.PublisherConfig{
+		RabbitMQExchange: "",
+		RabbitMQKey:      "send.judge.created.admin.welcome_email",
+	}, byt)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Failed to send email:  ", err.Error())
 		return
 	}
+	/*
+		queue, err := rmqUtils.GetQueue("send_judge_created_by_admin_welcome_email")
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		payload := exports.JudgeCreatedByAdminWelcomeEmailQueuePayload{
+			Email:       eventDTOData.JudgeEmail,
+			Name:        eventDTOData.JudgeName,
+			InviterName: eventDTOData.InviterName,
+			Password:    eventDTOData.Password,
+			TTL:         dataToken.TTL,
+			Token:       dataToken.Token,
+			Link:        link,
+		}
+		byt, err := json.Marshal(payload)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		err = queue.StartConsuming(1, time.Second)
+		queue.AddConsumer("judge_created_by_admin_welcome_email_list", &JudgeCreatedByAdminWelcomeEmailTaskConsumer{})
+		err = queue.PublishBytes(byt)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}*/
 }
 
 type JudgeCreatedByAdminWelcomeEmailTaskConsumer struct {

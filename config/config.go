@@ -40,6 +40,11 @@ func GetMongoDBURL() string {
 	return url
 }
 
+func GetRabbitMQURL() string {
+	url := os.Getenv("RABBITMQ_URL")
+	return url
+}
+
 func GetRemoteServerURL() (string, error) {
 	url, found := os.LookupEnv("REMOTE_SERVER_URL")
 	if !found {

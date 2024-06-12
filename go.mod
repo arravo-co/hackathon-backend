@@ -8,6 +8,7 @@ require (
 	github.com/dvsekhvalnov/jose2go v1.6.0
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/google/uuid v1.2.0
 	github.com/h2non/filetype v1.1.3
 	github.com/jaevor/go-nanoid v1.3.0
 	github.com/joho/godotenv v1.5.1
@@ -16,6 +17,7 @@ require (
 	github.com/matcornic/hermes/v2 v2.1.0
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/prometheus/client_golang v1.19.0
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/resend/resend-go/v2 v2.6.0
 	github.com/sethvargo/go-password v0.2.0
@@ -51,7 +53,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/uuid v1.2.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect

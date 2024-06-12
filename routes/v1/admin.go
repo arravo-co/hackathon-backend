@@ -9,7 +9,8 @@ import (
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/rmqUtils"
+	"github.com/arravoco/hackathon_backend/publish"
+	taskmgt "github.com/arravoco/hackathon_backend/task_mgt"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -75,7 +76,7 @@ func RegisterAnotherAdmin(c echo.Context) error {
 			Code:    400,
 			Message: "Failed at fully authenticating admin"})
 	}
-	err = authAdmin.AdminCreateNewAdminProlife(&dtos.CreateNewAdminByAuthAdminDTO{
+	err = authAdmin.AdminCreateNewAdminProfile(&dtos.CreateNewAdminByAuthAdminDTO{
 		Email:       dataInput.Email,
 		LastName:    dataInput.LastName,
 		FirstName:   dataInput.FirstName,
@@ -141,7 +142,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 			Code:    400,
 			Message: "Failed to fully authenticate admin"})
 	}
-	err = authAdmin.AdminCreateNewJudgeProlife(&dtos.CreateNewJudgeByAdminDTO{
+	err = authAdmin.AdminCreateNewJudgeProfile(&dtos.CreateNewJudgeByAdminDTO{
 		Email:       dataInput.Email,
 		LastName:    dataInput.LastName,
 		FirstName:   dataInput.FirstName,
@@ -180,24 +181,32 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 			fmt.Println(err.Error())
 			return
 		}
-		fmt.Println(filePath)
-		queue, err := rmqUtils.GetQueue("upload_pic_cloudinary")
-
+		tsk := taskmgt.GenerateTask(&exports.AddTaskDTO{
+			Label: "upload profile pic",
+		})
+		err = taskmgt.SaveTaskById(tsk)
 		if err != nil {
-			fmt.Printf("Error getting queue: %s\n", err.Error())
+			fmt.Println(err.Error())
 			return
 		}
-		fmt.Println("Queue created")
 		payload := exports.UploadPicQueuePayload{
 			Email:    dataInput.Email,
 			FilePath: filePath,
+			QueuePayload: exports.QueuePayload{
+
+				TaskId: tsk.Id,
+			},
 		}
 		byt, err := json.Marshal(payload)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		err = queue.PublishBytes(byt)
+
+		err = publish.Publish(&exports.PublisherConfig{
+			RabbitMQExchange: "",
+			RabbitMQKey:      "upload.profile_picture.cloudinary",
+		}, byt)
 		if err != nil {
 			fmt.Println(err)
 			return

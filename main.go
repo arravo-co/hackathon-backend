@@ -9,6 +9,8 @@ import (
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/jobs"
+	"github.com/arravoco/hackathon_backend/publish"
+	rabbitutils "github.com/arravoco/hackathon_backend/rabbitUtils"
 	"github.com/arravoco/hackathon_backend/rmqUtils"
 
 	//"github.com/arravoco/hackathon_backend/jobs"
@@ -80,8 +82,10 @@ func main() {
 	*/
 
 	//go jobs.StartConsumingPlayQueue()
-
-	go startAllJobs()
+	//go startAllJobs()
+	rabbitutils.DeclareAllQueues()
+	publish.SetPublisher(&rabbitutils.Publisher{})
+	go rabbitutils.ListenToAllQueues()
 	//panic("Intentionally crashed")
 	e.Logger.Fatal(e.Start(getURL(port)))
 }
@@ -112,10 +116,6 @@ func startAllJobs() {
 		fmt.Println(err.Error())
 	}
 
-	uploadPicConsumer, err := jobs.CreateUploadPicToCloudinaryConsumer()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 	for {
 		select {
 		case err := <-rmqUtils.ErrCh:
@@ -129,9 +129,6 @@ func startAllJobs() {
 			fmt.Println("mail to judge created by admin list task completed successfully")
 		case <-invitelistTaskConsumer.Ch:
 			fmt.Println("Invite list task completed successfully")
-
-		case <-uploadPicConsumer.Ch:
-			fmt.Println("Invite upload pic task completed successfully")
 		}
 	}
 }

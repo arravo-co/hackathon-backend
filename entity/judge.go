@@ -140,3 +140,37 @@ func (p *Judge) UpdateJudgeProfile(input dtos.UpdateJudgeDTO) error {
 	*/
 	return nil
 }
+
+func GetJudges() ([]*Judge, error) {
+
+	dataResponse, err := data.GetAccountsOfJudges()
+	// emit created event
+	if err != nil {
+		return nil, err
+	}
+	/*events.EmitJudgeAccountCreated(&exports.JudgeAccountCreatedByAdminEventData{
+		JudgeEmail: dataResponse.Email,
+		LastName:   dataResponse.LastName,
+		FirstName:  dataResponse.FirstName,
+		EventData:  exports.EventData{EventName: "JudgeAccountCreated"},
+	})
+	*/
+	var ent []*Judge
+	for _, acc := range dataResponse {
+		ent = append(ent, &Judge{
+			FirstName:         acc.FirstName,
+			LastName:          acc.LastName,
+			Email:             acc.Email,
+			Gender:            acc.Gender,
+			Role:              acc.Role,
+			HackathonId:       acc.HackathonId,
+			Status:            acc.Status,
+			State:             acc.State,
+			PhoneNumber:       acc.PhoneNumber,
+			ProfilePictureUrl: acc.ProfilePictureUrl,
+			CreatedAt:         acc.CreatedAt,
+			UpdatedAt:         acc.UpdatedAt,
+		})
+	}
+	return ent, err
+}

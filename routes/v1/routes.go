@@ -63,6 +63,8 @@ func setupParticipantsRoutes(api *echo.Group) {
 
 func setupJudgesRoutes(api *echo.Group) {
 	judgesRoutes = api.Group("/judges")
+	judgesRoutes.GET("/:email", GetJudgeByEmailAddress)
+	judgesRoutes.GET("", GetJudges)
 	judgesRoutes.POST("", RegisterJudge)
 }
 

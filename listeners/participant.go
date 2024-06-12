@@ -1,20 +1,49 @@
 package listeners
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/publish"
+	taskmgt "github.com/arravoco/hackathon_backend/task_mgt"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
 )
 
 func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreatedEventData, otherParams ...interface{}) {
+
+	tsk := taskmgt.GenerateTask(&exports.AddTaskDTO{
+		Label: "send.participant.created.welcome_email_verification_email",
+	})
+	err := taskmgt.SaveTaskById(tsk)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 	participantType := eventDTOData.ParticipantType
 	switch participantType {
 	case "TEAM":
 		ttl := time.Now().Add(time.Minute * 15)
+		payload := exports.SendWelcomeAndEmailVerificationTokenJobQueuePayload{
+			QueuePayload: exports.QueuePayload{
+				TaskId: "",
+			},
+			FirstName: eventDTOData.FirstName,
+			LastName:  eventDTOData.LastName,
+			Email:     eventDTOData.ParticipantEmail,
+		}
+		payloadByt, err := json.Marshal(&payload)
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())
+		}
+		publish.Publish(&exports.PublisherConfig{
+			RabbitMQExchange: "",
+			RabbitMQKey:      "send.participant.created.welcome_email_verification_email",
+		}, payloadByt)
+
 		dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 			Email: eventDTOData.ParticipantEmail,
 			TTL:   ttl,

@@ -1,0 +1,28 @@
+convention:
+Action: The primary action being taken (e.g., send).
+Entity: The main entity involved (e.g., judge).
+Event: The event or condition triggering the action (e.g., created).
+task: The event or condition triggering the action (e.g., created).
+Context: Additional context or source (e.g., admin).
+Purpose: The specific purpose or type of message (e.g., welcome_email).
+Service/Provider: service to perform action on, or to handle resource/entity (cloudinary) 
+
+
+
+QUEUES:
+
+upload.profile_picture.cloudinary: Upload picture to cloudinary
+send.judge.created.admin.welcome_email: Send email to judge created by admin
+send.participant.created.welcome_email_verification_email: task to generate email token, send email verification token
+
+
+exchanges:
+
+
+
+tasks:
+
+send_welcome_email_verification_email_to_newly_created_participant
+    -start_coordination
+    -generate_email_token
+    -send email verification token

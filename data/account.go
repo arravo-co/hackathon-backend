@@ -80,6 +80,27 @@ func GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
 	return accounts, err
 }
 
+func GetAccountsOfJudges() ([]exports.AccountDocument, error) {
+	var accounts []exports.AccountDocument
+	accountCol, err := Datasource.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	var filterStructs bson.D = bson.D{{
+		"role", "JUDGE"}}
+	cursor, err := accountCol.Find(ctx, filterStructs /*bson.D{{"$or", filterStructs}}*/)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(context.Background(), &accounts)
+	fmt.Println(accounts)
+	if err != nil {
+		return nil, err
+	}
+	return accounts, err
+}
+
 func GetAccountsByParticipantIds(participantIds []string) ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
 	accountCol, err := Datasource.GetAccountCollection()
@@ -263,6 +284,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 		Role:            dataToSave.Role,
 		PhoneNumber:     dataToSave.PhoneNumber,
 		IsEmailVerified: false,
+		Status:          dataToSave.Status,
 	}
 	result, err := accountCol.InsertOne(ctx, &acc)
 	if err != nil {
@@ -284,7 +306,7 @@ func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *ex
 	}
 	updateDoc := bson.M{"$set": dataInput}
 	after := options.After
-	opts := []*options.FindOneAndUpdateOptions{&options.FindOneAndUpdateOptions{
+	opts := []*options.FindOneAndUpdateOptions{{
 		ReturnDocument: &after,
 	}}
 	result := accountCol.FindOneAndUpdate(ctx, bson.M{"email": filter.Email}, &updateDoc, opts...)
