@@ -82,9 +82,14 @@ func UploadPicToCloudinary(imgPath string) (*uploader.UploadResult, error) {
 		fmt.Println(err.Error())
 		return nil, err
 	}
+	err = CleanupUpload(imgPath)
+	if err != nil {
+		fmt.Printf("Failed to clean up: %s\n", err.Error())
+	}
 	return uploadResult, nil
 }
 
 func CleanupUpload(imgPath string) error {
+	fmt.Println("file to delete:                            ", imgPath)
 	return os.Remove(imgPath)
 }

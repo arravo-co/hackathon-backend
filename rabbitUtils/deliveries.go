@@ -61,7 +61,6 @@ func HandlePicUploadConsumption(response *amqp.Delivery) {
 
 func HandleSendEmailToJudgeConsumption(response *amqp.Delivery) {
 	payloadStruct := exports.JudgeCreatedByAdminWelcomeEmailQueuePayload{}
-	fmt.Println("HandleSendEmailToJudgeConsumption: ", response.Body)
 	err := json.Unmarshal([]byte(response.Body), &payloadStruct)
 	if err != nil {
 		fmt.Println(err.Error())
