@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aidarkhanov/nanoid"
 	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 
@@ -132,18 +133,18 @@ func DeclareAllQueues() {
 }
 
 func ListenToAllQueues() {
-	chUploadPicQicJobDelivery, err := ConsumeQueue("upload.profile_picture.cloudinary", "customer1")
+	chUploadPicQicJobDelivery, err := ConsumeQueue("upload.profile_picture.cloudinary", GetConsumerTag())
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	chWelcomeEmailToJudgeDelivery, err := ConsumeQueue("send.judge.created.admin.welcome_email", "customer2")
+	chWelcomeEmailToJudgeDelivery, err := ConsumeQueue("send.judge.created.admin.welcome_email", GetConsumerTag())
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
 	//send.participant.created.welcome_email_verification_email
-	chCoordinateParticipantWelcomeVerDelivery, err := ConsumeQueue("send.participant.created.welcome_email_verification_email", "customerCoordinator2")
+	chCoordinateParticipantWelcomeVerDelivery, err := ConsumeQueue("send.participant.created.welcome_email_verification_email", GetConsumerTag())
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -160,4 +161,10 @@ func ListenToAllQueues() {
 			//HandleCoordinateParticipantWelcomeVerificationConsumption(&response)
 		}
 	}
+}
+
+func GetConsumerTag() string {
+
+	id := nanoid.Must(nanoid.Generate("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456456789", 10))
+	return id
 }

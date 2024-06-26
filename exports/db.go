@@ -24,7 +24,7 @@ type AccountDocument struct {
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 	Status            string    `bson:"status"`
-	ProfilePictureUrl string    `json:"profile_picture_url"`
+	ProfilePictureUrl string    `bson:"profile_picture_url"`
 	CreatedAt         time.Time `bson:"created_at,omitempty"`
 	UpdatedAt         time.Time `bson:"updated_at,omitempty"`
 }
