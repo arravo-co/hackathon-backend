@@ -285,6 +285,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 		PhoneNumber:     dataToSave.PhoneNumber,
 		IsEmailVerified: false,
 		Status:          dataToSave.Status,
+		Bio:             dataToSave.Bio,
 	}
 	result, err := accountCol.InsertOne(ctx, &acc)
 	if err != nil {

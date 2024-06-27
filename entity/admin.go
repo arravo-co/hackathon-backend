@@ -128,7 +128,7 @@ func (ad *Admin) AdminCreateNewJudgeProfile(dataInput *dtos.CreateNewJudgeByAdmi
 			HackathonId:  config.GetHackathonId(),
 			PasswordHash: passwordHash,
 			Status:       "INVITED",
-		},
+		}, Bio: dataInput.Bio,
 	})
 	if err != nil {
 		return err
@@ -142,14 +142,6 @@ func (ad *Admin) AdminCreateNewJudgeProfile(dataInput *dtos.CreateNewJudgeByAdmi
 		EventData:    exports.EventData{EventName: string(events.JudgeAccountCreatedByAdminEvent)},
 		Password:     password,
 	})
-
-	ad.passwordHash = acc.PasswordHash
-	ad.Email = acc.Email
-	ad.FirstName = acc.FirstName
-	ad.LastName = acc.LastName
-	ad.HackathonId = acc.HackathonId
-	ad.Gender = acc.Gender
-	ad.Role = acc.Role
 
 	return nil
 }

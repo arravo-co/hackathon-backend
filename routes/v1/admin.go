@@ -112,6 +112,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 		FirstName:   c.FormValue("first_name"),
 		Gender:      c.FormValue("gender"),
 		PhoneNumber: c.FormValue("phone_number"),
+		Bio:         c.FormValue("bio"),
 	}
 	/*	err := c.Bind(&dataInput)
 		if err != nil {
@@ -130,7 +131,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 
 	profPic, err := c.FormFile("profile_picture")
 	if err != nil {
-		fmt.Println("Failed to fully authenticate admin")
+		fmt.Println("Failed to load judge image")
 		return c.JSON(400, &RegisterJudgeByAdminResponseData{
 			Code:    400,
 			Message: err.Error()})
@@ -148,6 +149,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 		FirstName:   dataInput.FirstName,
 		Gender:      dataInput.Gender,
 		PhoneNumber: dataInput.PhoneNumber,
+		Bio:         dataInput.Bio,
 	})
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{
@@ -168,53 +170,55 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 		})
 	}
 	ch := make(chan interface{})
-	go func() {
-		dir, err := os.Getwd()
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		opt := utils.UploadOpts{
-			Folder: filepath.Join(dir, "uploads"),
-		}
-		filePath, err := utils.GetUploadedPic(profPic, []utils.UploadOpts{opt}...)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		tsk := taskmgt.GenerateTask(&exports.AddTaskDTO{
-			Label: "upload profile pic",
-		})
-		err = taskmgt.SaveTaskById(tsk)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		payload := exports.UploadPicQueuePayload{
-			Email:    dataInput.Email,
-			FilePath: filePath,
-			QueuePayload: exports.QueuePayload{
+	if profPic != nil {
+		go func() {
+			dir, err := os.Getwd()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			opt := utils.UploadOpts{
+				Folder: filepath.Join(dir, "uploads"),
+			}
+			filePath, err := utils.GetUploadedPic(profPic, []utils.UploadOpts{opt}...)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			tsk := taskmgt.GenerateTask(&exports.AddTaskDTO{
+				Label: "upload profile pic",
+			})
+			err = taskmgt.SaveTaskById(tsk)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			payload := exports.UploadPicQueuePayload{
+				Email:    dataInput.Email,
+				FilePath: filePath,
+				QueuePayload: exports.QueuePayload{
 
-				TaskId: tsk.Id,
-			},
-		}
-		byt, err := json.Marshal(payload)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+					TaskId: tsk.Id,
+				},
+			}
+			byt, err := json.Marshal(payload)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 
-		err = publish.Publish(&exports.PublisherConfig{
-			RabbitMQExchange: "",
-			RabbitMQKey:      "upload.profile_picture.cloudinary",
-		}, byt)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println("Queue payload published")
-		ch <- struct{}{}
-		//judge :=result.SecureURL
-	}()
-	<-ch
+			err = publish.Publish(&exports.PublisherConfig{
+				RabbitMQExchange: "",
+				RabbitMQKey:      "upload.profile_picture.cloudinary",
+			}, byt)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println("Queue payload published")
+			ch <- struct{}{}
+			//judge :=result.SecureURL
+		}()
+		<-ch
+	}
 	return nil
 }

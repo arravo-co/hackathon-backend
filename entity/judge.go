@@ -19,6 +19,7 @@ type Judge struct {
 	Status            string    `json:"status"`
 	State             string    `json:"state"`
 	PhoneNumber       string    `json:"phone_number"`
+	Bio               string    `json:"bio"`
 	ProfilePictureUrl string    `json:"profile_picture_url"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
@@ -39,6 +40,7 @@ func GetJudgeEntity(email string) (*Judge, error) {
 	judge.PhoneNumber = acc.PhoneNumber
 	judge.Status = acc.Status
 	judge.State = acc.State
+	judge.Bio = acc.Bio
 	judge.ProfilePictureUrl = acc.ProfilePictureUrl
 	judge.CreatedAt = acc.CreatedAt
 	judge.UpdatedAt = acc.UpdatedAt
@@ -60,6 +62,7 @@ func (judge *Judge) FillJudgeEntity(email string) error {
 	judge.PhoneNumber = acc.PhoneNumber
 	judge.Status = acc.Status
 	judge.State = acc.State
+	judge.Bio = acc.Bio
 	judge.ProfilePictureUrl = acc.ProfilePictureUrl
 	judge.CreatedAt = acc.CreatedAt
 	judge.UpdatedAt = acc.UpdatedAt
@@ -81,6 +84,7 @@ func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAc
 			Gender:       input.Gender,
 			State:        input.State,
 			Role:         "JUDGE", Status: "EMAIL_UNVERIFIED"},
+		Bio: input.Bio,
 	}
 	dataResponse, err := data.CreateJudgeAccount(dataInput)
 	// emit created event
@@ -98,12 +102,25 @@ func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAc
 }
 
 func (p *Judge) UpdateJudgeProfile(input dtos.UpdateJudgeDTO) error {
-	dataInput := &exports.UpdateAccountDocument{
-		FirstName:         input.FirstName,
-		LastName:          input.LastName,
-		Gender:            input.Gender,
-		State:             input.State,
-		ProfilePictureUrl: input.ProfilePictureUrl,
+
+	dataInput := &exports.UpdateAccountDocument{}
+	if input.LastName != "" {
+		dataInput.LastName = input.LastName
+	}
+	if input.State != "" {
+		dataInput.State = input.State
+	}
+	if input.FirstName != "" {
+		dataInput.FirstName = input.FirstName
+	}
+	if input.Bio != "" {
+		dataInput.Bio = input.Bio
+	}
+	if input.Gender != "" {
+		dataInput.Gender = input.Gender
+	}
+	if input.ProfilePictureUrl != "" {
+		dataInput.ProfilePictureUrl = input.ProfilePictureUrl
 	}
 	dataResponse, err := data.UpdateAccountInfoByEmail(&exports.UpdateAccountFilter{
 		Email: p.Email,
@@ -112,25 +129,14 @@ func (p *Judge) UpdateJudgeProfile(input dtos.UpdateJudgeDTO) error {
 	if err != nil {
 		return err
 	}
-	if input.FirstName != "" {
-		p.FirstName = dataResponse.FirstName
-	}
+	p.FirstName = dataResponse.FirstName
+	p.LastName = dataResponse.LastName
+	p.Gender = dataResponse.Gender
+	p.Bio = dataResponse.Bio
 
-	if input.FirstName != "" {
-		p.FirstName = dataResponse.FirstName
-	}
-
-	if input.LastName != "" {
-		p.LastName = dataResponse.LastName
-	}
-
-	if input.Gender != "" {
-		p.Gender = dataResponse.Gender
-	}
-
-	if input.ProfilePictureUrl != "" {
-		p.ProfilePictureUrl = dataResponse.ProfilePictureUrl
-	}
+	p.ProfilePictureUrl = dataResponse.ProfilePictureUrl
+	p.Role = dataResponse.Role
+	p.State = dataResponse.State
 	/*events.EmitJudgeAccountCreated(&exports.JudgeAccountCreatedByAdminEventData{
 		JudgeEmail: dataResponse.Email,
 		LastName:   dataResponse.LastName,
@@ -168,6 +174,7 @@ func GetJudges() ([]*Judge, error) {
 			State:             acc.State,
 			PhoneNumber:       acc.PhoneNumber,
 			ProfilePictureUrl: acc.ProfilePictureUrl,
+			Bio:               acc.Bio,
 			CreatedAt:         acc.CreatedAt,
 			UpdatedAt:         acc.UpdatedAt,
 		})

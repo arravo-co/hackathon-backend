@@ -8,6 +8,7 @@ type RegisterNewJudgeDTO struct {
 	ConfirmPassword string `validate:"eqfield=Password" json:"confirm_password"`
 	Gender          string `validate:"oneof=MALE FEMALE" json:"gender"`
 	State           string `json:"state"`
+	Bio             string `json:"bio"`
 }
 
 type CreateNewJudgeByAdminDTO struct {
@@ -16,6 +17,7 @@ type CreateNewJudgeByAdminDTO struct {
 	Email       string `validate:"email,required" json:"email"`
 	Gender      string `validate:"oneof=MALE FEMALE" json:"gender"`
 	PhoneNumber string `validate:"omitempty,e164" json:"phone_number"`
+	Bio         string ` json:"bio"`
 }
 
 type UpdateJudgeDTO struct {
@@ -23,5 +25,6 @@ type UpdateJudgeDTO struct {
 	LastName          string `validate:"omitempty,min=2" json:"last_name"`
 	Gender            string `validate:"omitempty, oneof=MALE FEMALE" json:"gender"`
 	State             string `json:"state"`
+	Bio               string `json:"bio"`
 	ProfilePictureUrl string `json:"profile_picture_url"`
 }

@@ -18,6 +18,7 @@ type AccountDocument struct {
 	State             string    `bson:"state,omitempty"`
 	Role              string    `bson:"role,omitempty"`
 	DOB               time.Time `bson:"dob,omitempty"`
+	Bio               string    `bson:"bio,omitempty"`
 	EmploymentStatus  string    `bson:"employment_status"`
 	ExperienceLevel   string    `bson:"experience_level"`
 	Motivation        string    `bson:"motivation"`
@@ -85,6 +86,7 @@ type UpdateAccountDocument struct {
 	LinkedInAddress   string    `bson:"linkedIn_address,omitempty"`
 	GithubAddress     string    `bson:"github_address,omitempty"`
 	State             string    `bson:"state,omitempty"`
+	Bio               string    `bson:"bio,omitempty"`
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
 	ProfilePictureUrl string    `bson:"profile_picture_url"`
@@ -156,6 +158,13 @@ type RemoveMemberFromParticipatingTeamData struct {
 	MemberEmail   string `bson:"email"`
 }
 
+type AddSolutionToTeamData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	Email         string `bson:"email"`
+	SolutionId    string `bson:"solution_id,omitempty"`
+}
+
 type AddToTeamInviteListData struct {
 	HackathonId   string `bson:"hackathon_id"`
 	ParticipantId string `bson:"participant_id"`
@@ -199,6 +208,7 @@ type TeamParticipantRecordCreatedData struct {
 
 type CreateJudgeAccountData struct {
 	CreateAccountData
+	Bio string `bson:"bio,omitempty"`
 }
 
 type UpdateAccountData struct {
@@ -210,4 +220,5 @@ type UpdateAccountData struct {
 	PhoneNumber       string `bson:"phone_number"`
 	Status            string `bson:"status"`
 	ProfilePictureUrl string `bson:"profile_picture_url"`
+	Bio               string `bson:"bio"`
 }
