@@ -1,4 +1,4 @@
-package data
+package query
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*exports.ParticipantDocument, error) {
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
+func (q *Query) CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*exports.ParticipantDocument, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -41,8 +41,8 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 	return &dat, nil
 }
 
-func GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
+func (q *Query) GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -64,8 +64,8 @@ func GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
 	return *dat, nil
 }
 
-func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
+func (q *Query) GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -84,8 +84,8 @@ func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, e
 	return &dat, nil
 }
 
-func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface{}, error) {
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
+func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface{}, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -119,8 +119,8 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 	return result, err
 }
 
-func AddSolutionToTeam(dataToSave *exports.AddSolutionToTeamData) (interface{}, error) {
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
+func (q *Query) AddSolutionToTeam(dataToSave *exports.AddSolutionToTeamData) (interface{}, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -151,9 +151,9 @@ func AddSolutionToTeam(dataToSave *exports.AddSolutionToTeamData) (interface{}, 
 	return result, err
 }
 
-func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
+func (q *Query) AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
 	partDoc := &exports.ParticipantDocument{}
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
+	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -181,8 +181,8 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 	return partDoc, err
 }
 
-func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParticipatingTeamData) (interface{}, error) {
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
+func (q *Query) RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParticipatingTeamData) (interface{}, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err

@@ -27,6 +27,7 @@ type AuthParticipantInfoUpdateDTO struct {
 	AuthUserInfoUpdateDTO
 	GithubAddress   string `validate:"url,omitempty" json:"github_address"`
 	LinkedInAddress string `validate:"url,omitempty" json:"linkedIn_address"`
+	SolutionId      string `validate:"url,omitempty" json:"solution_id"`
 }
 
 type CompletePasswordRecoveryDTO struct {

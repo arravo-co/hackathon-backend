@@ -1,4 +1,4 @@
-package data
+package query
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) DeleteAccount(identifier string) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	if err != nil {
 		return nil, err
 	}
@@ -26,8 +26,8 @@ func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
 	return &dataFromCol, err
 }
 
-func FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) 
 	return &dataFromCol, err
 }
 
-func GetAccountByEmail(email string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) GetAccountByEmail(email string) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -57,9 +57,9 @@ func GetAccountByEmail(email string) (*exports.AccountDocument, error) {
 	return &accountDoc, err
 }
 
-func GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
+func (q *Query) GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -80,9 +80,9 @@ func GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
 	return accounts, err
 }
 
-func GetAccountsOfJudges() ([]exports.AccountDocument, error) {
+func (q *Query) GetAccountsOfJudges() ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -101,9 +101,9 @@ func GetAccountsOfJudges() ([]exports.AccountDocument, error) {
 	return accounts, err
 }
 
-func GetAccountsByParticipantIds(participantIds []string) ([]exports.AccountDocument, error) {
+func (q *Query) GetAccountsByParticipantIds(participantIds []string) ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -124,8 +124,8 @@ func GetAccountsByParticipantIds(participantIds []string) ([]exports.AccountDocu
 	return accounts, err
 }
 
-func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -154,11 +154,12 @@ func CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
+	acc.Id = result.InsertedID
 	return &acc, err
 }
 
-func RemoveTeamMemberAccount(dataToSave *exports.RemoveTeamMemberAccountData) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) RemoveTeamMemberAccount(dataToSave *exports.RemoveTeamMemberAccountData) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -194,8 +195,8 @@ func CreateTeamParticipantAccount(dataToSave *exports.CreateTeamParticipantAccou
 }
 */
 
-func CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -219,8 +220,8 @@ func CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (*exports.Ac
 	return acc, nil
 }
 
-func CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -234,8 +235,8 @@ func CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
 	return dataToSave, nil
 }
 
-func CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -268,8 +269,8 @@ func CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) 
 	return &acc, err
 }
 
-func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.CreateJudgeAccountData, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.CreateJudgeAccountData, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -296,8 +297,8 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 	return dataToSave, err
 }
 
-func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
 	ctx := context.Context(context.Background())
@@ -315,8 +316,8 @@ func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *ex
 	return &accountDoc, err
 }
 
-func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
 	ctx := context.Context(context.Background())
@@ -330,8 +331,8 @@ func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput
 	return &accountDoc, err
 }
 
-func UpdatePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
+func (q *Query) UpdatePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.AccountDocument, error) {
+	accountCol, err := q.Datasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
 	ctx := context.Context(context.Background())

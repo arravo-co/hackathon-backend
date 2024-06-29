@@ -29,7 +29,7 @@ func GenerateTask(dataInput *exports.AddTaskDTO) *exports.Task {
 }
 
 func GetTaskById(id string) (*exports.Task, error) {
-	cmd := db.RedisClient.HGetAll(context.Background(), FormatTaskKey(id))
+	cmd := db.DefaultRedisClient.HGetAll(context.Background(), FormatTaskKey(id))
 	str, err := cmd.Result()
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func SaveTaskById(tskInput *exports.Task) error {
 	mp["parent_task_id"] = tskInput.ParentTaskId
 	mp["description"] = tskInput.Description
 	mp["status"] = tskInput.Status
-	pipe := db.RedisClient.TxPipeline()
+	pipe := db.DefaultRedisClient.TxPipeline()
 	cmd := pipe.HSet(context.Background(), FormatTaskKey(tskInput.Id), mp)
 	in, err := cmd.Result()
 	if err != nil {
@@ -75,7 +75,7 @@ func SaveTaskById(tskInput *exports.Task) error {
 }
 
 func UpdateTaskStatusById(id, status string) error {
-	cmd := db.RedisClient.HSet(context.Background(), FormatTaskKey(id), "status", status)
+	cmd := db.DefaultRedisClient.HSet(context.Background(), FormatTaskKey(id), "status", status)
 	in, err := cmd.Result()
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func UpdateTaskStatusById(id, status string) error {
 }
 
 func DeleteTaskStatusById(id string) error {
-	cmd := db.RedisClient.HDel(context.Background(), FormatTaskKey(id))
+	cmd := db.DefaultRedisClient.HDel(context.Background(), FormatTaskKey(id))
 	in, err := cmd.Result()
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func DeleteTaskStatusById(id string) error {
 
 func GetAllChildrenTasksById(id string) ([]*exports.Task, error) {
 	var ls []*exports.Task
-	cmd := db.RedisClient.SMembers(context.Background(), FormatChildrenTaskIdSetKey(id))
+	cmd := db.DefaultRedisClient.SMembers(context.Background(), FormatChildrenTaskIdSetKey(id))
 	mems, err := cmd.Result()
 	if err != nil {
 		return nil, err

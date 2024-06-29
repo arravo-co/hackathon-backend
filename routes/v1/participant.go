@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
+	"github.com/arravoco/hackathon_backend/repository"
+	"github.com/arravoco/hackathon_backend/services"
 	"github.com/labstack/echo/v4"
 )
 
 type RegisterParticipantSuccessResponse struct {
-	Code    int                 `json:"code"`
-	Message string              `json:"message"`
-	Data    *entity.Participant `data:"data"`
+	Code    int                               `json:"code"`
+	Message string                            `json:"message"`
+	Data    *repository.ParticipantRepository `data:"data"`
 }
 
 type RegisterParticipantFailResponse struct {
@@ -21,15 +24,15 @@ type RegisterParticipantFailResponse struct {
 }
 
 type GetParticipantsResponseData struct {
-	Code    int                  `json:"code"`
-	Message string               `json:"message"`
-	Data    []entity.Participant `json:"data"`
+	Code    int                                `json:"code"`
+	Message string                             `json:"message"`
+	Data    []repository.ParticipantRepository `json:"data"`
 }
 
 type GetParticipantResponseData struct {
-	Code    int                 `json:"code"`
-	Message string              `json:"message"`
-	Data    *entity.Participant `json:"data"`
+	Code    int                               `json:"code"`
+	Message string                            `json:"message"`
+	Data    *repository.ParticipantRepository `json:"data"`
 }
 
 // @Title Register New Participant
@@ -47,7 +50,7 @@ func RegisterParticipant(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	newParticipant := entity.Participant{}
+	newParticipant := repository.ParticipantRepository{}
 	err = validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
@@ -55,7 +58,7 @@ func RegisterParticipant(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	var responseData *entity.Participant
+	var responseData *repository.ParticipantRepository
 	if data.Type == "INDIVIDUAL" {
 		responseData, err = newParticipant.RegisterIndividual(data)
 	} else if data.Type == "TEAM" {
@@ -99,9 +102,9 @@ type FailResponse struct {
 }
 
 type GetTeamMembersSuccessResponse struct {
-	Code    int                        `json:"code"`
-	Message string                     `json:"message"`
-	Data    []entity.TeamMemberAccount `json:"data"`
+	Code    int                            `json:"code"`
+	Message string                         `json:"message"`
+	Data    []repository.TeamMemberAccount `json:"data"`
 }
 
 // @Title Fully Register New Team Member
@@ -128,7 +131,14 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	resData, err := entity.CompleteNewTeamMemberRegistration(&entity.CompleteNewTeamMemberRegistrationEntityData{
+	q := query.GetDefaultQuery()
+	if q != nil {
+		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Failed to complete registration. Try again later",
+		})
+	}
+	resData, err := services.CompleteNewTeamMemberRegistration(q, &services.CompleteNewTeamMemberRegistrationEntityData{
 		FirstName:     data.FirstName,
 		Email:         data.Email,
 		LastName:      data.LastName,
@@ -167,7 +177,7 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 // @ Router			/api/v1/participants/{participantId}/team              [get]
 func GetTeamMembersInfo(ctx echo.Context) error {
 	participantId := ctx.Param("participantId")
-	participant := &entity.Participant{}
+	participant := &repository.ParticipantRepository{}
 	err := participant.FillParticipantInfo(participantId)
 	if err != nil {
 		return err
@@ -193,7 +203,7 @@ func GetTeamMembersInfo(ctx echo.Context) error {
 // @Failure 400 object RegisterAnotherAdminResponseData "Failed to get participant info"
 // @Router /api/v1/participants [get]
 func GetParticipants(c echo.Context) error {
-	participants, err := entity.GetParticipantsInfo()
+	participants, err := repository.GetParticipantsInfo()
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,
@@ -216,7 +226,7 @@ func GetParticipants(c echo.Context) error {
 // @Router /api/v1/participants/{participantId} [get]
 func GetParticipant(c echo.Context) error {
 	participantId := c.Param("participantId")
-	participant, err := entity.GetParticipantInfo(participantId)
+	participant, err := repository.GetParticipantInfo(participantId)
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,

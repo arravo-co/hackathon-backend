@@ -10,6 +10,8 @@ import (
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/repository"
+	"github.com/arravoco/hackathon_backend/services"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
@@ -332,7 +334,7 @@ func ChangePassword(c echo.Context) error {
 			},
 		})
 	}
-	acc, err := entity.ChangePassword(&entity.PasswordChangeData{
+	acc, err := repository.ChangePassword(&repository.PasswordChangeData{
 		Email:       tokenData.Email,
 		OldPassword: dataDto.OldPassword,
 		NewPassword: dataDto.NewPassword,
@@ -373,7 +375,7 @@ func GetAuthUserInfo(c echo.Context) error {
 	var user interface{}
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
-		participant := entity.Participant{}
+		participant := repository.ParticipantRepository{}
 		err = participant.FillParticipantInfo(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
@@ -387,7 +389,7 @@ func GetAuthUserInfo(c echo.Context) error {
 	}
 
 	if tokenData.Role == "ADMIN" {
-		participant := entity.Admin{}
+		participant := repository.Admin{}
 		err = participant.FillAdminEntity(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
@@ -433,7 +435,7 @@ func UpdateAuthUserInfo(c echo.Context) error {
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
 		updateData := dtos.AuthParticipantInfoUpdateDTO{}
-		participant := entity.Participant{
+		participant := repository.ParticipantRepository{
 			Email: tokenData.Email,
 		}
 		err = participant.UpdateParticipantInfo(&dtos.AuthParticipantInfoUpdateDTO{
@@ -620,7 +622,7 @@ func InviteMemberToTeam(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	participant := entity.Participant{}
+	participant := repository.ParticipantRepository{}
 	err = participant.FillParticipantInfo(tokenData.Email)
 	if participantId != participant.ParticipantId {
 		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
@@ -729,7 +731,7 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 // @Router			/api/v1/auth/me/team              [get]
 func GetMyTeamMembersInfo(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
-	participant := &entity.Participant{}
+	participant := &repository.ParticipantRepository{}
 	err := participant.FillParticipantInfo(payload.Email)
 	if err != nil {
 		return err
@@ -768,13 +770,13 @@ func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
 	memberId := ctx.Param("team_member_email")
 
-	participant := &entity.Participant{}
+	participant := &repository.ParticipantRepository{}
 	err := participant.FillParticipantInfo(payload.Email)
 
 	if err != nil {
 		return err
 	}
-	member, err := participant.RemoveMemberFromTeam(&entity.RemoveMemberFromTeamData{
+	member, err := services.RemoveMemberFromTeam(&services.RemoveMemberFromTeamData{
 		MemberEmail:   memberId,
 		HackathonId:   payload.HackathonId,
 		ParticipantId: payload.ParticipantId,

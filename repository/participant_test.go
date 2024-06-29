@@ -1,4 +1,4 @@
-package entity
+package repository
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestRegisterTeamLead(t *testing.T) {
-	p := Participant{}
+	p := ParticipantRepository{}
 	args := dtos.RegisterNewParticipantDTO{
 		FirstName: "Temitope",
 		LastName:  "Alabi",

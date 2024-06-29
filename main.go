@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/arravoco/hackathon_backend/config"
+	"github.com/arravoco/hackathon_backend/data"
+	"github.com/arravoco/hackathon_backend/db"
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/jobs"
@@ -83,6 +85,9 @@ func main() {
 
 	//go jobs.StartConsumingPlayQueue()
 	//go startAllJobs()
+	db.SetupRedis()
+	rmqUtils.SetupDefaultQueue()
+	data.SetupDefaultDataSource()
 	rabbitutils.DeclareAllQueues()
 	publish.SetPublisher(&rabbitutils.Publisher{})
 	go rabbitutils.ListenToAllQueues()

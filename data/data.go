@@ -7,17 +7,23 @@ import (
 	"github.com/arravoco/hackathon_backend/rmqUtils"
 )
 
-var Datasource exports.DBInterface
+var DefaultDatasource exports.DBInterface
 
-var hackathonId string
-
-func init() {
-	Datasource = db.Mongo{}
-
+func SetupDefaultDataSource() {
+	dat, err := db.GetMongoRepository("hackathons_db")
+	if err != nil {
+		panic(err.Error())
+	}
+	DefaultDatasource = dat
 }
 
-func GetDatasource() exports.DBInterface {
-	return Datasource
+func GetDefaultDatasource() exports.DBInterface {
+	dat, err := db.GetMongoRepository("hackathons_db")
+	if err != nil {
+		panic(err.Error())
+	}
+	DefaultDatasource = dat
+	return DefaultDatasource
 }
 
 func GetQueue(name string) (rmq.Queue, error) {

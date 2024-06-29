@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/arravoco/hackathon_backend/dtos"
-	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/publish"
+	"github.com/arravoco/hackathon_backend/repository"
 	taskmgt "github.com/arravoco/hackathon_backend/task_mgt"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/labstack/echo/v4"
@@ -35,7 +35,7 @@ func RegisterAdmin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	authAdmin := entity.Admin{}
+	authAdmin := repository.Admin{}
 	err = authAdmin.RegisterNewAdmin(&dtos.CreateNewAdminDTO{
 		Email:       dataInput.Email,
 		LastName:    dataInput.LastName,
@@ -69,7 +69,7 @@ func RegisterAnotherAdmin(c echo.Context) error {
 	dataInput := dtos.CreateNewAdminByAuthAdminDTO{}
 	c.Bind(&dataInput)
 	validate.Struct(dataInput)
-	authAdmin := entity.Admin{}
+	authAdmin := repository.Admin{}
 	err := authAdmin.FillAdminEntity(authPayload.Email)
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{
@@ -136,7 +136,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 			Code:    400,
 			Message: err.Error()})
 	}
-	authAdmin := entity.Admin{}
+	authAdmin := repository.Admin{}
 	err = authAdmin.FillAdminEntity(authPayload.Email)
 	if err != nil {
 		return c.JSON(400, &RegisterJudgeByAdminResponseData{

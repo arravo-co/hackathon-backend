@@ -15,7 +15,7 @@ func FormatTaskCoordinatorKey(str string) string {
 }
 
 func GetSendParticipantWelcomeAndVerificationCoordinatorById(id string) (*exports.SendParticipantWelcomeAndVerificationEmailCoordinatorState, error) {
-	cmd := db.RedisClient.HGetAll(context.Background(), FormatTaskKey(id))
+	cmd := db.DefaultRedisClient.HGetAll(context.Background(), FormatTaskKey(id))
 	str, err := cmd.Result()
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func SaveSendParticipantWelcomeAndVerificationEmailCoordinatorTaskById(tskInput 
 	mp["team_lead_name"] = tskInput.TeamLeadName
 	mp["team_role"] = tskInput.TeamRole
 	mp["team_name"] = tskInput.TeamName
-	pipe := db.RedisClient.TxPipeline()
+	pipe := db.DefaultRedisClient.TxPipeline()
 	cmd := pipe.HSet(context.Background(), FormatTaskCoordinatorKey(tskInput.CoordinatorId), mp)
 	in, err := cmd.Result()
 	if err != nil {
@@ -67,7 +67,7 @@ func SaveSendParticipantWelcomeAndVerificationEmailCoordinatorTaskById(tskInput 
 }
 
 func UpdateSendParticipantWelcomeAndVerificationEmailCoordinatorById(id, status string) error {
-	cmd := db.RedisClient.HSet(context.Background(), FormatTaskKey(id), "status", status)
+	cmd := db.DefaultRedisClient.HSet(context.Background(), FormatTaskKey(id), "status", status)
 	in, err := cmd.Result()
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func UpdateSendParticipantWelcomeAndVerificationEmailCoordinatorById(id, status 
 }
 
 func UpdateSendParticipantWelcomeAndVerificationEmailCoordinatorTaskStatusById(id, status string) error {
-	cmd := db.RedisClient.HSet(context.Background(), FormatTaskKey(id), "status", status)
+	cmd := db.DefaultRedisClient.HSet(context.Background(), FormatTaskKey(id), "status", status)
 	in, err := cmd.Result()
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func UpdateSendParticipantWelcomeAndVerificationEmailCoordinatorTaskStatusById(i
 }
 
 func DeleteSendParticipantWelcomeAndVerificationCoordinatorTaskStatusById(id string) error {
-	cmd := db.RedisClient.HDel(context.Background(), FormatTaskKey(id))
+	cmd := db.DefaultRedisClient.HDel(context.Background(), FormatTaskKey(id))
 	in, err := cmd.Result()
 	if err != nil {
 		return err

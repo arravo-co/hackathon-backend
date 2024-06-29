@@ -10,10 +10,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func init() {
-	godotenv.Load()
+func SetupDefaultEnvironment() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
+func SetupEnvironment(path string) {
+	err := godotenv.Load(path)
+	if err != nil {
+		panic(err.Error())
+	}
+}
 func GetResendAPIKey() string {
 	return os.Getenv("RESEND_API_KEY")
 }
