@@ -51,7 +51,20 @@ type ParticipantRepository struct {
 	CreatedAt           time.Time            `json:"created_at"`
 	UpdatedAt           time.Time            `json:"updated_at"`
 }
-
+type ParticipantRecord struct {
+	ParticipantId       string               `json:"participant_id"`
+	TeamLeadEmail       string               `json:"team_lead_email"`
+	TeamName            string               `json:"team_name"`
+	TeamRole            string               `json:"team_role"`
+	HackathonId         string               `json:"hackathon_id"`
+	ParticipantType     string               `json:"type"`
+	CoParticipants      []CoParticipantInfo  `json:"co_participants"`
+	ParticipantEmail    string               `json:"participant_email"`
+	InviteList          []exports.InviteInfo `json:"invite_list"`
+	ParticipationStatus string               `json:"participation_status"`
+	CreatedAt           time.Time            `json:"created_at"`
+	UpdatedAt           time.Time            `json:"updated_at"`
+}
 type CoParticipantInfo struct {
 	FirstName        string    `json:"first_name"`
 	LastName         string    `json:"last_name"`
@@ -93,6 +106,18 @@ type TeamMemberAccount struct {
 	Status            string    `json:"status"`
 }
 
+type CoParticipantCreatedData struct {
+	Email         string
+	Password      string
+	ParticipantId string
+}
+
+type RemoveMemberFromTeamData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	MemberEmail   string `bson:"email"`
+}
+
 func NewParticipantRepository(q *query.Query) *ParticipantRepository {
 	return &ParticipantRepository{
 		DB: q,
@@ -110,6 +135,24 @@ func (p *ParticipantRepository) AddMemberToParticipatingTeam(dataToSave *exports
 	}
 
 	return partDoc, err
+}
+
+func (p ParticipantRepository) CreateParticipantRecord(dataInput *exports.CreateParticipantRecordData) (*ParticipantRecord, error) {
+	partDoc, err := p.DB.CreateParticipantRecord(dataInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ParticipantRecord{
+		TeamLeadEmail:       partDoc.TeamLeadEmail,
+		ParticipantId:       partDoc.ParticipantId,
+		ParticipationStatus: partDoc.Status,
+		HackathonId:         partDoc.HackathonId,
+		ParticipantType:     partDoc.Type,
+		TeamName:            partDoc.TeamName,
+		CreatedAt:           partDoc.CreatedAt,
+		UpdatedAt:           partDoc.UpdatedAt,
+	}, nil
 }
 
 func (p ParticipantRepository) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
@@ -345,12 +388,6 @@ func (p *ParticipantRepository) RegisterTeamLead(input dtos.RegisterNewParticipa
 	}, err
 }
 
-type CoParticipantCreatedData struct {
-	Email         string
-	Password      string
-	ParticipantId string
-}
-
 func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entity.Participant, error) {
 	p := &entity.Participant{}
 	accountData, err := data.GetAccountByEmail(idOrEmail)
@@ -468,8 +505,8 @@ func GenerateParticipantID(emails []string) (string, error) {
 	return sub, nil
 }
 
-func GetParticipantInfo(participantId string) (*ParticipantRepository, error) {
-	participant, err := data.GetParticipantRecord(participantId)
+func (s *ParticipantRepository) GetParticipantInfo(participantId string) (*entity.Participant, error) {
+	participant, err := s.DB.GetParticipantRecord(participantId)
 	if err != nil {
 		return nil, err
 	}
@@ -479,7 +516,7 @@ func GetParticipantInfo(participantId string) (*ParticipantRepository, error) {
 	if err != nil {
 		return nil, err
 	}
-	pE := ParticipantRepository{}
+	pE := entity.Participant{}
 	cs := []CoParticipantInfo{}
 
 	for _, a := range accs {
@@ -538,7 +575,83 @@ func GetParticipantInfo(participantId string) (*ParticipantRepository, error) {
 			}
 		}
 	}
-	pE.CoParticipants = cs
 
 	return &pE, err
+}
+
+func (s *ParticipantRepository) GetParticipantsInfo() ([]entity.Participant, error) {
+	partDocs, err := s.DB.GetParticipantsRecordsAggregate()
+	var participants []entity.Participant
+	for _, part := range partDocs {
+		participants = append(participants, entity.Participant{
+			Email:            part.Email,
+			FirstName:        part.FirstName,
+			LastName:         part.LastName,
+			Gender:           part.Gender,
+			DOB:              part.DOB,
+			TeamLeadEmail:    part.TeamName,
+			AccountRole:      part.Role,
+			ParticipantId:    part.ParticipantId,
+			ParticipantEmail: part.ParticipantEmail,
+			TeamName:         part.TeamName,
+			TeamRole:         "TEAM_LEAD",
+			PhoneNumber:      part.PhoneNumber,
+			ParticipantType:  part.Type,
+			CoParticipants: func(arr []exports.CoParticipantAggregateDocument) []valueobjects.CoParticipantInfo {
+				var items []valueobjects.CoParticipantInfo
+				for _, ar := range arr {
+					items = append(items, valueobjects.CoParticipantInfo{
+						Email:            ar.Email,
+						FirstName:        ar.FirstName,
+						LastName:         ar.LastName,
+						Gender:           ar.Gender,
+						State:            ar.State,
+						AccountRole:      ar.AccountRole,
+						TeamRole:         ar.TeamRole,
+						Motivation:       ar.Motivation,
+						DOB:              ar.DOB,
+						Skillset:         ar.Skillset,
+						EmploymentStatus: ar.EmploymentStatus,
+						ExperienceLevel:  ar.ExperienceLevel,
+						PhoneNumber:      ar.PhoneNumber,
+						CreatedAt:        ar.CreatedAt,
+						UpdatedAt:        ar.UpdatedAt,
+					})
+				}
+				return items
+			}(part.CoParticipants),
+		})
+	}
+	return participants, err
+}
+
+func (s *ParticipantRepository) RemoveMemberFromTeam(dataInput *RemoveMemberFromTeamData) (*entity.TeamMemberAccount, error) {
+	_, err := s.DB.RemoveMemberFromParticipatingTeam(&exports.RemoveMemberFromParticipatingTeamData{
+		HackathonId:   dataInput.HackathonId,
+		MemberEmail:   dataInput.MemberEmail,
+		ParticipantId: dataInput.ParticipantId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	acc, err := data.DeleteAccount(dataInput.MemberEmail)
+	info := FillTeamMemberInfo(acc)
+	return info, err
+}
+
+func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberAccount {
+	info := &entity.TeamMemberAccount{}
+	info.Email = account.Email
+	info.Status = account.Status
+	info.FirstName = account.FirstName
+	info.LastName = account.LastName
+	info.Gender = account.Gender
+	info.State = account.State
+	info.TeamRole = account.Role
+	info.HackathonId = account.HackathonId
+	info.DOB = account.DOB
+
+	// emit created event
+
+	return info
 }

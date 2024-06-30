@@ -375,8 +375,8 @@ func GetAuthUserInfo(c echo.Context) error {
 	var user interface{}
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
-		participant := repository.ParticipantRepository{}
-		err = participant.FillParticipantInfo(tokenData.Email)
+		partServ := services.NewParticipantService()
+		participant, err := partServ.FillParticipantInfo(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
 				ResponseData{
@@ -385,7 +385,7 @@ func GetAuthUserInfo(c echo.Context) error {
 				},
 			})
 		}
-		user = &participant
+		user = participant
 	}
 
 	if tokenData.Role == "ADMIN" {
@@ -622,8 +622,8 @@ func InviteMemberToTeam(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	participant := repository.ParticipantRepository{}
-	err = participant.FillParticipantInfo(tokenData.Email)
+	partServ := services.NewParticipantService()
+	participant, err := partServ.FillParticipantInfo(tokenData.Email)
 	if participantId != participant.ParticipantId {
 		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
 			Code:    echo.ErrBadRequest.Code,
@@ -642,7 +642,7 @@ func InviteMemberToTeam(c echo.Context) error {
 			Message: "Only a participating team can invite new members.",
 		})
 	}
-	responseData, err := participant.InviteToTeam(&exports.AddToTeamInviteListData{
+	responseData, err := partServ.InviteToTeam(&exports.AddToTeamInviteListData{
 		HackathonId:   hackathonId,
 		ParticipantId: participant.ParticipantId,
 		Email:         data.Email,
@@ -731,12 +731,12 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 // @Router			/api/v1/auth/me/team              [get]
 func GetMyTeamMembersInfo(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
-	participant := &repository.ParticipantRepository{}
-	err := participant.FillParticipantInfo(payload.Email)
+	partServ := services.NewParticipantService()
+	participant, err := partServ.FillParticipantInfo(payload.Email)
 	if err != nil {
 		return err
 	}
-	participants, err := participant.GetTeamMembersInfo()
+	participants, err := partServ.GetTeamMembersInfo(participant)
 	fmt.Println(participants)
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{
@@ -757,6 +757,11 @@ type DeleteTeamMemberSuccessResponse struct {
 	Data    *entity.TeamMemberAccount `json:"data"`
 }
 
+type DeleteTeamMemberFailResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 // @Title Get Team Members Info
 // @Description	 Delete Team Member from Team
 // @Summary		 Remove Team Member from Team
@@ -770,13 +775,19 @@ func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
 	memberId := ctx.Param("team_member_email")
 
-	participant := &repository.ParticipantRepository{}
-	err := participant.FillParticipantInfo(payload.Email)
+	partServ := services.NewParticipantService()
+	participant, err := partServ.FillParticipantInfo(payload.Email)
 
 	if err != nil {
 		return err
 	}
-	member, err := services.RemoveMemberFromTeam(&services.RemoveMemberFromTeamData{
+	if participant.TeamLeadEmail != payload.Email {
+		return ctx.JSON(401, DeleteTeamMemberFailResponse{
+			Message: "Unauthorized",
+			Code:    401,
+		})
+	}
+	member, err := partServ.RemoveMemberFromTeam(&repository.RemoveMemberFromTeamData{
 		MemberEmail:   memberId,
 		HackathonId:   payload.HackathonId,
 		ParticipantId: payload.ParticipantId,

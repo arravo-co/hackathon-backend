@@ -24,15 +24,15 @@ type RegisterParticipantFailResponse struct {
 }
 
 type GetParticipantsResponseData struct {
-	Code    int                                `json:"code"`
-	Message string                             `json:"message"`
-	Data    []repository.ParticipantRepository `json:"data"`
+	Code    int                  `json:"code"`
+	Message string               `json:"message"`
+	Data    []entity.Participant `json:"data"`
 }
 
 type GetParticipantResponseData struct {
-	Code    int                               `json:"code"`
-	Message string                            `json:"message"`
-	Data    *repository.ParticipantRepository `json:"data"`
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Data    *entity.Participant `json:"data"`
 }
 
 // @Title Register New Participant
@@ -102,9 +102,9 @@ type FailResponse struct {
 }
 
 type GetTeamMembersSuccessResponse struct {
-	Code    int                            `json:"code"`
-	Message string                         `json:"message"`
-	Data    []repository.TeamMemberAccount `json:"data"`
+	Code    int                        `json:"code"`
+	Message string                     `json:"message"`
+	Data    []entity.TeamMemberAccount `json:"data"`
 }
 
 // @Title Fully Register New Team Member
@@ -138,7 +138,9 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 			Message: "Failed to complete registration. Try again later",
 		})
 	}
-	resData, err := services.CompleteNewTeamMemberRegistration(q, &services.CompleteNewTeamMemberRegistrationEntityData{
+
+	partServ := services.NewParticipantService()
+	resData, err := partServ.CompleteNewTeamMemberRegistration(&services.CompleteNewTeamMemberRegistrationEntityData{
 		FirstName:     data.FirstName,
 		Email:         data.Email,
 		LastName:      data.LastName,
@@ -177,21 +179,23 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 // @ Router			/api/v1/participants/{participantId}/team              [get]
 func GetTeamMembersInfo(ctx echo.Context) error {
 	participantId := ctx.Param("participantId")
-	participant := &repository.ParticipantRepository{}
-	err := participant.FillParticipantInfo(participantId)
-	if err != nil {
-		return err
-	}
-	participants, err := participant.GetTeamMembersInfo()
+	partServ := services.NewParticipantService()
+	participant, err := partServ.FillParticipantInfo(participantId)
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{
-			Message: "",
-			Data:    participants,
+			Message: "Failed to fetch team members information",
+		})
+	}
+	mems, err := partServ.GetTeamMembersInfo(participant)
+
+	if err != nil {
+		return ctx.JSON(400, GetTeamMembersSuccessResponse{
+			Message: "Failed to fetch team members information",
 		})
 	}
 	return ctx.JSON(200, GetTeamMembersSuccessResponse{
 		Message: "",
-		Data:    participants,
+		Data:    mems,
 		Code:    200,
 	})
 }
@@ -203,7 +207,8 @@ func GetTeamMembersInfo(ctx echo.Context) error {
 // @Failure 400 object RegisterAnotherAdminResponseData "Failed to get participant info"
 // @Router /api/v1/participants [get]
 func GetParticipants(c echo.Context) error {
-	participants, err := repository.GetParticipantsInfo()
+	partServ := services.NewParticipantService()
+	participants, err := partServ.GetParticipantsInfo()
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,
@@ -226,7 +231,8 @@ func GetParticipants(c echo.Context) error {
 // @Router /api/v1/participants/{participantId} [get]
 func GetParticipant(c echo.Context) error {
 	participantId := c.Param("participantId")
-	participant, err := repository.GetParticipantInfo(participantId)
+	partServ := services.NewParticipantService()
+	participant, err := partServ.GetParticipantInfo(participantId)
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,

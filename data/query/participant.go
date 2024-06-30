@@ -64,6 +64,210 @@ func (q *Query) GetParticipantsRecords() ([]exports.ParticipantDocument, error) 
 	return *dat, nil
 }
 
+func (q *Query) GetParticipantsRecordsAggregate() ([]exports.ParticipantAccountWithCoParticipantsDocument, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
+	if err != nil {
+		return nil, err
+	}
+	ctx := context.Context(context.Background())
+	var result []exports.ParticipantAccountWithCoParticipantsDocument
+	pipeline := bson.A{
+		bson.D{{"$match", bson.D{{"status", "UNREVIEWED"}}}},
+		bson.D{
+			{"$lookup",
+				bson.D{
+					{"from", "accounts"},
+					{"localField", "participant_id"},
+					{"foreignField", "participant_id"},
+					{"as", "accounts"},
+				},
+			},
+		},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"team_lead_info",
+						bson.D{
+							{"$ifNull",
+								bson.A{
+									bson.D{
+										{"$arrayElemAt",
+											bson.A{
+												bson.D{
+													{"$filter",
+														bson.D{
+															{"input", "$accounts"},
+															{"as", "arr"},
+															{"cond",
+																bson.D{
+																	{"$eq",
+																		bson.A{
+																			bson.D{{"$getField", "team_lead_email"}},
+																			"$$arr.email",
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+												0,
+											},
+										},
+									},
+									"",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$replaceRoot",
+				bson.D{
+					{"newRoot",
+						bson.D{
+							{"$mergeObjects",
+								bson.A{
+									"$team_lead_info",
+									"$$ROOT",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"co_participants",
+						bson.D{
+							{"$map",
+								bson.D{
+									{"input", "$co_participants"},
+									{"as", "arr"},
+									{"in",
+										bson.D{
+											{"$mergeObjects",
+												bson.A{
+													"$$arr",
+													bson.D{{"team_role", "$$arr.role"}},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{{"$unset", "co_participants.role"}},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"co_participants",
+						bson.D{
+							{"$map",
+								bson.D{
+									{"input",
+										bson.D{
+											{"$filter",
+												bson.D{
+													{"input", "$accounts"},
+													{"as", "arr"},
+													{"cond",
+														bson.D{
+															{"$not",
+																bson.A{
+																	bson.D{
+																		{"$eq",
+																			bson.A{
+																				"$$arr.email",
+																				"$team_lead_email",
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									{"as", "item"},
+									{"in",
+										bson.D{
+											{"$mergeObjects",
+												bson.A{
+													bson.D{
+														{"$setField",
+															bson.D{
+																{"input", "$$item"},
+																{"field", bson.D{{"$literal", "account_role"}}},
+																{"value", "$$item.role"},
+															},
+														},
+													},
+													bson.D{
+														{"$arrayElemAt",
+															bson.A{
+																bson.D{
+																	{"$filter",
+																		bson.D{
+																			{"input", "$co_participants"},
+																			{"as", "arr"},
+																			{"cond",
+																				bson.D{
+																					{"$eq",
+																						bson.A{
+																							"$$arr.email",
+																							"$$item.email",
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+																0,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$unset",
+				bson.A{
+					"password_hash",
+					"co_participants.password_hash",
+					"team_lead_info",
+				},
+			},
+		},
+	}
+
+	cursor, err := participantCol.Aggregate(ctx, pipeline)
+	err = cursor.All(context.Background(), &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (q *Query) GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
 	participantCol, err := q.Datasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
