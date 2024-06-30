@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/arravoco/hackathon_backend/dtos"
-	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/repository"
 	"github.com/arravoco/hackathon_backend/utils"
 )
 
@@ -17,7 +17,7 @@ func ConsumeUploadPicQueue(payloadStruct *exports.UploadPicQueuePayload) error {
 	}
 	fmt.Println(uploadResult)
 
-	judge, err := entity.GetJudgeEntity(payloadStruct.Email)
+	judge, err := repository.GetJudgeEntity(payloadStruct.Email)
 	if err != nil {
 		return err
 	}

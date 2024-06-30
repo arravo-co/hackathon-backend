@@ -10,6 +10,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func init() {
+
+	err := godotenv.Load()
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
 func SetupDefaultEnvironment() {
 	err := godotenv.Load()
 	if err != nil {
@@ -51,6 +59,8 @@ func GetMongoDBURL() string {
 
 func GetRabbitMQURL() string {
 	url := os.Getenv("RABBITMQ_URL")
+	if url == "" {
+	}
 	return url
 }
 

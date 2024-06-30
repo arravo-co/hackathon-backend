@@ -237,10 +237,11 @@ func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (interface{
 
 func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
-	ctx := context.Context(context.Background())
 	if err != nil {
+		fmt.Printf("%s\n", err.Error())
 		return nil, err
 	}
+	fmt.Println("Create")
 	acc := exports.AccountDocument{
 		Email:            dataToSave.Email,
 		PasswordHash:     dataToSave.PasswordHash,
@@ -260,6 +261,8 @@ func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAc
 		ExperienceLevel:  dataToSave.ExperienceLevel,
 		EmploymentStatus: dataToSave.EmploymentStatus,
 	}
+	fmt.Println("acciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+	ctx := context.Context(context.Background())
 	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())

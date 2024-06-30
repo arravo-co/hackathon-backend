@@ -178,16 +178,18 @@ func (s *ParticipantService) RegisterTeamLead(input dtos.RegisterNewParticipantD
 	if err != nil {
 		return nil, err
 	}
-
 	areEmailsInCache := cache.FindEmailInCache(input.Email)
 	if !areEmailsInCache {
 		//return nil, errors.New("email already exists")
 	}
 
 	dob, err := time.Parse("2006-04-02", input.DOB)
-	if err == nil {
+	if err != nil {
+		fmt.Println("\nhere: ", err.Error())
+
 		return nil, err
 	}
+	fmt.Println("\nhere: ", input)
 	acc, err := s.AccountRepository.CreateParticipantAccount(&exports.CreateParticipantAccountData{
 		ParticipantId:    participantId,
 		Skillset:         input.Skillset,
@@ -209,6 +211,7 @@ func (s *ParticipantService) RegisterTeamLead(input dtos.RegisterNewParticipantD
 		},
 	})
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	dataInput := &exports.CreateParticipantRecordData{

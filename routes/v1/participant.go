@@ -7,15 +7,14 @@ import (
 	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
-	"github.com/arravoco/hackathon_backend/repository"
 	"github.com/arravoco/hackathon_backend/services"
 	"github.com/labstack/echo/v4"
 )
 
 type RegisterParticipantSuccessResponse struct {
-	Code    int                               `json:"code"`
-	Message string                            `json:"message"`
-	Data    *repository.ParticipantRepository `data:"data"`
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Data    *entity.Participant `data:"data"`
 }
 
 type RegisterParticipantFailResponse struct {
@@ -50,7 +49,6 @@ func RegisterParticipant(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	newParticipant := repository.ParticipantRepository{}
 	err = validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
@@ -58,11 +56,21 @@ func RegisterParticipant(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	var responseData *repository.ParticipantRepository
+	var responseData *entity.Participant
 	if data.Type == "INDIVIDUAL" {
-		responseData, err = newParticipant.RegisterIndividual(data)
+		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: "Only teams are allowed to register",
+		})
 	} else if data.Type == "TEAM" {
-		responseData, err = newParticipant.RegisterTeamLead(data)
+		partServ := services.NewParticipantService()
+		responseData, err = partServ.RegisterTeamLead(data)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
+				Code:    echo.ErrBadRequest.Code,
+				Message: err.Error(),
+			})
+		}
 	}
 	fmt.Println(err)
 	if err != nil {

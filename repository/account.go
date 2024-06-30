@@ -75,6 +75,7 @@ func (acc *AccountRepository) CreateTeamMemberAccount(dataToSave *exports.Create
 }
 
 func (acc *AccountRepository) CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*entity.Participant, error) {
+
 	accountCol, err := acc.DB.CreateParticipantAccount(dataToSave)
 	return &entity.Participant{
 		FirstName:       accountCol.FirstName,

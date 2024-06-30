@@ -23,7 +23,7 @@ type Publisher struct {
 func init() {
 	var err error
 	rabbitMQURL := config.GetRabbitMQURL()
-	fmt.Println(rabbitMQURL)
+	fmt.Println("Rabbit URL: ", rabbitMQURL)
 	Conn, err = amqp.Dial(rabbitMQURL)
 	if err != nil {
 		log.Fatalln(err)
