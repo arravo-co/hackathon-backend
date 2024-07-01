@@ -8,18 +8,34 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var RedisClient *redis.Client
+var DefaultRedisClient *redis.Client
 
-func init() {
+func SetupRedis() {
+	if DefaultRedisClient != nil {
+		return
+	}
+	DefaultRedisClient = GetDefaultRedisClient()
+}
+
+func GetDefaultRedisClient() *redis.Client {
+	if DefaultRedisClient != nil {
+		return DefaultRedisClient
+	}
+	DefaultRedisClient = NewRedisClient()
+	return DefaultRedisClient
+}
+
+func NewRedisClient() *redis.Client {
 	url := config.GetRedisURL()
 	opts, err := redis.ParseURL(url)
 	if err != nil {
 		fmt.Printf("\n%v\n", err)
 	}
-	RedisClient = redis.NewClient(opts)
-	pong, err := RedisClient.Ping(context.Background()).Result()
+	DefaultRedisClient = redis.NewClient(opts)
+	pong, err := DefaultRedisClient.Ping(context.Background()).Result()
 	if err != nil {
 		fmt.Printf("\n%v\n", err)
 	}
 	fmt.Println(pong)
+	return DefaultRedisClient
 }

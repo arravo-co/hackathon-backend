@@ -9,9 +9,9 @@ import (
 
 var cfKeyId = "emails_per_hackathon:hackathon_id"
 
-func init() {
+func SetupDefaultCache() {
 	/**/ ctx := context.Background()
-	status := db.RedisClient.CFReserve(ctx, cfKeyId, 100000)
+	status := db.DefaultRedisClient.CFReserve(ctx, cfKeyId, 100000)
 	if status.Err() != nil {
 		utils.MySugarLogger.Errorln(status.Err().Error())
 	}
@@ -20,7 +20,7 @@ func init() {
 
 func RemoveEmailFromCache(email string) bool {
 	ctx := context.Background()
-	cmd := db.RedisClient.CFDel(ctx, cfKeyId, email)
+	cmd := db.DefaultRedisClient.CFDel(ctx, cfKeyId, email)
 	if cmd.Err() != nil {
 		utils.MySugarLogger.Error("%v", cmd.Err().Error())
 		return false
@@ -30,7 +30,7 @@ func RemoveEmailFromCache(email string) bool {
 
 func AddEmailToCache(email string) bool {
 	ctx := context.Background()
-	cmd := db.RedisClient.CFAddNX(ctx, cfKeyId, email)
+	cmd := db.DefaultRedisClient.CFAddNX(ctx, cfKeyId, email)
 	if cmd.Err() != nil {
 		utils.MySugarLogger.Error("%v", cmd.Err().Error())
 		return false
@@ -40,7 +40,7 @@ func AddEmailToCache(email string) bool {
 
 func FindEmailInCache(email string) bool {
 	ctx := context.Background()
-	cmd := db.RedisClient.CFExists(ctx, cfKeyId, email)
+	cmd := db.DefaultRedisClient.CFExists(ctx, cfKeyId, email)
 	if cmd.Err() != nil {
 		utils.MySugarLogger.Error("%v", cmd.Err().Error())
 		return false
@@ -55,7 +55,7 @@ func FindEmailInCache(email string) bool {
 
 func FindEmailsInCache(emails []interface{}) ([]bool, error) {
 	ctx := context.Background()
-	cmd := db.RedisClient.CFMExists(ctx, cfKeyId, emails...)
+	cmd := db.DefaultRedisClient.CFMExists(ctx, cfKeyId, emails...)
 	if cmd.Err() != nil {
 		utils.MySugarLogger.Error("%v", cmd.Err().Error())
 		return nil, cmd.Err()

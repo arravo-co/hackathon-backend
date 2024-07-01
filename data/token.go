@@ -13,7 +13,7 @@ import (
 
 func UpsertToken(dataInput *exports.UpsertTokenData) (*exports.TokenData, error) {
 	fmt.Printf("\nuuuuuuuuuuuuuuuuuuuuuuuuuu\n%+v\npppppppppppppppppppppppppp\n", dataInput)
-	tokenCol, err := Datasource.GetTokenCollection()
+	tokenCol, err := DefaultDatasource.GetTokenCollection()
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func UpsertToken(dataInput *exports.UpsertTokenData) (*exports.TokenData, error)
 func VerifyToken(dataInput *exports.VerifyTokenData) error {
 	fmt.Printf("\n%+v\n", dataInput)
 	var tokenInfo exports.TokenData
-	tokenCol, err := Datasource.GetTokenCollection()
+	tokenCol, err := DefaultDatasource.GetTokenCollection()
 	if err != nil {
 		return err
 	}

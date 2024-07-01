@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
+	"github.com/arravoco/hackathon_backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -47,7 +49,6 @@ func RegisterParticipant(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	newParticipant := entity.Participant{}
 	err = validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
@@ -57,9 +58,19 @@ func RegisterParticipant(c echo.Context) error {
 	}
 	var responseData *entity.Participant
 	if data.Type == "INDIVIDUAL" {
-		responseData, err = newParticipant.RegisterIndividual(data)
+		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: "Only teams are allowed to register",
+		})
 	} else if data.Type == "TEAM" {
-		responseData, err = newParticipant.RegisterTeamLead(data)
+		partServ := services.NewParticipantService()
+		responseData, err = partServ.RegisterTeamLead(data)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
+				Code:    echo.ErrBadRequest.Code,
+				Message: err.Error(),
+			})
+		}
 	}
 	fmt.Println(err)
 	if err != nil {
@@ -128,7 +139,16 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	resData, err := entity.CompleteNewTeamMemberRegistration(&entity.CompleteNewTeamMemberRegistrationEntityData{
+	q := query.GetDefaultQuery()
+	if q != nil {
+		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Failed to complete registration. Try again later",
+		})
+	}
+
+	partServ := services.NewParticipantService()
+	resData, err := partServ.CompleteNewTeamMemberRegistration(&services.CompleteNewTeamMemberRegistrationEntityData{
 		FirstName:     data.FirstName,
 		Email:         data.Email,
 		LastName:      data.LastName,
@@ -167,21 +187,23 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 // @ Router			/api/v1/participants/{participantId}/team              [get]
 func GetTeamMembersInfo(ctx echo.Context) error {
 	participantId := ctx.Param("participantId")
-	participant := &entity.Participant{}
-	err := participant.FillParticipantInfo(participantId)
-	if err != nil {
-		return err
-	}
-	participants, err := participant.GetTeamMembersInfo()
+	partServ := services.NewParticipantService()
+	participant, err := partServ.FillParticipantInfo(participantId)
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{
-			Message: "",
-			Data:    participants,
+			Message: "Failed to fetch team members information",
+		})
+	}
+	mems, err := partServ.GetTeamMembersInfo(participant)
+
+	if err != nil {
+		return ctx.JSON(400, GetTeamMembersSuccessResponse{
+			Message: "Failed to fetch team members information",
 		})
 	}
 	return ctx.JSON(200, GetTeamMembersSuccessResponse{
 		Message: "",
-		Data:    participants,
+		Data:    mems,
 		Code:    200,
 	})
 }
@@ -193,7 +215,8 @@ func GetTeamMembersInfo(ctx echo.Context) error {
 // @Failure 400 object RegisterAnotherAdminResponseData "Failed to get participant info"
 // @Router /api/v1/participants [get]
 func GetParticipants(c echo.Context) error {
-	participants, err := entity.GetParticipantsInfo()
+	partServ := services.NewParticipantService()
+	participants, err := partServ.GetParticipantsInfo()
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,
@@ -216,7 +239,8 @@ func GetParticipants(c echo.Context) error {
 // @Router /api/v1/participants/{participantId} [get]
 func GetParticipant(c echo.Context) error {
 	participantId := c.Param("participantId")
-	participant, err := entity.GetParticipantInfo(participantId)
+	partServ := services.NewParticipantService()
+	participant, err := partServ.GetParticipantInfo(participantId)
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,

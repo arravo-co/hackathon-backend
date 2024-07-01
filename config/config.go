@@ -11,9 +11,26 @@ import (
 )
 
 func init() {
-	godotenv.Load()
+
+	err := godotenv.Load()
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
+func SetupDefaultEnvironment() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+func SetupEnvironment(path string) {
+	err := godotenv.Load(path)
+	if err != nil {
+		panic(err.Error())
+	}
+}
 func GetResendAPIKey() string {
 	return os.Getenv("RESEND_API_KEY")
 }
@@ -42,6 +59,8 @@ func GetMongoDBURL() string {
 
 func GetRabbitMQURL() string {
 	url := os.Getenv("RABBITMQ_URL")
+	if url == "" {
+	}
 	return url
 }
 

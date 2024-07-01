@@ -13,7 +13,7 @@ import (
 )
 
 func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*exports.ParticipantDocument, error) {
-	participantCol, err := Datasource.GetParticipantCollection()
+	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 }
 
 func GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
-	participantCol, err := Datasource.GetParticipantCollection()
+	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
 }
 
 func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
-	participantCol, err := Datasource.GetParticipantCollection()
+	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, e
 }
 
 func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface{}, error) {
-	participantCol, err := Datasource.GetParticipantCollection()
+	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 }
 
 func AddSolutionToTeam(dataToSave *exports.AddSolutionToTeamData) (interface{}, error) {
-	participantCol, err := Datasource.GetParticipantCollection()
+	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func AddSolutionToTeam(dataToSave *exports.AddSolutionToTeamData) (interface{}, 
 
 func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
 	partDoc := &exports.ParticipantDocument{}
-	participantCol, err := Datasource.GetParticipantCollection()
+	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
@@ -182,7 +182,7 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 }
 
 func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParticipatingTeamData) (interface{}, error) {
-	participantCol, err := Datasource.GetParticipantCollection()
+	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err

@@ -7,4 +7,5 @@ type DBInterface interface {
 	GetParticipantCollection() (*mongo.Collection, error)
 	GetTokenCollection() (*mongo.Collection, error)
 	GetScoreCollection() (*mongo.Collection, error)
+	GetSolutionCollection() (*mongo.Collection, error)
 }

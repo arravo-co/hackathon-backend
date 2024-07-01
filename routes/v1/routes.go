@@ -18,8 +18,10 @@ type ResponseData struct {
 }
 
 var participantsRoutes *echo.Group
-var authRoutes *echo.Group
+var solutionRoutes *echo.Group
+var scoreRoutes *echo.Group
 var judgesRoutes *echo.Group
+var authRoutes *echo.Group
 var validate *validator.Validate
 
 // @Version 1.0.0
@@ -35,6 +37,7 @@ func StartAllRoutes(e *echo.Echo) {
 
 	rrr := otelecho.Middleware("")
 	api := e.Group("/api/v1" /**/, rrr)
+	setupSolutionRoutes(api)
 	setupAuthRoutes(api)
 	setupJudgesRoutes(api)
 	setupParticipantsRoutes(api)
@@ -74,7 +77,6 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.GET("/verification/email/initiation", InitiateEmailVerification)
 	authRoutes.GET("/verification/email/completion", CompleteEmailVerificationViaGet)
 	authRoutes.POST("/verification/email/completion", CompleteEmailVerification)
-	authRoutes.POST("/password/change", ChangePassword, othermiddleware.Auth())
 	authRoutes.GET("/password/recovery/initiation", InitiatePasswordRecovery)
 	authRoutes.POST("/password/recovery/completion", CompletePasswordRecovery)
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
@@ -88,7 +90,13 @@ func setupAuthRoutes(api *echo.Group) {
 }
 
 func setupScoreRoutes(api *echo.Group) {
-	authRoutes = api.Group("/score_management")
-	authRoutes.GET("/create_score_record", ScoreParticipant, othermiddleware.CheckIfIsRole("JUDGE"))
-	authRoutes.GET("/score_participant", ScoreParticipant, othermiddleware.CheckIfIsRole("JUDGE"))
+	scoreRoutes = api.Group("/score_management")
+	scoreRoutes.GET("/create_score_record", ScoreParticipant, othermiddleware.CheckIfIsRole("JUDGE"))
+	scoreRoutes.GET("/score_participant", ScoreParticipant, othermiddleware.CheckIfIsRole("JUDGE"))
+}
+
+func setupSolutionRoutes(api *echo.Group) {
+	solutionRoutes = api.Group("/solutions")
+	solutionRoutes.GET("/:id", GetSolutionDataById)
+	solutionRoutes.POST("", CreateSolution, othermiddleware.Auth(), othermiddleware.CheckIfIsRole("ADMIN"))
 }

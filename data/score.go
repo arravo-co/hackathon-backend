@@ -10,7 +10,7 @@ import (
 )
 
 func CreateParticipantScore(dataToSave *exports.CreateParticipantScoreData) (*exports.ParticipantScoreDocument, error) {
-	participantScoreCol, err := Datasource.GetScoreCollection()
+	participantScoreCol, err := DefaultDatasource.GetScoreCollection()
 	if err != nil {
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
@@ -30,7 +30,7 @@ func CreateParticipantScore(dataToSave *exports.CreateParticipantScoreData) (*ex
 }
 
 func UpdateParticipantScoreRecordByJudge(updateFilter *exports.UpdateParticipantScoreFilterData, dataToSave *exports.UpdateParticipantScoreDataByJudge) (*exports.ParticipantScoreDocument, error) {
-	participantScoreCol, err := Datasource.GetScoreCollection()
+	participantScoreCol, err := DefaultDatasource.GetScoreCollection()
 	if err != nil {
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
@@ -66,7 +66,7 @@ func UpdateParticipantScoreRecordByJudge(updateFilter *exports.UpdateParticipant
 }
 
 func GetParticipantScore(updateFilter *exports.UpdateParticipantScoreFilterData) (*exports.ParticipantScoreDocument, error) {
-	participantScoreCol, err := Datasource.GetScoreCollection()
+	participantScoreCol, err := DefaultDatasource.GetScoreCollection()
 	if err != nil {
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
@@ -82,7 +82,7 @@ func GetParticipantScore(updateFilter *exports.UpdateParticipantScoreFilterData)
 }
 
 func GetParticipantsScores(updateFilter *exports.UpdateParticipantScoreFilterData) (*[]exports.ParticipantScoreDocument, error) {
-	participantScoreCol, err := Datasource.GetScoreCollection()
+	participantScoreCol, err := DefaultDatasource.GetScoreCollection()
 	if err != nil {
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
@@ -101,7 +101,7 @@ func GetParticipantsScores(updateFilter *exports.UpdateParticipantScoreFilterDat
 }
 
 func GetJudgeScoring(judgeId string) (*[]exports.ParticipantScoreDocument, error) {
-	participantScoreCol, err := Datasource.GetScoreCollection()
+	participantScoreCol, err := DefaultDatasource.GetScoreCollection()
 	if err != nil {
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
