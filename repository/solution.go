@@ -39,9 +39,26 @@ func (*SolutionRepository) UpdateSolution(creator_id string, dataInput exports.C
 	return nil, nil
 }
 
-func (*SolutionRepository) GetSolutions(creator_id string, dataInput exports.CreateSolutionData) ([]*SolutionRepository, error) {
+func (s *SolutionRepository) GetSolutionsData(dataInput *exports.GetSolutionsQueryData) ([]entity.Solution, error) {
+	solDocs, err := s.DB.GetManySolutionData(dataInput)
+	if err != nil {
+		return nil, err
+	}
+	var sols []entity.Solution
 
-	return nil, nil
+	for _, sol := range solDocs {
+		sols = append(sols, entity.Solution{
+			Id:          sol.Id.(primitive.ObjectID).Hex(),
+			Title:       sol.Title,
+			Description: sol.Description,
+			HackathonId: sol.HackathonId,
+			CreatorId:   sol.CreatorId,
+			CreatedAt:   sol.CreatedAt,
+			UpdatedAt:   sol.UpdatedAt,
+		})
+	}
+
+	return sols, nil
 }
 
 func (s *SolutionRepository) GetSolutionDataById(id string) (*entity.Solution, error) {
