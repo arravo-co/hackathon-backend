@@ -14,7 +14,7 @@ func init() {
 
 	err := godotenv.Load()
 	if err != nil {
-		panic(err.Error())
+		//panic(err.Error())
 	}
 }
 
