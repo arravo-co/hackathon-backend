@@ -155,7 +155,14 @@ type UpdateAccountData struct {
 }
 
 type CreateSolutionData struct {
-	Title       string `bson:"name"`
+	Title       string `bson:"title"`
+	Description string `bson:"description"`
+	CreatorId   string `bson:"creator_id"`
+	HackathonId string `bson:"hackathon_id"`
+}
+
+type GetSolutionsQueryData struct {
+	Title       string `bson:"title"`
 	Description string `bson:"description"`
 	CreatorId   string `bson:"creator_id"`
 	HackathonId string `bson:"hackathon_id"`

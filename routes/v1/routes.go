@@ -98,5 +98,6 @@ func setupScoreRoutes(api *echo.Group) {
 func setupSolutionRoutes(api *echo.Group) {
 	solutionRoutes = api.Group("/solutions")
 	solutionRoutes.GET("/:id", GetSolutionDataById)
+	solutionRoutes.GET("", GetSolutionsData)
 	solutionRoutes.POST("", CreateSolution, othermiddleware.Auth(), othermiddleware.CheckIfIsRole("ADMIN"))
 }

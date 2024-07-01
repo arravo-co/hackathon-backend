@@ -32,3 +32,7 @@ func (s *SolutionService) CreateSolution(dataInput *exports.CreateSolutionData) 
 func (s *SolutionService) GetSolutionDataById(id string) (*entity.Solution, error) {
 	return s.SolutionRepository.GetSolutionDataById(id)
 }
+
+func (s *SolutionService) GetSolutionData(dataInput *exports.GetSolutionsQueryData) ([]entity.Solution, error) {
+	return s.SolutionRepository.GetSolutionsData(dataInput)
+}

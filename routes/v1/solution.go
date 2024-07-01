@@ -18,6 +18,12 @@ type CreateSolutionResponse struct {
 	Data    *entity.Solution `json:"data"`
 }
 
+type GetSolutionsDataResponse struct {
+	Code    int               `json:"code"`
+	Message string            `json:"message"`
+	Data    []entity.Solution `json:"data"`
+}
+
 // @Title Basic Log in
 // @Description	Log a user in
 // @Summary		Log a user in
@@ -97,5 +103,29 @@ func GetSolutionDataById(c echo.Context) error {
 		Code:    200,
 		Message: "Successfully fetch solution",
 		Data:    solution,
+	})
+}
+
+func GetSolutionsData(c echo.Context) error {
+
+	hackathonId := c.QueryParam("hackathon_id")
+
+	solutionService := services.NewSolutionService()
+	solutions, err := solutionService.GetSolutionData(&exports.GetSolutionsQueryData{
+		HackathonId: hackathonId,
+	})
+
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(500, CreateSolutionResponse{
+			Code:    500,
+			Message: "Error fetch solution: ",
+		})
+	}
+
+	return c.JSON(200, GetSolutionsDataResponse{
+		Code:    200,
+		Message: "Successfully fetch solutions",
+		Data:    solutions,
 	})
 }

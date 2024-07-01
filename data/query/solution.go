@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
@@ -112,5 +113,6 @@ func (q *Query) GetManySolutionData(filterInput interface{}) ([]exports.Solution
 		return nil, err
 	}
 	err = result.All(context.Background(), &dataFromCol)
+	fmt.Println(dataFromCol)
 	return dataFromCol, err
 }
