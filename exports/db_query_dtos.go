@@ -157,6 +157,7 @@ type UpdateAccountData struct {
 type CreateSolutionData struct {
 	Title       string `bson:"title"`
 	Description string `bson:"description"`
+	Objective   string `bson:"objective,omitempty"`
 	CreatorId   string `bson:"creator_id"`
 	HackathonId string `bson:"hackathon_id"`
 }
@@ -164,6 +165,7 @@ type CreateSolutionData struct {
 type GetSolutionsQueryData struct {
 	Title       string `bson:"title"`
 	Description string `bson:"description"`
+	Objective   string `bson:"objective,omitempty"`
 	CreatorId   string `bson:"creator_id"`
 	HackathonId string `bson:"hackathon_id"`
 }
@@ -172,4 +174,5 @@ type UpdateSolutionData struct {
 	Title       string `bson:"title,omitempty"`
 	Description string `bson:"description,omitempty"`
 	CreatorId   string `bson:"creator_id"`
+	Objective   string `bson:"objective,omitempty"`
 }

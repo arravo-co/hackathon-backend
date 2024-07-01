@@ -60,6 +60,7 @@ func CreateSolution(c echo.Context) error {
 		CreatorId:   tokenData.Email,
 		Title:       dataDto.Title,
 		Description: dataDto.Description,
+		Objective:   dataDto.Objective,
 		HackathonId: tokenData.HackathonId,
 	})
 

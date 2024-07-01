@@ -39,4 +39,5 @@ type CompletePasswordRecoveryDTO struct {
 type CreateSolutionData struct {
 	Title       string `validate:"required" json:"title"`
 	Description string `validate:"required" json:"description"`
+	Objective   string `validate:"required" json:"objective"`
 }

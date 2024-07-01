@@ -75,6 +75,7 @@ type ParticipantScoreDocument struct {
 type SolutionDocument struct {
 	Id          interface{} `bson:"_id,omitempty" `
 	Title       string      `bson:"title,omitempty"`
+	Objective   string      `bson:"objective,omitempty"`
 	Description string      `bson:"description"`
 	HackathonId string      `bson:"hackathon_id"`
 	CreatorId   string      `bson:"creator_id"`

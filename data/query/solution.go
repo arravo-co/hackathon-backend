@@ -20,6 +20,7 @@ func (q *Query) CreateSolutionData(dataInput *exports.CreateSolutionData) (*expo
 		Title:       dataInput.Title,
 		Description: dataInput.Description,
 		HackathonId: dataInput.HackathonId,
+		Objective:   dataInput.Objective,
 		CreatorId:   dataInput.CreatorId,
 		CreatedAt:   time.Now(),
 	}
@@ -37,6 +38,7 @@ func (q *Query) UpdateSolutionData(id string, dataInput *exports.UpdateSolutionD
 	dataFromCol := &exports.SolutionDocument{
 		Description: dataInput.Description,
 		Title:       dataInput.Title,
+		Objective:   dataInput.Objective,
 		UpdatedAt:   time.Now(),
 	}
 	objId, err := primitive.ObjectIDFromHex(id)
@@ -60,6 +62,14 @@ func (q *Query) UpdateSolutionData(id string, dataInput *exports.UpdateSolutionD
 		if updates == nil {
 			updates = &bson.M{
 				"title": dataInput.Title,
+			}
+		}
+	}
+
+	if dataInput.Objective != "" {
+		if updates == nil {
+			updates = &bson.M{
+				"objective": dataInput.Objective,
 			}
 		}
 	}
