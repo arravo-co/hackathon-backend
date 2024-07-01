@@ -47,7 +47,15 @@ type ParticipantService struct {
 }
 
 func NewParticipantService() *ParticipantService {
-	return &ParticipantService{}
+	q := query.GetDefaultQuery()
+	part := repository.NewParticipantRepository(q)
+	acc := repository.NewAccountRepository(q)
+	sol := repository.NewSolutionRepository(q)
+	return &ParticipantService{
+		ParticipantRepository: part,
+		AccountRepository:     acc,
+		SolutionRepository:    sol,
+	}
 }
 
 func (s *ParticipantService) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationEntityData) (*entity.Participant, error) {

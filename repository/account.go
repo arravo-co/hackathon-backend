@@ -42,7 +42,9 @@ type AccountRepository struct {
 }
 
 func NewAccountRepository(q *query.Query) *AccountRepository {
-	return &AccountRepository{}
+	return &AccountRepository{
+		DB: q,
+	}
 }
 
 func (acc *AccountRepository) CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*entity.TeamMemberAccount, error) {

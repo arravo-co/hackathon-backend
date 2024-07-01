@@ -18,6 +18,7 @@ func (q *Query) CreateSolutionData(dataInput *exports.CreateSolutionData) (*expo
 	dataFromCol := exports.SolutionDocument{
 		Title:       dataInput.Title,
 		Description: dataInput.Description,
+		HackathonId: dataInput.HackathonId,
 		CreatorId:   dataInput.CreatorId,
 		CreatedAt:   time.Now(),
 	}

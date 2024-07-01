@@ -200,6 +200,7 @@ func CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (*exports.Ac
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(dataToSave)
 	result, err := accountCol.InsertOne(ctx, dataToSave)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())

@@ -158,6 +158,7 @@ type CreateSolutionData struct {
 	Title       string `bson:"name"`
 	Description string `bson:"description"`
 	CreatorId   string `bson:"creator_id"`
+	HackathonId string `bson:"hackathon_id"`
 }
 
 type UpdateSolutionData struct {

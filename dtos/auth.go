@@ -35,3 +35,8 @@ type CompletePasswordRecoveryDTO struct {
 	Token       string ` validate:"required" json:"token"`
 	NewPassword string ` validate:"required" json:"new_password"`
 }
+
+type CreateSolutionData struct {
+	Title       string `validate:"required" json:"title"`
+	Description string `validate:"required" json:"description"`
+}

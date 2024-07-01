@@ -1,6 +1,8 @@
 package data
 
 import (
+	"fmt"
+
 	"github.com/adjust/rmq/v5"
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
@@ -14,6 +16,7 @@ func SetupDefaultDataSource() {
 	if err != nil {
 		panic(err.Error())
 	}
+	fmt.Println("\n\nDefault DataSource initialized\n\n")
 	DefaultDatasource = dat
 }
 

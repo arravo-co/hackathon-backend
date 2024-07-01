@@ -35,8 +35,8 @@ func GetMongoRepositoryWithDB(db *mongo.Database) *MongoRepository {
 }
 
 func GetNewMongoRepository(conf *exports.MongoDBConnConfig) (*MongoRepository, error) {
-	var url string
-	var dbName string
+	var url string = ""
+	var dbName string = ""
 	if conf.Url != "" {
 		url = conf.Url
 	}
@@ -58,6 +58,7 @@ func GetNewMongoRepository(conf *exports.MongoDBConnConfig) (*MongoRepository, e
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("\n\n\nConnected to database\n\n\n")
 	db := client.Database(dbName)
 	return &MongoRepository{
 		DB: db,
@@ -128,11 +129,8 @@ func GetCollection(colName string) (*mongo.Collection, error) {
 }
 
 func (m MongoRepository) GetAccountCollection() (*mongo.Collection, error) {
-	col, err := GetCollection("accounts")
-	if err != nil {
-		fmt.Printf("\n%s\n", err.Error())
-		return nil, err
-	}
+	var err error
+	col := m.DB.Collection("accounts")
 	err = CreateIndexes(col.Database())
 	if err != nil {
 		fmt.Printf("\n%s\n", err.Error())
@@ -142,17 +140,19 @@ func (m MongoRepository) GetAccountCollection() (*mongo.Collection, error) {
 }
 
 func (m MongoRepository) GetParticipantCollection() (*mongo.Collection, error) {
-	col, err := GetCollection("participants")
+	var err error
+	col := m.DB.Collection("participants")
 
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{"participant_id", -1}},
+		Options: options.Index().SetUnique(true),
+	}
+	indexName, err := m.DB.Collection("participants").Indexes().CreateOne(context.TODO(), indexModel)
 	if err != nil {
-		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
 	}
-	err = CreateParticipantColIndexes()
-	if err != nil {
-		fmt.Printf("\n%s\n", err.Error())
-		return nil, err
-	}
+	fmt.Printf("\n%s\n", indexName)
+
 	return col, err
 }
 
