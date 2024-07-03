@@ -79,3 +79,7 @@ type ParticipantCreatedResponseDTO struct {
 	TeamSize        int      `json:"team_size,omitempty"`
 	Age             int      `json:"age,omitempty"`
 }
+
+type SelectTeamSolutionData struct {
+	SolutionId string `validate:"required" json:"solution_id"`
+}

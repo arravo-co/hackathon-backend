@@ -20,7 +20,7 @@ type Publisher struct {
 	Config *exports.PublisherConfig
 }
 
-func init() {
+func SetupRMQ() {
 	var err error
 	rabbitMQURL := config.GetRabbitMQURL()
 	fmt.Println("Rabbit URL: ", rabbitMQURL)
@@ -129,6 +129,12 @@ func DeclareAllQueues() {
 		log.Fatalln("Error: ", err.Error())
 	}
 	log.Println(sendParticipantCreatedWelcomeEmailQueue)
+
+	uploadSolutionPicQueue, err := DeclareQueue("upload.solution_picture.cloudinary")
+	if err != nil {
+		log.Fatalln("Error: ", err.Error())
+	}
+	log.Println(uploadSolutionPicQueue)
 	//
 }
 
@@ -149,15 +155,22 @@ func ListenToAllQueues() {
 		fmt.Println(err.Error())
 	}
 
+	chUploadSolutionPicQueue, err := ConsumeQueue("upload.solution_picture.cloudinary", GetConsumerTag())
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	for {
 		select {
 		case response := <-chUploadPicQicJobDelivery:
 			fmt.Printf(response.ConsumerTag)
-			HandlePicUploadConsumption(&response)
+			HandleJudgeProfilePicUploadConsumption(&response)
 		case response := <-chWelcomeEmailToJudgeDelivery:
 			HandleSendEmailToJudgeConsumption(&response)
 		case response := <-chCoordinateParticipantWelcomeVerDelivery:
 			fmt.Printf(response.ConsumerTag)
+		case response := <-chUploadSolutionPicQueue:
+			HandleSolutionPicUploadConsumption(&response)
 			//HandleCoordinateParticipantWelcomeVerificationConsumption(&response)
 		}
 	}

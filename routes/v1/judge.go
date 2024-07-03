@@ -153,7 +153,7 @@ func UpdateJudge(c echo.Context) error {
 				fmt.Println(err.Error())
 				return
 			}
-			payload := exports.UploadPicQueuePayload{
+			payload := exports.UploadJudgeProfilePicQueuePayload{
 				Email:    email,
 				FilePath: filePath,
 				QueuePayload: exports.QueuePayload{

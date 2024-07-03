@@ -192,7 +192,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 				fmt.Println(err.Error())
 				return
 			}
-			payload := exports.UploadPicQueuePayload{
+			payload := exports.UploadJudgeProfilePicQueuePayload{
 				Email:    dataInput.Email,
 				FilePath: filePath,
 				QueuePayload: exports.QueuePayload{

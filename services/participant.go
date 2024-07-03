@@ -286,6 +286,15 @@ func (s *ParticipantService) RemoveMemberFromTeam(dataInput *repository.RemoveMe
 	return info, err
 }
 
+func (s *ParticipantService) SelectionTeamSolution(dataInput *exports.SelectTeamSolutionData) (*entity.Solution, error) {
+	fmt.Println(dataInput)
+	solEnt, err := s.ParticipantRepository.SelectSolutionForTeam(dataInput)
+	if err != nil {
+		return nil, err
+	}
+	return solEnt, err
+}
+
 func (s *ParticipantService) FillParticipantInfo(id string) (*entity.Participant, error) {
 	ent, err := s.ParticipantRepository.FillParticipantInfo(id)
 	// emit created event

@@ -34,6 +34,35 @@ type GetParticipantResponseData struct {
 	Data    *entity.Participant `json:"data"`
 }
 
+type RegisterTeamParticipantSuccessResponse struct {
+	Code    int                `json:"code"`
+	Message string             `json:"message"`
+	Data    entity.Participant `json:"data"`
+}
+type RegisterTeamParticipantFailResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+type InviteTeamMemberFailResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+type InviteTeamMemberSuccessResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type FailResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type GetTeamMembersSuccessResponse struct {
+	Code    int                        `json:"code"`
+	Message string                     `json:"message"`
+	Data    []entity.TeamMemberAccount `json:"data"`
+}
+
 // @Title Register New Participant
 // @Description	Register new participant
 // @Summary		Register new participant
@@ -84,35 +113,6 @@ func RegisterParticipant(c echo.Context) error {
 		Code: http.StatusCreated,
 		Data: responseData,
 	})
-}
-
-type RegisterTeamParticipantSuccessResponse struct {
-	Code    int                `json:"code"`
-	Message string             `json:"message"`
-	Data    entity.Participant `json:"data"`
-}
-type RegisterTeamParticipantFailResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-type InviteTeamMemberFailResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-type InviteTeamMemberSuccessResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-type FailResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-type GetTeamMembersSuccessResponse struct {
-	Code    int                        `json:"code"`
-	Message string                     `json:"message"`
-	Data    []entity.TeamMemberAccount `json:"data"`
 }
 
 // @Title Fully Register New Team Member

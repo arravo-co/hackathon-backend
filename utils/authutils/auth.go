@@ -7,18 +7,21 @@ import (
 
 	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/data"
+	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jaevor/go-nanoid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthUtils struct {
 }
 
 func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsBasicLoginSuccessData, error) {
-	accountDoc, err := data.FindAccountIdentifier(dataInput.Identifier)
+	q := query.GetDefaultQuery()
+	accountDoc, err := q.FindAccountIdentifier(dataInput.Identifier)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 		return nil, errors.New("no email or username provided that matches record")
@@ -29,9 +32,15 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 		return nil, err
 	}
 	var participantDoc *exports.ParticipantDocument
+	var solDoc *exports.SolutionDocument
 	if accountDoc.Role == "PARTICIPANT" {
-		participantDoc, _ = data.GetParticipantRecord(accountDoc.ParticipantId)
+		participantDoc, _ = q.GetParticipantRecord(accountDoc.ParticipantId)
 	}
+
+	if participantDoc.SolutionId != "" {
+		solDoc, _ = q.GetSolutionDataById(participantDoc.SolutionId)
+	}
+
 	rr := &exports.AuthUtilsPayload{
 		Email:       accountDoc.Email,
 		LastName:    accountDoc.LastName,
@@ -40,7 +49,6 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 		HackathonId: accountDoc.HackathonId,
 	}
 	if participantDoc != nil {
-
 		if participantDoc.ParticipantId != "" {
 			rr.IsParticipant = true
 			rr.ParticipantType = participantDoc.Type
@@ -52,16 +60,32 @@ func BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*exports.AuthUtilsB
 	if err != nil {
 		return nil, err
 	}
-	dataOutput := &exports.AuthUtilsBasicLoginSuccessData{
-		AccessToken: accessToken,
-		FirstName:   accountDoc.FirstName,
-		LastName:    accountDoc.LastName,
-		Status:      accountDoc.Status,
-		Role:        accountDoc.Role,
-		Gender:      accountDoc.Gender,
-		Email:       accountDoc.Email,
-		HackathonId: accountDoc.HackathonId,
+	var ss = &struct {
+		Id               string "json:\"id\""
+		Title            string "json:\"title\""
+		Description      string "json:\"description\""
+		SolutionImageUrl string "json:\"solution_image_url\""
+		CreatorId        string "json:\"creator_id\""
+	}{
+		Id:               solDoc.Id.(primitive.ObjectID).Hex(),
+		Title:            solDoc.Title,
+		Description:      solDoc.Description,
+		SolutionImageUrl: solDoc.SolutionImageUrl,
+		CreatorId:        solDoc.CreatorId,
 	}
+
+	dataOutput := &exports.AuthUtilsBasicLoginSuccessData{
+		AccessToken:   accessToken,
+		FirstName:     accountDoc.FirstName,
+		LastName:      accountDoc.LastName,
+		Status:        accountDoc.Status,
+		Role:          accountDoc.Role,
+		Gender:        accountDoc.Gender,
+		Email:         accountDoc.Email,
+		HackathonId:   accountDoc.HackathonId,
+		PhoneNumber:   accountDoc.PhoneNumber,
+		ParticipantId: participantDoc.ParticipantId,
+		Solution:      ss}
 	return dataOutput, err
 }
 

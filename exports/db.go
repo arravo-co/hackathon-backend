@@ -37,19 +37,20 @@ type AccountDocument struct {
 
 type ParticipantDocument struct {
 	Id               interface{}
-	ParticipantId    string          `bson:"participant_id"`
-	HackathonId      string          `bson:"hackathon_id"`
-	Type             string          `bson:"type,omitempty"`
-	TeamLeadEmail    string          `bson:"team_lead_email,omitempty"`
-	SolutionId       string          `bson:"solution_id,omitempty"`
-	TeamName         string          `bson:"team_name,omitempty"`
-	CoParticipants   []CoParticipant `bson:"co_participants,omitempty"`
-	ParticipantEmail string          `bson:"participant_email,omitempty"`
-	GithubAddress    string          `bson:"github_address,omitempty"`
-	InviteList       []InviteInfo    `bson:"invite_list,omitempty"`
-	Status           string          `bson:"status,omitempty"`
-	CreatedAt        time.Time       `bson:"created_at,omitempty"`
-	UpdatedAt        time.Time       `bson:"updated_at,omitempty"`
+	ParticipantId    string           `bson:"participant_id"`
+	HackathonId      string           `bson:"hackathon_id"`
+	Type             string           `bson:"type,omitempty"`
+	TeamLeadEmail    string           `bson:"team_lead_email,omitempty"`
+	SolutionId       string           `bson:"solution_id,omitempty"`
+	Solution         SolutionDocument `bson:"solution"`
+	TeamName         string           `bson:"team_name,omitempty"`
+	CoParticipants   []CoParticipant  `bson:"co_participants,omitempty"`
+	ParticipantEmail string           `bson:"participant_email,omitempty"`
+	GithubAddress    string           `bson:"github_address,omitempty"`
+	InviteList       []InviteInfo     `bson:"invite_list,omitempty"`
+	Status           string           `bson:"status,omitempty"`
+	CreatedAt        time.Time        `bson:"created_at,omitempty"`
+	UpdatedAt        time.Time        `bson:"updated_at,omitempty"`
 }
 
 type CoParticipant struct {
@@ -73,14 +74,15 @@ type ParticipantScoreDocument struct {
 }
 
 type SolutionDocument struct {
-	Id          interface{} `bson:"_id,omitempty" `
-	Title       string      `bson:"title,omitempty"`
-	Objective   string      `bson:"objective,omitempty"`
-	Description string      `bson:"description"`
-	HackathonId string      `bson:"hackathon_id"`
-	CreatorId   string      `bson:"creator_id"`
-	CreatedAt   time.Time   `bson:"created_at"`
-	UpdatedAt   time.Time   `bson:"updated_at"`
+	Id               interface{} `bson:"_id" `
+	Title            string      `bson:"title,omitempty"`
+	Objective        string      `bson:"objective,omitempty"`
+	Description      string      `bson:"description,omitempty"`
+	HackathonId      string      `bson:"hackathon_id,omitempty"`
+	CreatorId        string      `bson:"creator_id,omitempty"`
+	SolutionImageUrl string      `bson:"solution_image_url,omitempty"`
+	CreatedAt        time.Time   `bson:"created_at,omitempty"`
+	UpdatedAt        time.Time   `bson:"updated_at,omitempty"`
 }
 
 type ParticipantAccountWithCoParticipantsDocument struct {
@@ -97,13 +99,13 @@ type ParticipantAccountWithCoParticipantsDocument struct {
 	Role              string      `bson:"role,omitempty"`
 	DOB               time.Time   `bson:"dob,omitempty"`
 	Bio               string      `bson:"bio,omitempty"`
-	EmploymentStatus  string      `bson:"employment_status"`
-	ExperienceLevel   string      `bson:"experience_level"`
-	Motivation        string      `bson:"motivation"`
+	EmploymentStatus  string      `bson:"employment_status,omitempty"`
+	ExperienceLevel   string      `bson:"experience_level,omitempty"`
+	Motivation        string      `bson:"motivation,omitempty"`
 	IsEmailVerified   bool        `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time   `bson:"is_email_verified_at,omitempty"`
-	Status            string      `bson:"status"`
-	ProfilePictureUrl string      `bson:"profile_picture_url"`
+	Status            string      `bson:"status,omitempty"`
+	ProfilePictureUrl string      `bson:"profile_picture_url,omitempty"`
 	LinkedInAddress   string      `bson:"linkedIn_address,omitempty"`
 	CreatedAt         time.Time   `bson:"created_at,omitempty"`
 	UpdatedAt         time.Time   `bson:"updated_at,omitempty"`
@@ -126,18 +128,18 @@ type CoParticipantAggregateDocument struct {
 	PhoneNumber       string    `bson:"phone_number,omitempty"`
 	Skillset          []string  `bson:"skillset,omitempty"`
 	ParticipantId     string    `bson:"participant_id,omitempty"`
-	HackathonId       string    `bson:"hackathon_id"`
+	HackathonId       string    `bson:"hackathon_id,omitempty"`
 	State             string    `bson:"state,omitempty"`
 	TeamRole          string    `bson:"team_role,omitempty"`
 	DOB               time.Time `bson:"dob,omitempty"`
 	Bio               string    `bson:"bio,omitempty"`
-	EmploymentStatus  string    `bson:"employment_status"`
-	ExperienceLevel   string    `bson:"experience_level"`
-	Motivation        string    `bson:"motivation"`
+	EmploymentStatus  string    `bson:"employment_status,omitempty"`
+	ExperienceLevel   string    `bson:"experience_level,omitempty"`
+	Motivation        string    `bson:"motivation,omitempty"`
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
-	Status            string    `bson:"status"`
-	ProfilePictureUrl string    `bson:"profile_picture_url"`
+	Status            string    `bson:"status,omitempty"`
+	ProfilePictureUrl string    `bson:"profile_picture_url,omitempty"`
 	LinkedInAddress   string    `bson:"linkedIn_address,omitempty"`
 	CreatedAt         time.Time `bson:"created_at,omitempty"`
 	UpdatedAt         time.Time `bson:"updated_at,omitempty"`

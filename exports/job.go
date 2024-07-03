@@ -17,10 +17,16 @@ type QueuePayload struct {
 	Direction             string `json:"direction,omitempty"` // REQUEST RESPONSE COMMAND
 }
 
-type UploadPicQueuePayload struct {
+type UploadJudgeProfilePicQueuePayload struct {
 	QueuePayload
 	Email    string `json:"account_email"`
 	FilePath string `json:"file_path"`
+}
+
+type UploadSolutionPicQueuePayload struct {
+	QueuePayload
+	SolutionId string `json:"solution_id"`
+	FilePath   string `json:"file_path"`
 }
 
 type CoordinateSendParticipantEmailPayload struct {

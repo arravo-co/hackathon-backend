@@ -25,19 +25,35 @@ func (s *SolutionRepository) CreateSolution(dataInput *exports.CreateSolutionDat
 	}
 
 	return &entity.Solution{
-		Id:          solDoc.Id.(primitive.ObjectID).Hex(),
-		Title:       solDoc.Title,
-		Description: solDoc.Description,
-		HackathonId: solDoc.HackathonId,
-		Objective:   solDoc.Objective,
-		CreatorId:   solDoc.CreatorId,
-		CreatedAt:   solDoc.CreatedAt,
-		UpdatedAt:   solDoc.UpdatedAt,
+		Id:               solDoc.Id.(primitive.ObjectID).Hex(),
+		Title:            solDoc.Title,
+		Description:      solDoc.Description,
+		HackathonId:      solDoc.HackathonId,
+		Objective:        solDoc.Objective,
+		SolutionImageUrl: solDoc.SolutionImageUrl,
+		CreatorId:        solDoc.CreatorId,
+		CreatedAt:        solDoc.CreatedAt,
+		UpdatedAt:        solDoc.UpdatedAt,
 	}, nil
 }
 
-func (*SolutionRepository) UpdateSolution(creator_id string, dataInput exports.CreateSolutionData) (*SolutionRepository, error) {
-	return nil, nil
+func (s *SolutionRepository) UpdateSolution(creator_id string, dataInput *exports.UpdateSolutionData) (*entity.Solution, error) {
+	sol, err := s.DB.UpdateSolutionData(creator_id, dataInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.Solution{
+		Id:               sol.Id.(primitive.ObjectID).Hex(),
+		Title:            sol.Title,
+		Description:      sol.Description,
+		Objective:        sol.Objective,
+		HackathonId:      sol.HackathonId,
+		CreatorId:        sol.CreatorId,
+		SolutionImageUrl: sol.SolutionImageUrl,
+		CreatedAt:        sol.CreatedAt,
+		UpdatedAt:        sol.UpdatedAt,
+	}, nil
 }
 
 func (s *SolutionRepository) GetSolutionsData(dataInput *exports.GetSolutionsQueryData) ([]entity.Solution, error) {
@@ -49,14 +65,15 @@ func (s *SolutionRepository) GetSolutionsData(dataInput *exports.GetSolutionsQue
 
 	for _, sol := range solDocs {
 		sols = append(sols, entity.Solution{
-			Id:          sol.Id.(primitive.ObjectID).Hex(),
-			Title:       sol.Title,
-			Description: sol.Description,
-			Objective:   sol.Objective,
-			HackathonId: sol.HackathonId,
-			CreatorId:   sol.CreatorId,
-			CreatedAt:   sol.CreatedAt,
-			UpdatedAt:   sol.UpdatedAt,
+			Id:               sol.Id.(primitive.ObjectID).Hex(),
+			Title:            sol.Title,
+			Description:      sol.Description,
+			Objective:        sol.Objective,
+			HackathonId:      sol.HackathonId,
+			CreatorId:        sol.CreatorId,
+			SolutionImageUrl: sol.SolutionImageUrl,
+			CreatedAt:        sol.CreatedAt,
+			UpdatedAt:        sol.UpdatedAt,
 		})
 	}
 
@@ -70,13 +87,14 @@ func (s *SolutionRepository) GetSolutionDataById(id string) (*entity.Solution, e
 	}
 
 	return &entity.Solution{
-		Id:          sol.Id.(primitive.ObjectID).Hex(),
-		Title:       sol.Title,
-		Description: sol.Description,
-		HackathonId: sol.HackathonId,
-		Objective:   sol.Objective,
-		CreatorId:   sol.CreatorId,
-		CreatedAt:   sol.CreatedAt,
-		UpdatedAt:   sol.UpdatedAt,
+		Id:               sol.Id.(primitive.ObjectID).Hex(),
+		Title:            sol.Title,
+		Description:      sol.Description,
+		HackathonId:      sol.HackathonId,
+		Objective:        sol.Objective,
+		CreatorId:        sol.CreatorId,
+		SolutionImageUrl: sol.SolutionImageUrl,
+		CreatedAt:        sol.CreatedAt,
+		UpdatedAt:        sol.UpdatedAt,
 	}, nil
 }

@@ -101,6 +101,23 @@ type CompletePasswordRecoverySuccessResponseData struct {
 	Email string `json:"email"`
 }
 
+type DeleteTeamMemberSuccessResponse struct {
+	Code    int                       `json:"code"`
+	Message string                    `json:"message"`
+	Data    *entity.TeamMemberAccount `json:"data"`
+}
+
+type DeleteTeamMemberFailResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type AddSolutionSuccessResponse struct {
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Data    *entity.Participant `json:"data"`
+}
+
 // @Title Basic Log in
 // @Description	Log a user in
 // @Summary		Log a user in
@@ -751,17 +768,6 @@ func GetMyTeamMembersInfo(ctx echo.Context) error {
 	})
 }
 
-type DeleteTeamMemberSuccessResponse struct {
-	Code    int                       `json:"code"`
-	Message string                    `json:"message"`
-	Data    *entity.TeamMemberAccount `json:"data"`
-}
-
-type DeleteTeamMemberFailResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
 // @Title Get Team Members Info
 // @Description	 Delete Team Member from Team
 // @Summary		 Remove Team Member from Team
@@ -773,6 +779,7 @@ type DeleteTeamMemberFailResponse struct {
 // @Router			/api/v1/auth/me/team/{memberId}              [delete]
 func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
+
 	memberId := ctx.Param("team_member_email")
 
 	partServ := services.NewParticipantService()
@@ -781,12 +788,14 @@ func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+
 	if participant.TeamLeadEmail != payload.Email {
 		return ctx.JSON(401, DeleteTeamMemberFailResponse{
 			Message: "Unauthorized",
 			Code:    401,
 		})
 	}
+
 	member, err := partServ.RemoveMemberFromTeam(&repository.RemoveMemberFromTeamData{
 		MemberEmail:   memberId,
 		HackathonId:   payload.HackathonId,
@@ -801,6 +810,70 @@ func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	return ctx.JSON(200, DeleteTeamMemberSuccessResponse{
 		Message: "",
 		Data:    member,
+		Code:    200,
+	})
+}
+
+// @Title Get Team Members Info
+// @Description	 Delete Team Member from Team
+// @Summary		 Remove Team Member from Team
+// @Tags			Participants
+// @Param  memberId  path  string  true  "email of team member"
+// @Produce		json
+// @Success		200	{object}	DeleteTeamMemberSuccessResponse
+// @Failure		400	{object}	FailResponse
+// @Router			/api/v1/auth/me/team/solution              [put]
+func ChooseSolutionForMyTeam(ctx echo.Context) error {
+	authPayload := authutils.GetAuthPayload(ctx)
+	solDataBodyPayload := dtos.SelectTeamSolutionData{}
+	err := ctx.Bind(&solDataBodyPayload)
+
+	if err != nil {
+		return ctx.JSON(400, &ResponseData{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+	err = validate.Struct(&solDataBodyPayload)
+
+	if err != nil {
+		return ctx.JSON(400, &ResponseData{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+	partServ := services.NewParticipantService()
+	participant, err := partServ.FillParticipantInfo(authPayload.Email)
+
+	if err != nil {
+		return ctx.JSON(400, &ResponseData{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+
+	if participant.TeamLeadEmail != authPayload.Email {
+		return ctx.JSON(401, DeleteTeamMemberFailResponse{
+			Message: "Unauthorized",
+			Code:    401,
+		})
+	}
+
+	solEnt, err := partServ.SelectionTeamSolution(&exports.SelectTeamSolutionData{
+		HackathonId:   authPayload.HackathonId,
+		ParticipantId: authPayload.ParticipantId,
+		SolutionId:    solDataBodyPayload.SolutionId,
+	})
+	if err != nil {
+		return ctx.JSON(400, FailResponse{
+			Message: err.Error(),
+			Code:    400,
+		})
+	}
+	participant.Solution = solEnt
+	return ctx.JSON(200, AddSolutionSuccessResponse{
+		Message: "",
+		Data:    participant,
 		Code:    200,
 	})
 }

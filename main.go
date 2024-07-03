@@ -88,6 +88,7 @@ func main() {
 	db.SetupRedis()
 	rmqUtils.SetupDefaultQueue()
 	data.SetupDefaultDataSource()
+	rabbitutils.SetupRMQ()
 	rabbitutils.DeclareAllQueues()
 	publish.SetPublisher(&rabbitutils.Publisher{})
 	go rabbitutils.ListenToAllQueues()

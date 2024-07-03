@@ -41,3 +41,9 @@ type CreateSolutionData struct {
 	Description string `validate:"required" json:"description"`
 	Objective   string `validate:"required" json:"objective"`
 }
+
+type UpdateSolutionData struct {
+	Title       string ` json:"title"`
+	Description string ` json:"description"`
+	Objective   string ` json:"objective"`
+}
