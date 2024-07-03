@@ -36,10 +36,11 @@ func (q *Query) UpdateSolutionData(id string, dataInput *exports.UpdateSolutionD
 		return nil, err
 	}
 	dataFromCol := &exports.SolutionDocument{
-		Description: dataInput.Description,
-		Title:       dataInput.Title,
-		Objective:   dataInput.Objective,
-		UpdatedAt:   time.Now(),
+		Description:      dataInput.Description,
+		Title:            dataInput.Title,
+		Objective:        dataInput.Objective,
+		SolutionImageUrl: dataInput.SolutionImageUrl,
+		UpdatedAt:        time.Now(),
 	}
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -48,36 +49,7 @@ func (q *Query) UpdateSolutionData(id string, dataInput *exports.UpdateSolutionD
 	filter := bson.M{
 		"_id": objId,
 	}
-	var updates *bson.M
 
-	if dataInput.Description != "" {
-		if updates == nil {
-			updates = &bson.M{
-				"description": dataInput.Description,
-			}
-		}
-	}
-
-	if dataInput.Title != "" {
-		if updates == nil {
-			updates = &bson.M{
-				"title": dataInput.Title,
-			}
-		}
-	}
-
-	if dataInput.Objective != "" {
-		if updates == nil {
-			updates = &bson.M{
-				"objective": dataInput.Objective,
-			}
-		}
-	}
-	if updates == nil {
-		updates = &bson.M{
-			"updated_at": time.Now(),
-		}
-	}
 	after := options.After
 
 	result := solutionCol.FindOneAndUpdate(context.Background(), filter, bson.M{"$set": dataFromCol}, &options.FindOneAndUpdateOptions{

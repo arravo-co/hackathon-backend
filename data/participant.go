@@ -119,38 +119,6 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 	return result, err
 }
 
-func AddSolutionToTeam(dataToSave *exports.AddSolutionToTeamData) (interface{}, error) {
-	participantCol, err := DefaultDatasource.GetParticipantCollection()
-	ctx := context.Context(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	filter := bson.M{
-		"participant_id": dataToSave.ParticipantId,
-		"hackathon_id":   dataToSave.HackathonId,
-	}
-	upd := bson.M{
-		"$set": bson.M{"solution_id": dataToSave.SolutionId},
-	}
-	fmt.Println(upd)
-
-	result, err := participantCol.UpdateOne(ctx, filter, upd)
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-		return nil, err
-	}
-	fmt.Printf("%#v", result)
-	if result.MatchedCount == 0 {
-		fmt.Printf("failed to add to invite list")
-		return nil, errors.New("failed to add to invite list: failed to match")
-	}
-	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
-		fmt.Printf("No changes made")
-		return nil, errors.New("failed to add to invite list: failed to save")
-	}
-	return result, err
-}
-
 func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
 	partDoc := &exports.ParticipantDocument{}
 	participantCol, err := DefaultDatasource.GetParticipantCollection()

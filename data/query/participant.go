@@ -9,6 +9,7 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -261,6 +262,9 @@ func (q *Query) GetParticipantsRecordsAggregate() ([]exports.ParticipantAccountW
 	}
 
 	cursor, err := participantCol.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
 	err = cursor.All(context.Background(), &result)
 	if err != nil {
 		return nil, err
@@ -323,38 +327,6 @@ func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData)
 	return result, err
 }
 
-func (q *Query) AddSolutionToTeam(dataToSave *exports.AddSolutionToTeamData) (interface{}, error) {
-	participantCol, err := q.Datasource.GetParticipantCollection()
-	ctx := context.Context(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	filter := bson.M{
-		"participant_id": dataToSave.ParticipantId,
-		"hackathon_id":   dataToSave.HackathonId,
-	}
-	upd := bson.M{
-		"$set": bson.M{"solution_id": dataToSave.SolutionId},
-	}
-	fmt.Println(upd)
-
-	result, err := participantCol.UpdateOne(ctx, filter, upd)
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-		return nil, err
-	}
-	fmt.Printf("%#v", result)
-	if result.MatchedCount == 0 {
-		fmt.Printf("failed to add to invite list")
-		return nil, errors.New("failed to add to invite list: failed to match")
-	}
-	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
-		fmt.Printf("No changes made")
-		return nil, errors.New("failed to add to invite list: failed to save")
-	}
-	return result, err
-}
-
 func (q *Query) AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
 	partDoc := &exports.ParticipantDocument{}
 	participantCol, err := q.Datasource.GetParticipantCollection()
@@ -368,7 +340,7 @@ func (q *Query) AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToPart
 		"invite_list.email": dataToSave.Email,
 	}
 
-	fmt.Println("\n\n\n", filter, "\n\n\n")
+	//fmt.Println("\n\n\n", filter, "\n\n\n")
 
 	upd := bson.M{
 		"$addToSet": bson.M{"co_participants": bson.M{"email": dataToSave.Email, "role": dataToSave.TeamRole}},
@@ -396,7 +368,7 @@ func (q *Query) RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemb
 		"hackathon_id":   dataToSave.HackathonId,
 	}
 
-	fmt.Println("\n\n", dataToSave.MemberEmail, "\n\n")
+	//fmt.Println("\n\n", dataToSave.MemberEmail, "\n\n")
 
 	upd := bson.M{
 		"$pull": bson.M{"co_participants.email": dataToSave.MemberEmail},
@@ -417,4 +389,49 @@ func (q *Query) RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemb
 		return nil, fmt.Errorf("no changes made.")
 	}
 	return participantCol, err
+}
+
+func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData) (*exports.ParticipantDocument, error) {
+	solId, err := primitive.ObjectIDFromHex(dataToSave.SolutionId)
+	if err != nil {
+		return nil, err
+	}
+	solCol, err := q.Datasource.GetSolutionCollection()
+	if err != nil {
+		return nil, err
+	}
+	solDoc := exports.SolutionDocument{}
+	solResult := solCol.FindOne(context.Background(), bson.M{"_id": solId})
+	if err := solResult.Decode(&solDoc); err != nil {
+		return nil, err
+	}
+
+	if solDoc.Title == "" {
+		return nil, errors.New("No document with id " + dataToSave.SolutionId)
+	}
+	participantCol, err := q.Datasource.GetParticipantCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.M{
+		"participant_id": dataToSave.ParticipantId,
+		"hackathon_id":   dataToSave.HackathonId,
+	}
+
+	//fmt.Println("\n\n", dataToSave.MemberEmail, "\n\n")
+
+	upd := bson.M{
+		"$set": bson.M{"solution_id": dataToSave.SolutionId},
+	}
+	partDoc := exports.ParticipantDocument{}
+	ret := options.After
+	resultPartDoc := participantCol.FindOneAndUpdate(ctx, filter, upd, &options.FindOneAndUpdateOptions{
+		ReturnDocument: &ret,
+	})
+	if err := resultPartDoc.Decode(&partDoc); err != nil {
+		return nil, err
+	}
+	partDoc.Solution = solDoc
+	return &partDoc, err
 }

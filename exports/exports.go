@@ -49,6 +49,13 @@ type AuthUtilsBasicLoginSuccessData struct {
 	ParticipantEmail    string       `json:"participant_email"`
 	InviteList          []InviteInfo `json:"invite_list"`
 	Skillset            []string     `json:"skillset"`
+	Solution            *struct {
+		Id               string `json:"id"`
+		Title            string `json:"title"`
+		Description      string `json:"description"`
+		SolutionImageUrl string `json:"solution_image_url"`
+		CreatorId        string `json:"creator_id"`
+	} `json:"solution"`
 }
 
 type jwtCustomClaims struct {

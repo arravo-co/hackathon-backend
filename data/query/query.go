@@ -1,9 +1,6 @@
 package query
 
 import (
-	"context"
-	"fmt"
-
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 )
@@ -21,7 +18,7 @@ func GetDefaultQuery() *Query {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("\n\n\n", re.DB.Client().Connect(context.Background()), "\n\n\n\n")
+	//fmt.Println("\n\n\n", re.DB.Client().Connect(context.Background()), "\n\n\n\n")
 
 	return GetQueryWithConfiguredDatasource(&exports.ConfigQueryWithDatasource{
 		Datasource: re,

@@ -37,13 +37,12 @@ func GetUploadedPic(file *multipart.FileHeader, opts ...UploadOpts) (string, err
 	}
 	defer src.Close()
 	fileName := file.Filename
-	fmt.Println(fileName)
 	var byt []byte
 	_, err = src.Read(byt)
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("\nprofile picture file  %d     %s\n", file.Size, string(byt))
+	fmt.Printf("\n picture file  %d     %s\n", file.Size, string(byt))
 	is_img := filetype.IsImage(byt)
 	if !is_img {
 		//return "", fmt.Errorf("error: not an image type ")

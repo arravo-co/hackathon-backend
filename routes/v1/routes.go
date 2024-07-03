@@ -82,6 +82,7 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
 	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
 	authRoutes.POST("/me/team/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
+	authRoutes.POST("/me/team/solution", ChooseSolutionForMyTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 	authRoutes.GET("/team/invite", ValidateTeamInviteLink)
 	authRoutes.GET("/me/team", GetMyTeamMembersInfo, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 
@@ -98,6 +99,7 @@ func setupScoreRoutes(api *echo.Group) {
 func setupSolutionRoutes(api *echo.Group) {
 	solutionRoutes = api.Group("/solutions")
 	solutionRoutes.GET("/:id", GetSolutionDataById)
+	solutionRoutes.PUT("/:id", UpdateSolutionDataById, othermiddleware.Auth(), othermiddleware.CheckIfIsRole("ADMIN"))
 	solutionRoutes.GET("", GetSolutionsData)
 	solutionRoutes.POST("", CreateSolution, othermiddleware.Auth(), othermiddleware.CheckIfIsRole("ADMIN"))
 }

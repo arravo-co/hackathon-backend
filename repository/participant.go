@@ -17,6 +17,7 @@ import (
 	"github.com/arravoco/hackathon_backend/events"
 	"github.com/arravoco/hackathon_backend/exports"
 	valueobjects "github.com/arravoco/hackathon_backend/value_objects"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // AddMemberToParticipatingTeam
@@ -180,19 +181,6 @@ func (p ParticipantRepository) InviteToTeam(dataInput *exports.AddToTeamInviteLi
 	err = q.PublishBytes(byt)
 	if err != nil {
 		fmt.Println(err.Error())
-	}
-	return res, nil
-}
-
-func (p ParticipantRepository) AddSolutionToTeam(solution_id string) (interface{}, error) {
-	res, err := p.DB.AddSolutionToTeam(&exports.AddSolutionToTeamData{
-		Email:         p.Email,
-		ParticipantId: p.ParticipantEmail,
-		HackathonId:   p.HackathonId,
-		SolutionId:    solution_id,
-	})
-	if err != nil {
-		return nil, err
 	}
 	return res, nil
 }
@@ -456,7 +444,8 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 	solRepo := NewSolutionRepository(repo.DB)
 	sol, err := solRepo.GetSolutionDataById(particicipantDocData.SolutionId)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		return p, nil
 	}
 	p.Solution = &entity.Solution{
 		Id:          sol.Id,
@@ -581,6 +570,7 @@ func (s *ParticipantRepository) GetParticipantInfo(participantId string) (*entit
 
 func (s *ParticipantRepository) GetParticipantsInfo() ([]entity.Participant, error) {
 	partDocs, err := s.DB.GetParticipantsRecordsAggregate()
+
 	var participants []entity.Participant
 	for _, part := range partDocs {
 		participants = append(participants, entity.Participant{
@@ -637,6 +627,28 @@ func (s *ParticipantRepository) RemoveMemberFromTeam(dataInput *RemoveMemberFrom
 	acc, err := data.DeleteAccount(dataInput.MemberEmail)
 	info := FillTeamMemberInfo(acc)
 	return info, err
+}
+
+//
+
+func (s *ParticipantRepository) SelectSolutionForTeam(dataInput *exports.SelectTeamSolutionData) (*entity.Solution, error) {
+
+	partDoc, err := s.DB.SelectSolutionForTeam(&exports.SelectTeamSolutionData{
+		HackathonId:   dataInput.HackathonId,
+		ParticipantId: dataInput.ParticipantId,
+		SolutionId:    dataInput.SolutionId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &entity.Solution{
+		Id:          partDoc.Solution.Id.(primitive.ObjectID).Hex(),
+		HackathonId: partDoc.Solution.HackathonId,
+		Description: partDoc.Solution.Description,
+		Objective:   partDoc.Solution.Objective,
+		Title:       partDoc.Solution.Title,
+		CreatorId:   partDoc.Solution.CreatorId,
+	}, err
 }
 
 func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberAccount {

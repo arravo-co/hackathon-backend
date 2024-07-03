@@ -128,6 +128,10 @@ func GetCollection(colName string) (*mongo.Collection, error) {
 	return col, nil
 }
 
+func (m MongoRepository) GetView() (*mongo.Collection, error) {
+	return nil, nil
+}
+
 func (m MongoRepository) GetAccountCollection() (*mongo.Collection, error) {
 	var err error
 	col := m.DB.Collection("accounts")

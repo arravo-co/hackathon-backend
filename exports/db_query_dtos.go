@@ -89,13 +89,6 @@ type RemoveMemberFromParticipatingTeamData struct {
 	MemberEmail   string `bson:"email"`
 }
 
-type AddSolutionToTeamData struct {
-	HackathonId   string `bson:"hackathon_id"`
-	ParticipantId string `bson:"participant_id"`
-	Email         string `bson:"email"`
-	SolutionId    string `bson:"solution_id,omitempty"`
-}
-
 type AddToTeamInviteListData struct {
 	HackathonId   string `bson:"hackathon_id"`
 	ParticipantId string `bson:"participant_id"`
@@ -171,8 +164,15 @@ type GetSolutionsQueryData struct {
 }
 
 type UpdateSolutionData struct {
-	Title       string `bson:"title,omitempty"`
-	Description string `bson:"description,omitempty"`
-	CreatorId   string `bson:"creator_id"`
-	Objective   string `bson:"objective,omitempty"`
+	Title            string `bson:"title,omitempty"`
+	Description      string `bson:"description,omitempty"`
+	CreatorId        string `bson:"creator_id"`
+	Objective        string `bson:"objective,omitempty"`
+	SolutionImageUrl string `bson:"solution_image_url,omitempty"`
+}
+
+type SelectTeamSolutionData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	SolutionId    string `bson:"solution_id"`
 }
