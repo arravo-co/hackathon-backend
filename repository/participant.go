@@ -17,7 +17,6 @@ import (
 	"github.com/arravoco/hackathon_backend/events"
 	"github.com/arravoco/hackathon_backend/exports"
 	valueobjects "github.com/arravoco/hackathon_backend/value_objects"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // AddMemberToParticipatingTeam
@@ -693,13 +692,13 @@ func (s *ParticipantRepository) SelectSolutionForTeam(dataInput *exports.SelectT
 		return nil, err
 	}
 	return &entity.Solution{
-		Id:          partDoc.Solution.Id.(primitive.ObjectID).Hex(),
+		Id:          partDoc.SolutionId,
 		HackathonId: partDoc.Solution.HackathonId,
 		Description: partDoc.Solution.Description,
 		Objective:   partDoc.Solution.Objective,
 		Title:       partDoc.Solution.Title,
 		CreatorId:   partDoc.Solution.CreatorId,
-	}, err
+	}, nil
 }
 
 func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberAccount {

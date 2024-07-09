@@ -392,6 +392,7 @@ func (q *Query) RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemb
 }
 
 func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData) (*exports.ParticipantDocument, error) {
+	fmt.Println(dataToSave.SolutionId, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
 	solId, err := primitive.ObjectIDFromHex(dataToSave.SolutionId)
 	if err != nil {
 		return nil, err
@@ -400,8 +401,12 @@ func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(solId, "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
 	solDoc := exports.SolutionDocument{}
 	solResult := solCol.FindOne(context.Background(), bson.M{"_id": solId})
+	if solResult.Err() != nil {
+		return nil, solResult.Err()
+	}
 	if err := solResult.Decode(&solDoc); err != nil {
 		return nil, err
 	}
@@ -410,10 +415,10 @@ func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData
 		return nil, errors.New("No document with id " + dataToSave.SolutionId)
 	}
 	participantCol, err := q.Datasource.GetParticipantCollection()
-	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
 	}
+	ctx := context.Context(context.Background())
 	filter := bson.M{
 		"participant_id": dataToSave.ParticipantId,
 		"hackathon_id":   dataToSave.HackathonId,
