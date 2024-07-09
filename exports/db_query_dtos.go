@@ -50,12 +50,16 @@ type CreateAccountData struct {
 
 type CreateParticipantAccountData struct {
 	CreateAccountData
-	ParticipantId    string    `bson:"participant_id"`
-	Skillset         []string  `bson:"skillset"`
-	DOB              time.Time `bson:"dob"`
-	EmploymentStatus string    `bson:"employment_status"`
-	ExperienceLevel  string    `bson:"experience_level"`
-	Motivation       string    `bson:"motivation"`
+	ParticipantId       string    `bson:"participant_id"`
+	Skillset            []string  `bson:"skillset"`
+	DOB                 time.Time `bson:"dob"`
+	EmploymentStatus    string    `bson:"employment_status"`
+	ExperienceLevel     string    `bson:"experience_level"`
+	Motivation          string    `bson:"motivation"`
+	HackathonExperience string    `bson:"hackathon_experience"`
+	YearsOfExperience   int       `bson:"years_of_experience"`
+	FieldOfStudy        string    `bson:"field_of_study"`
+	PreviousProjects    []string  `bson:"previous_projects"`
 }
 
 type CreateTeamMemberAccountData struct {

@@ -79,17 +79,25 @@ func (acc *AccountRepository) CreateTeamMemberAccount(dataToSave *exports.Create
 func (acc *AccountRepository) CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*entity.Participant, error) {
 
 	accountCol, err := acc.DB.CreateParticipantAccount(dataToSave)
+	if err != nil {
+		return nil, err
+	}
 	return &entity.Participant{
-		FirstName:       accountCol.FirstName,
-		LastName:        accountCol.LastName,
-		DOB:             accountCol.DOB,
-		Gender:          accountCol.Gender,
-		State:           accountCol.State,
-		ParticipantId:   accountCol.ParticipantId,
-		PhoneNumber:     accountCol.PhoneNumber,
-		Email:           accountCol.Email,
-		IsEmailVerified: accountCol.IsEmailVerified,
-		CreatedAt:       accountCol.CreatedAt,
-		UpdatedAt:       accountCol.UpdatedAt,
-	}, err
+		FirstName:           accountCol.FirstName,
+		LastName:            accountCol.LastName,
+		DOB:                 accountCol.DOB,
+		Gender:              accountCol.Gender,
+		State:               accountCol.State,
+		ParticipantId:       accountCol.ParticipantId,
+		PhoneNumber:         accountCol.PhoneNumber,
+		Email:               accountCol.Email,
+		Motivation:          accountCol.Motivation,
+		HackathonExperience: accountCol.HackathonExperience,
+		FieldOfStudy:        accountCol.FieldOfStudy,
+		YearsOfExperience:   accountCol.YearsOfExperience,
+		PreviousProjects:    accountCol.PreviousProjects,
+		IsEmailVerified:     accountCol.IsEmailVerified,
+		CreatedAt:           accountCol.CreatedAt,
+		UpdatedAt:           accountCol.UpdatedAt,
+	}, nil
 }

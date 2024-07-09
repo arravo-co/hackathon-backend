@@ -199,12 +199,16 @@ func (s *ParticipantService) RegisterTeamLead(input dtos.RegisterNewParticipantD
 	}
 	fmt.Println("\nhere: ", input)
 	acc, err := s.AccountRepository.CreateParticipantAccount(&exports.CreateParticipantAccountData{
-		ParticipantId:    participantId,
-		Skillset:         input.Skillset,
-		DOB:              dob,
-		Motivation:       input.Motivation,
-		EmploymentStatus: input.EmploymentStatus,
-		ExperienceLevel:  input.ExperienceLevel,
+		ParticipantId:       participantId,
+		Skillset:            input.Skillset,
+		DOB:                 dob,
+		Motivation:          input.Motivation,
+		EmploymentStatus:    input.EmploymentStatus,
+		ExperienceLevel:     input.ExperienceLevel,
+		HackathonExperience: input.HackathonExperience,
+		YearsOfExperience:   input.YearsOfExperience,
+		FieldOfStudy:        input.FieldOfStudy,
+		PreviousProjects:    input.PreviousProjects,
 		CreateAccountData: exports.CreateAccountData{
 			Email:        input.Email,
 			FirstName:    input.FirstName,
@@ -271,6 +275,10 @@ func (s *ParticipantService) RegisterTeamLead(input dtos.RegisterNewParticipantD
 		Motivation:          input.Motivation,
 		ExperienceLevel:     input.ExperienceLevel,
 		EmploymentStatus:    input.EmploymentStatus,
+		PreviousProjects:    input.PreviousProjects,
+		HackathonExperience: input.HackathonExperience,
+		FieldOfStudy:        input.FieldOfStudy,
+		YearsOfExperience:   input.YearsOfExperience,
 		CreatedAt:           acc.CreatedAt,
 		UpdatedAt:           acc.UpdatedAt,
 	}, err

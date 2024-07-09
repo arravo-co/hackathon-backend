@@ -33,6 +33,10 @@ type Participant struct {
 	EmploymentStatus    string                           `json:"employment_status"`
 	ExperienceLevel     string                           `json:"experience_level"`
 	Motivation          string                           `json:"motivation"`
+	HackathonExperience string                           `json:"hackathon_experience"`
+	YearsOfExperience   int                              `json:"years_of_experience"`
+	FieldOfStudy        string                           `json:"field_of_study"`
+	PreviousProjects    []string                         `json:"previous_projects"`
 	IsEmailVerified     bool                             `json:"is_email_verified"`
 	EmailVerifiedAt     time.Time                        `json:"email_verified_at"`
 	Solution            *Solution                        `json:"solution"`

@@ -56,6 +56,14 @@ type AuthUtilsBasicLoginSuccessData struct {
 		SolutionImageUrl string `json:"solution_image_url"`
 		CreatorId        string `json:"creator_id"`
 	} `json:"solution"`
+	Bio                 string   `bson:"bio,omitempty"`
+	EmploymentStatus    string   `bson:"employment_status,omitempty"`
+	ExperienceLevel     string   `bson:"experience_level,omitempty"`
+	Motivation          string   `bson:"motivation,omitempty"`
+	HackathonExperience string   `bson:"hackathon_experience,omitempty"`
+	YearsOfExperience   int      `bson:"years_of_experience,omitempty"`
+	FieldOfStudy        string   `bson:"field_of_study,omitempty"`
+	PreviousProjects    []string `bson:"previous_projects,omitempty"`
 }
 
 type jwtCustomClaims struct {

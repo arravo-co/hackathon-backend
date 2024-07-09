@@ -72,16 +72,22 @@ here:
 	}
 
 	dataOutput := &exports.AuthUtilsBasicLoginSuccessData{
-		AccessToken: accessToken,
-		FirstName:   accountDoc.FirstName,
-		LastName:    accountDoc.LastName,
-		Status:      accountDoc.Status,
-		Role:        accountDoc.Role,
-		Gender:      accountDoc.Gender,
-		Email:       accountDoc.Email,
-		HackathonId: accountDoc.HackathonId,
-		PhoneNumber: accountDoc.PhoneNumber,
-		Solution:    ss}
+		AccessToken:         accessToken,
+		FirstName:           accountDoc.FirstName,
+		LastName:            accountDoc.LastName,
+		Status:              accountDoc.Status,
+		Role:                accountDoc.Role,
+		Gender:              accountDoc.Gender,
+		Email:               accountDoc.Email,
+		HackathonId:         accountDoc.HackathonId,
+		PhoneNumber:         accountDoc.PhoneNumber,
+		Bio:                 accountDoc.Bio,
+		Motivation:          accountDoc.Motivation,
+		HackathonExperience: accountDoc.HackathonExperience,
+		FieldOfStudy:        accountDoc.FieldOfStudy,
+		YearsOfExperience:   accountDoc.YearsOfExperience,
+		PreviousProjects:    accountDoc.PreviousProjects,
+		Solution:            ss}
 	if participantDoc != nil {
 		dataOutput.ParticipantId = participantDoc.ParticipantId
 	}

@@ -48,6 +48,10 @@ type ParticipantRepository struct {
 	EmploymentStatus    string               `json:"employment_status"`
 	ExperienceLevel     string               `json:"experience_level"`
 	Motivation          string               `json:"motivation"`
+	HackathonExperience string               `json:"hackathon_experience"`
+	YearsOfExperience   int                  `json:"years_of_experience"`
+	FieldOfStudy        string               `json:"field_of_study"`
+	PreviousProjects    []string             `json:"previous_projects"`
 	Solution            *SolutionRepository  `json:"solution"`
 	CreatedAt           time.Time            `json:"created_at"`
 	UpdatedAt           time.Time            `json:"updated_at"`
@@ -67,25 +71,29 @@ type ParticipantRecord struct {
 	UpdatedAt           time.Time            `json:"updated_at"`
 }
 type CoParticipantInfo struct {
-	FirstName        string    `json:"first_name"`
-	LastName         string    `json:"last_name"`
-	Email            string    `json:"email"`
-	Gender           string    `json:"gender"`
-	State            string    `json:"state"`
-	Age              int       `json:"age"`
-	DOB              time.Time `json:"dob"`
-	AccountStatus    string    `json:"account_status"`
-	AccountRole      string    `json:"account_role"`
-	TeamRole         string    `json:"team_role"`
-	ParticipantId    string    `json:"participant_id"`
-	HackathonId      string    `json:"hackathon_id"`
-	Skillset         []string  `json:"skillset"`
-	PhoneNumber      string    `json:"phone_number"`
-	EmploymentStatus string    `json:"employment_status"`
-	ExperienceLevel  string    `json:"experience_level"`
-	Motivation       string    `json:"motivation"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+	FirstName           string    `json:"first_name"`
+	LastName            string    `json:"last_name"`
+	Email               string    `json:"email"`
+	Gender              string    `json:"gender"`
+	State               string    `json:"state"`
+	Age                 int       `json:"age"`
+	DOB                 time.Time `json:"dob"`
+	AccountStatus       string    `json:"account_status"`
+	AccountRole         string    `json:"account_role"`
+	TeamRole            string    `json:"team_role"`
+	ParticipantId       string    `json:"participant_id"`
+	HackathonId         string    `json:"hackathon_id"`
+	Skillset            []string  `json:"skillset"`
+	PhoneNumber         string    `json:"phone_number"`
+	EmploymentStatus    string    `json:"employment_status"`
+	ExperienceLevel     string    `json:"experience_level"`
+	Motivation          string    `json:"motivation"`
+	HackathonExperience string    `json:"hackathon_experience"`
+	YearsOfExperience   int       `json:"years_of_experience"`
+	FieldOfStudy        string    `json:"field_of_study"`
+	PreviousProjects    []string  `json:"previous_projects"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at"`
 }
 
 type TeamMemberAccount struct {
@@ -207,12 +215,16 @@ func (p *ParticipantRepository) RegisterIndividual(input dtos.RegisterNewPartici
 			HackathonId:  config.GetHackathonId(),
 			Status:       "EMAIL_UNVERIFIED",
 		},
-		DOB:              dob,
-		Skillset:         input.Skillset,
-		ParticipantId:    participantId,
-		Motivation:       input.Motivation,
-		ExperienceLevel:  input.ExperienceLevel,
-		EmploymentStatus: input.EmploymentStatus,
+		DOB:                 dob,
+		Skillset:            input.Skillset,
+		ParticipantId:       participantId,
+		Motivation:          input.Motivation,
+		YearsOfExperience:   input.YearsOfExperience,
+		PreviousProjects:    input.PreviousProjects,
+		HackathonExperience: input.HackathonExperience,
+		FieldOfStudy:        input.FieldOfStudy,
+		ExperienceLevel:     input.ExperienceLevel,
+		EmploymentStatus:    input.EmploymentStatus,
 	}
 	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
 	if isEmailInCache {
@@ -271,6 +283,10 @@ func (p *ParticipantRepository) RegisterIndividual(input dtos.RegisterNewPartici
 		Skillset:            accCreated.Skillset,
 		PhoneNumber:         accCreated.PhoneNumber,
 		Motivation:          dataInput.Motivation,
+		YearsOfExperience:   dataInput.YearsOfExperience,
+		HackathonExperience: dataInput.HackathonExperience,
+		FieldOfStudy:        dataInput.FieldOfStudy,
+		PreviousProjects:    dataInput.PreviousProjects,
 		ExperienceLevel:     dataInput.ExperienceLevel,
 		EmploymentStatus:    dataInput.EmploymentStatus,
 		CreatedAt:           accCreated.CreatedAt,
@@ -300,12 +316,16 @@ func (p *ParticipantRepository) RegisterTeamLead(input dtos.RegisterNewParticipa
 	}
 	accRepo := NewAccountRepository(p.DB)
 	acc, err := accRepo.CreateParticipantAccount(&exports.CreateParticipantAccountData{
-		ParticipantId:    participantId,
-		Skillset:         input.Skillset,
-		DOB:              dob,
-		Motivation:       input.Motivation,
-		EmploymentStatus: input.EmploymentStatus,
-		ExperienceLevel:  input.ExperienceLevel,
+		ParticipantId:       participantId,
+		Skillset:            input.Skillset,
+		DOB:                 dob,
+		Motivation:          input.Motivation,
+		EmploymentStatus:    input.EmploymentStatus,
+		ExperienceLevel:     input.ExperienceLevel,
+		YearsOfExperience:   input.YearsOfExperience,
+		HackathonExperience: input.HackathonExperience,
+		PreviousProjects:    input.PreviousProjects,
+		FieldOfStudy:        input.FieldOfStudy,
 		CreateAccountData: exports.CreateAccountData{
 			Email:        input.Email,
 			FirstName:    input.FirstName,
@@ -369,6 +389,10 @@ func (p *ParticipantRepository) RegisterTeamLead(input dtos.RegisterNewParticipa
 		TeamRole:            "TEAM_LEAD",
 		CoParticipants:      []CoParticipantInfo{},
 		Motivation:          input.Motivation,
+		YearsOfExperience:   input.YearsOfExperience,
+		FieldOfStudy:        input.FieldOfStudy,
+		HackathonExperience: input.HackathonExperience,
+		PreviousProjects:    input.PreviousProjects,
 		ExperienceLevel:     input.ExperienceLevel,
 		EmploymentStatus:    input.EmploymentStatus,
 		CreatedAt:           acc.CreatedAt,
@@ -401,8 +425,13 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 	p.ParticipantType = particicipantDocData.Type
 	p.ParticipantEmail = particicipantDocData.ParticipantEmail
 	p.ParticipantId = particicipantDocData.ParticipantId
+
 	p.Age = time.Now().Year() - accountData.DOB.Year()
 	p.Motivation = accountData.Motivation
+	p.FieldOfStudy = accountData.FieldOfStudy
+	p.HackathonExperience = accountData.HackathonExperience
+	p.PreviousProjects = accountData.PreviousProjects
+	p.YearsOfExperience = accountData.YearsOfExperience
 	p.ExperienceLevel = accountData.ExperienceLevel
 	p.EmploymentStatus = accountData.EmploymentStatus
 	if particicipantDocData.Type == "TEAM" {
@@ -419,22 +448,26 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 			for _, acc := range partAccs {
 				if acc.Email == part.Email {
 					p.CoParticipants = append(p.CoParticipants, valueobjects.CoParticipantInfo{
-						Email:            part.Email,
-						TeamRole:         part.Role,
-						FirstName:        acc.FirstName,
-						LastName:         acc.LastName,
-						DOB:              acc.DOB,
-						Age:              time.Now().Year() - acc.DOB.Year(),
-						Gender:           acc.Gender,
-						AccountStatus:    acc.Status,
-						PhoneNumber:      acc.PhoneNumber,
-						AccountRole:      acc.Role,
-						State:            acc.Role,
-						Skillset:         acc.Skillset,
-						HackathonId:      acc.HackathonId,
-						Motivation:       acc.Motivation,
-						ExperienceLevel:  acc.ExperienceLevel,
-						EmploymentStatus: acc.EmploymentStatus,
+						Email:               part.Email,
+						TeamRole:            part.Role,
+						FirstName:           acc.FirstName,
+						LastName:            acc.LastName,
+						DOB:                 acc.DOB,
+						Age:                 time.Now().Year() - acc.DOB.Year(),
+						Gender:              acc.Gender,
+						AccountStatus:       acc.Status,
+						PhoneNumber:         acc.PhoneNumber,
+						AccountRole:         acc.Role,
+						State:               acc.Role,
+						Skillset:            acc.Skillset,
+						HackathonId:         acc.HackathonId,
+						Motivation:          acc.Motivation,
+						YearsOfExperience:   acc.YearsOfExperience,
+						FieldOfStudy:        acc.FieldOfStudy,
+						PreviousProjects:    acc.PreviousProjects,
+						HackathonExperience: acc.HackathonExperience,
+						ExperienceLevel:     acc.ExperienceLevel,
+						EmploymentStatus:    acc.EmploymentStatus,
 					})
 
 				}
@@ -531,6 +564,10 @@ func (s *ParticipantRepository) GetParticipantInfo(participantId string) (*entit
 			pE.Motivation = a.Motivation
 			pE.ExperienceLevel = a.ExperienceLevel
 			pE.EmploymentStatus = a.EmploymentStatus
+			pE.Motivation = a.Motivation
+			pE.YearsOfExperience = a.YearsOfExperience
+			pE.HackathonExperience = a.HackathonExperience
+			pE.PreviousProjects = a.PreviousProjects
 			pE.CreatedAt = a.CreatedAt
 			pE.UpdatedAt = a.UpdatedAt
 			if participant.Type == "TEAM" {
@@ -540,25 +577,29 @@ func (s *ParticipantRepository) GetParticipantInfo(participantId string) (*entit
 			for _, c := range participant.CoParticipants {
 				if c.Email == a.Email {
 					cs = append(cs, CoParticipantInfo{
-						FirstName:        a.FirstName,
-						Email:            c.Email,
-						LastName:         a.LastName,
-						PhoneNumber:      a.PhoneNumber,
-						Gender:           a.Gender,
-						State:            a.State,
-						DOB:              a.DOB,
-						Age:              time.Now().Year() - a.DOB.Year(),
-						AccountStatus:    a.Status,
-						ParticipantId:    a.ParticipantId,
-						HackathonId:      a.HackathonId,
-						TeamRole:         c.Role,
-						AccountRole:      a.Role,
-						Skillset:         a.Skillset,
-						Motivation:       a.Motivation,
-						ExperienceLevel:  a.ExperienceLevel,
-						EmploymentStatus: a.EmploymentStatus,
-						CreatedAt:        a.CreatedAt,
-						UpdatedAt:        a.UpdatedAt,
+						FirstName:           a.FirstName,
+						Email:               c.Email,
+						LastName:            a.LastName,
+						PhoneNumber:         a.PhoneNumber,
+						Gender:              a.Gender,
+						State:               a.State,
+						DOB:                 a.DOB,
+						Age:                 time.Now().Year() - a.DOB.Year(),
+						AccountStatus:       a.Status,
+						ParticipantId:       a.ParticipantId,
+						HackathonId:         a.HackathonId,
+						TeamRole:            c.Role,
+						AccountRole:         a.Role,
+						Skillset:            a.Skillset,
+						Motivation:          a.Motivation,
+						YearsOfExperience:   a.YearsOfExperience,
+						FieldOfStudy:        a.FieldOfStudy,
+						HackathonExperience: a.HackathonExperience,
+						PreviousProjects:    a.PreviousProjects,
+						ExperienceLevel:     a.ExperienceLevel,
+						EmploymentStatus:    a.EmploymentStatus,
+						CreatedAt:           a.CreatedAt,
+						UpdatedAt:           a.UpdatedAt,
 					})
 				}
 			}
@@ -574,38 +615,48 @@ func (s *ParticipantRepository) GetParticipantsInfo() ([]entity.Participant, err
 	var participants []entity.Participant
 	for _, part := range partDocs {
 		participants = append(participants, entity.Participant{
-			Email:            part.Email,
-			FirstName:        part.FirstName,
-			LastName:         part.LastName,
-			Gender:           part.Gender,
-			DOB:              part.DOB,
-			TeamLeadEmail:    part.TeamName,
-			AccountRole:      part.Role,
-			ParticipantId:    part.ParticipantId,
-			ParticipantEmail: part.ParticipantEmail,
-			TeamName:         part.TeamName,
-			TeamRole:         "TEAM_LEAD",
-			PhoneNumber:      part.PhoneNumber,
-			ParticipantType:  part.Type,
+			Email:               part.Email,
+			FirstName:           part.FirstName,
+			LastName:            part.LastName,
+			Gender:              part.Gender,
+			DOB:                 part.DOB,
+			TeamLeadEmail:       part.TeamName,
+			AccountRole:         part.Role,
+			ParticipantId:       part.ParticipantId,
+			ParticipantEmail:    part.ParticipantEmail,
+			TeamName:            part.TeamName,
+			TeamRole:            "TEAM_LEAD",
+			PhoneNumber:         part.PhoneNumber,
+			ParticipantType:     part.Type,
+			Motivation:          part.Motivation,
+			YearsOfExperience:   part.YearsOfExperience,
+			HackathonExperience: part.HackathonExperience,
+			PreviousProjects:    part.PreviousProjects,
+			FieldOfStudy:        part.FieldOfStudy,
 			CoParticipants: func(arr []exports.CoParticipantAggregateDocument) []valueobjects.CoParticipantInfo {
 				var items []valueobjects.CoParticipantInfo
 				for _, ar := range arr {
 					items = append(items, valueobjects.CoParticipantInfo{
-						Email:            ar.Email,
-						FirstName:        ar.FirstName,
-						LastName:         ar.LastName,
-						Gender:           ar.Gender,
-						State:            ar.State,
-						AccountRole:      ar.AccountRole,
-						TeamRole:         ar.TeamRole,
-						Motivation:       ar.Motivation,
-						DOB:              ar.DOB,
-						Skillset:         ar.Skillset,
-						EmploymentStatus: ar.EmploymentStatus,
-						ExperienceLevel:  ar.ExperienceLevel,
-						PhoneNumber:      ar.PhoneNumber,
-						CreatedAt:        ar.CreatedAt,
-						UpdatedAt:        ar.UpdatedAt,
+						HackathonId:         ar.HackathonId,
+						Email:               ar.Email,
+						FirstName:           ar.FirstName,
+						LastName:            ar.LastName,
+						Gender:              ar.Gender,
+						State:               ar.State,
+						AccountRole:         ar.AccountRole,
+						TeamRole:            ar.TeamRole,
+						Motivation:          ar.Motivation,
+						DOB:                 ar.DOB,
+						Skillset:            ar.Skillset,
+						YearsOfExperience:   ar.YearsOfExperience,
+						FieldOfStudy:        ar.FieldOfStudy,
+						HackathonExperience: ar.HackathonExperience,
+						PreviousProjects:    ar.PreviousProjects,
+						EmploymentStatus:    ar.EmploymentStatus,
+						ExperienceLevel:     ar.ExperienceLevel,
+						PhoneNumber:         ar.PhoneNumber,
+						CreatedAt:           ar.CreatedAt,
+						UpdatedAt:           ar.UpdatedAt,
 					})
 				}
 				return items
@@ -662,7 +713,11 @@ func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberAcco
 	info.TeamRole = account.Role
 	info.HackathonId = account.HackathonId
 	info.DOB = account.DOB
-
+	info.Motivation = account.Motivation
+	info.HackathonExperience = account.HackathonExperience
+	info.YearsOfExperience = account.YearsOfExperience
+	info.FieldOfStudy = account.FieldOfStudy
+	info.PreviousProjects = account.PreviousProjects
 	// emit created event
 
 	return info
