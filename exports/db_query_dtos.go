@@ -35,17 +35,21 @@ type CreateAdminAccountData struct {
 }
 
 type CreateAccountData struct {
-	Email             string `bson:"email"`
-	PasswordHash      string `bson:"password_hash"`
-	FirstName         string `bson:"first_name"`
-	LastName          string `bson:"last_name"`
-	Gender            string `bson:"gender"`
-	State             string `bson:"state"`
-	Role              string `bson:"role"`
-	PhoneNumber       string `bson:"phone_number"`
-	HackathonId       string `bson:"hackathon_id"`
-	Status            string `bson:"status"`
-	ProfilePictureUrl string `bson:"profile_picture_url"`
+	Email             string    `bson:"email"`
+	PasswordHash      string    `bson:"password_hash"`
+	FirstName         string    `bson:"first_name"`
+	LastName          string    `bson:"last_name"`
+	Gender            string    `bson:"gender"`
+	State             string    `bson:"state"`
+	Role              string    `bson:"role"`
+	PhoneNumber       string    `bson:"phone_number"`
+	HackathonId       string    `bson:"hackathon_id"`
+	Status            string    `bson:"status"`
+	ProfilePictureUrl string    `bson:"profile_picture_url"`
+	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
+	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 type CreateParticipantAccountData struct {

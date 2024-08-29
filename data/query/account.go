@@ -10,6 +10,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+/*
+	func (q *Query) GetAccountByEmail(email string) (*exports.AccountDocument, error) {
+		accountCol, err := q.Datasource.GetAccountCollection()
+		ctx := context.Context(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		filterStruct := bson.D{
+			{Key: "email", Value: email},
+		}
+		result := accountCol.FindOne(ctx, filterStruct)
+		accountDoc := exports.AccountDocument{}
+		err = result.Decode(&accountDoc)
+		return &accountDoc, err
+	}
+*/
 func (q *Query) DeleteAccount(identifier string) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	if err != nil {
@@ -41,7 +57,6 @@ func (q *Query) FindAccountIdentifier(identifier string) (*exports.AccountDocume
 	err = accountCol.FindOne(context.TODO(), filter).Decode(&dataFromCol)
 	return &dataFromCol, err
 }
-
 func (q *Query) GetAccountByEmail(email string) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
@@ -79,7 +94,6 @@ func (q *Query) GetAccountsByEmails(emails []string) ([]exports.AccountDocument,
 	}
 	return accounts, err
 }
-
 func (q *Query) GetAccountsOfJudges() ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
 	accountCol, err := q.Datasource.GetAccountCollection()
@@ -276,13 +290,13 @@ func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAc
 	return &acc, err
 }
 
-func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.CreateJudgeAccountData, error) {
+func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	acc := exports.AccountDocument{
+	acc := &exports.AccountDocument{
 		Email:           dataToSave.Email,
 		PasswordHash:    dataToSave.PasswordHash,
 		FirstName:       dataToSave.FirstName,
@@ -295,13 +309,14 @@ func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (
 		Status:          dataToSave.Status,
 		Bio:             dataToSave.Bio,
 	}
-	result, err := accountCol.InsertOne(ctx, &acc)
+	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	return dataToSave, err
+	acc.Id = result.InsertedID
+	return acc, err
 }
 
 func (q *Query) UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {

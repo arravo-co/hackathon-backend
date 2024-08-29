@@ -9,6 +9,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+/*
+type Datasource interface {
+	DeleteAccount(identifier string) (*exports.AccountDocument, error)
+	FindAccountIdentifier(identifier string) (*exports.AccountDocument, error)
+	GetAccountByEmail(email string) (*exports.AccountDocument, error)
+	GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error)
+	CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.CreateJudgeAccountData, error)
+}
+*/
 // AddMemberToParticipatingTeam
 type AccountRepository struct {
 	DB                  *query.Query

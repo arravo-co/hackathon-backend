@@ -7,14 +7,16 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
-	if err != nil {
-		return nil, err
-	}
+type AccountData struct {
+	AccountCollection *mongo.Collection
+}
+
+func (dt *AccountData) DeleteAccount(identifier string) (*exports.AccountDocument, error) {
+	accountCol := dt.AccountCollection
 	filter := bson.D{{
 		"$or", bson.A{
 			bson.D{{"email", identifier}},
@@ -22,15 +24,12 @@ func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
 		}},
 	}
 	dataFromCol := exports.AccountDocument{}
-	err = accountCol.FindOneAndDelete(context.TODO(), filter).Decode(&dataFromCol)
+	err := accountCol.FindOneAndDelete(context.TODO(), filter).Decode(&dataFromCol)
 	return &dataFromCol, err
 }
 
-func FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
-	if err != nil {
-		return nil, err
-	}
+func (dt *AccountData) FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) {
+	accountCol := dt.AccountCollection
 	filter := bson.D{{
 		"$or", bson.A{
 			bson.D{{"email", identifier}},
@@ -38,7 +37,7 @@ func FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) 
 		}},
 	}
 	dataFromCol := exports.AccountDocument{}
-	err = accountCol.FindOne(context.TODO(), filter).Decode(&dataFromCol)
+	err := accountCol.FindOne(context.TODO(), filter).Decode(&dataFromCol)
 	return &dataFromCol, err
 }
 
@@ -287,6 +286,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 		IsEmailVerified: false,
 		Status:          dataToSave.Status,
 		Bio:             dataToSave.Bio,
+		CreatedAt:       time.Now(),
 	}
 	result, err := accountCol.InsertOne(ctx, &acc)
 	if err != nil {

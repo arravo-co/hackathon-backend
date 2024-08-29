@@ -18,7 +18,7 @@ func ConsumeUploadJudgeProfilePicQueue(payloadStruct *exports.UploadJudgeProfile
 	}
 	fmt.Println(uploadResult)
 
-	judge, err := repository.GetJudgeEntity(payloadStruct.Email)
+	judge, err := repository.GetJudgeByEmail(payloadStruct.Email)
 	if err != nil {
 		return err
 	}

@@ -29,6 +29,15 @@ func GetDefaultDatasource() exports.DBInterface {
 	return DefaultDatasource
 }
 
+func GetDatasource(cfg *exports.MongoDBConnConfig) exports.DBInterface {
+	dat, err := db.GetNewMongoRepository(cfg)
+	if err != nil {
+		panic(err.Error())
+	}
+	DefaultDatasource = dat
+	return DefaultDatasource
+}
+
 func GetQueue(name string) (rmq.Queue, error) {
 	return rmqUtils.GetQueue(name)
 }
