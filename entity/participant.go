@@ -28,6 +28,7 @@ type Participant struct {
 	InviteList          []exports.InviteInfo             `json:"invite_list"`
 	AccountStatus       string                           `json:"account_status"`
 	ParticipationStatus string                           `json:"participation_status"`
+	ReviewRanking       int                              `json:"review_ranking"`
 	Skillset            []string                         `json:"skillset"`
 	PhoneNumber         string                           `json:"phone_number"`
 	EmploymentStatus    string                           `json:"employment_status"`

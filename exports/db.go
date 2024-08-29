@@ -52,6 +52,7 @@ type ParticipantDocument struct {
 	ParticipantEmail string           `bson:"participant_email,omitempty"`
 	GithubAddress    string           `bson:"github_address,omitempty"`
 	InviteList       []InviteInfo     `bson:"invite_list,omitempty"`
+	ReviewRanking    int              `bson:"review_ranking,omitempty"`
 	Status           string           `bson:"status,omitempty"`
 	CreatedAt        time.Time        `bson:"created_at,omitempty"`
 	UpdatedAt        time.Time        `bson:"updated_at,omitempty"`

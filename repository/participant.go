@@ -424,7 +424,7 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 	p.ParticipantType = particicipantDocData.Type
 	p.ParticipantEmail = particicipantDocData.ParticipantEmail
 	p.ParticipantId = particicipantDocData.ParticipantId
-
+	p.ReviewRanking = particicipantDocData.ReviewRanking
 	p.Age = time.Now().Year() - accountData.DOB.Year()
 	p.Motivation = accountData.Motivation
 	p.FieldOfStudy = accountData.FieldOfStudy

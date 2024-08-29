@@ -39,18 +39,6 @@ import (
 // @Server http://localhost:5000 Localhost
 // @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
-	//consumer.Cleanup()
-	/*
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-		defer stop()
-		shutdown, err := opentel.Setup(ctx)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer func() {
-			err = errors.Join(err, shutdown(ctx))
-		}()
-	*/
 	prometheus.MustRegister(exports.MyFirstCounter)
 	security.GenerateKeys()
 
@@ -64,27 +52,7 @@ func main() {
 	})
 	fmt.Println("Starting metrics")
 	e.Logger.Info(port)
-	/*
-	 */
-	/*
-		q, err := queue.GetQueue("play_list")
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		byt, err := json.Marshal(exports.PlayQueuePayload{Time: time.Now()})
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		err = q.PublishBytes(byt)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	*/
 
-	//go jobs.StartConsumingPlayQueue()
-	//go startAllJobs()
 	db.SetupRedis()
 	rmqUtils.SetupDefaultQueue()
 	data.SetupDefaultDataSource()

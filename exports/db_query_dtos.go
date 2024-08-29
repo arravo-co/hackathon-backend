@@ -121,6 +121,7 @@ type CreateParticipantRecordData struct {
 	Type             string          `bson:"type"`
 	HackathonId      string          `bson:"hackathon_id"`
 	GithubAddress    string          `bson:"github_address,omitempty"`
+	ReviewRanking    int             `bson:"review_ranking"`
 }
 
 type TeamParticipantRecordCreatedData struct {
