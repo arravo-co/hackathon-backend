@@ -10,3 +10,12 @@ type RegisterNewJudgeDTO struct {
 	State           string `json:"state"`
 	Bio             string `json:"bio"`
 }
+
+type UpdateJudgeDTO struct {
+	FirstName         string `validate:"omitempty,min=2"`
+	LastName          string `validate:"omitempty,min=2"`
+	Gender            string `validate:"omitempty,oneof=MALE FEMALE"`
+	State             string
+	Bio               string
+	ProfilePictureUrl string
+}

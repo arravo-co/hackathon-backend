@@ -1,10 +1,12 @@
 package repository
 
 import (
-	"github.com/arravoco/hackathon_backend/data"
-	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+var validate *validator.Validate = validator.New()
 
 type JudgeAccountRepository struct {
 	DB exports.JudgeDatasourceQueryMethods
@@ -40,6 +42,10 @@ func (ac *JudgeAccountRepository) GetJudgeByEmail(email string) (*exports.JudgeA
 
 func (dt *JudgeAccountRepository) CreateJudgeAccount(input *exports.RegisterNewJudgeDTO) (*exports.JudgeAccountRepository, error) {
 
+	err := validate.Struct(input)
+	if err != nil {
+		return nil, err
+	}
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
@@ -62,7 +68,9 @@ func (dt *JudgeAccountRepository) CreateJudgeAccount(input *exports.RegisterNewJ
 	if err != nil {
 		return nil, err
 	}
+	id := dataResponse.Id.(primitive.ObjectID).Hex()
 	judge := &exports.JudgeAccountRepository{
+		Id:                id,
 		FirstName:         dataResponse.FirstName,
 		LastName:          dataResponse.LastName,
 		Email:             dataResponse.Email,
@@ -87,7 +95,7 @@ func (dt *JudgeAccountRepository) CreateJudgeAccount(input *exports.RegisterNewJ
 	return judge, err
 }
 
-func (dt *JudgeAccountRepository) UpdateJudgeProfile(email string, input dtos.UpdateJudgeDTO) error {
+func (dt *JudgeAccountRepository) UpdateJudgeAccount(email string, input *exports.UpdateJudgeDTO) error {
 
 	dataInput := &exports.UpdateAccountDocument{}
 	if input.LastName != "" {
@@ -120,7 +128,7 @@ func (dt *JudgeAccountRepository) UpdateJudgeProfile(email string, input dtos.Up
 
 func (dt *JudgeAccountRepository) GetJudges() ([]*exports.JudgeAccountRepository, error) {
 
-	dataResponse, err := data.GetAccountsOfJudges()
+	dataResponse, err := dt.DB.GetAccountsOfJudges()
 	// emit created event
 	if err != nil {
 		return nil, err
@@ -159,9 +167,7 @@ func (dt *JudgeAccountRepository) DeleteJudgeAccount(identifier string) (*export
 func (dt *JudgeAccountRepository) GetJudgeAccountByEmail(email string) (*exports.JudgeAccountRepository, error) {
 	return nil, nil
 }
-func (dt *JudgeAccountRepository) UpdateJudgeAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.JudgeAccountRepository, error) {
-	return nil, nil
-}
-func (dt *JudgeAccountRepository) UpdateJudgePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.JudgeAccountRepository, error) {
+
+func (dt *JudgeAccountRepository) UpdateJudgePassword(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.JudgeAccountRepository, error) {
 	return nil, nil
 }

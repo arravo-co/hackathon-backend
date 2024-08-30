@@ -14,7 +14,7 @@ type DatasourceQueryMethods interface {
 	AddToTeamInviteList(dataToSave *AddToTeamInviteListData) (interface{}, error)
 	CreateAccount(dataToSave *CreateAccountData) (interface{}, error)
 	CreateAdminAccount(dataToSave *CreateAdminAccountData) (*AccountDocument, error)
-	CreateJudgeAccount(dataToSave *CreateJudgeAccountData) (*CreateJudgeAccountData, error)
+	CreateJudgeAccount(dataToSave *CreateJudgeAccountData) (*AccountDocument, error)
 	CreateParticipantAccount(dataToSave *CreateParticipantAccountData) (*AccountDocument, error)
 	CreateParticipantRecord(dataToSave *CreateParticipantRecordData) (*ParticipantDocument, error)
 	CreateSolutionData(dataInput *CreateSolutionData) (*SolutionDocument, error)
@@ -41,7 +41,7 @@ type DatasourceQueryMethods interface {
 
 type JudgeDatasourceQueryMethods interface {
 	CreateAccount(dataToSave *CreateAccountData) (interface{}, error)
-	CreateJudgeAccount(dataToSave *CreateJudgeAccountData) (*CreateJudgeAccountData, error)
+	CreateJudgeAccount(dataToSave *CreateJudgeAccountData) (*AccountDocument, error)
 	DeleteAccount(identifier string) (*AccountDocument, error)
 	FindAccountIdentifier(identifier string) (*AccountDocument, error)
 	GetAccountByEmail(email string) (*AccountDocument, error)

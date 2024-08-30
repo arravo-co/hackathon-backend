@@ -79,7 +79,7 @@ func GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
 	return accounts, err
 }
 
-func GetAccountsOfJudges() ([]exports.AccountDocument, error) {
+func (dt *AccountData) GetAccountsOfJudges() ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	ctx := context.Context(context.Background())

@@ -674,7 +674,7 @@ func (s *ParticipantRepository) RemoveMemberFromTeam(dataInput *RemoveMemberFrom
 	if err != nil {
 		return nil, err
 	}
-	acc, err := data.DeleteAccount(dataInput.MemberEmail)
+	acc, err := s.DB.DeleteAccount(dataInput.MemberEmail)
 	info := FillTeamMemberInfo(acc)
 	return info, err
 }

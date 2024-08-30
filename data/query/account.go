@@ -321,7 +321,9 @@ func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (
 
 func (q *Query) UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
-	fmt.Printf("%+v", filter)
+	if err != nil {
+		return nil, err
+	}
 	accountDoc := exports.AccountDocument{}
 	ctx := context.Context(context.Background())
 	defer ctx.Done()
@@ -333,8 +335,10 @@ func (q *Query) UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, da
 	opts := []*options.FindOneAndUpdateOptions{{
 		ReturnDocument: &after,
 	}}
+	//panic(fmt.Sprintf("%s      %s", filter.Email, updateDoc))
 	result := accountCol.FindOneAndUpdate(ctx, bson.M{"email": filter.Email}, &updateDoc, opts...)
 	err = result.Decode(&accountDoc)
+	//panic(fmt.Sprintf("%s      %s", accountDoc, err))
 	return &accountDoc, err
 }
 

@@ -5,6 +5,8 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/arravoco/hackathon_backend/config"
@@ -173,4 +175,29 @@ func UnencryptAndVerifyLink(str string) ([]byte, error) {
 	fmt.Println(key)
 	originalMsg, err := rsa.DecryptPKCS1v15(nil, key, originalMsgCipherText)
 	return originalMsg, err
+}
+
+func FindProjectRoot(marker string) (string, error) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		// Check if the marker file/folder exists in the current directory
+		markerPath := filepath.Join(currentDir, marker)
+		if _, err := os.Stat(markerPath); err == nil {
+			return currentDir, nil // Found the marker, return the directory
+		}
+
+		// Move to the parent directory
+		parentDir := filepath.Dir(currentDir)
+		if parentDir == currentDir {
+			// Reached the root of the filesystem without finding the marker
+			break
+		}
+		currentDir = parentDir
+	}
+
+	return "", fmt.Errorf("marker %s not found", marker)
 }

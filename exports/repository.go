@@ -2,8 +2,6 @@ package exports
 
 import (
 	"time"
-
-	"github.com/arravoco/hackathon_backend/dtos"
 )
 
 type JudgeAccountRepository struct {
@@ -27,12 +25,12 @@ type JudgeAccountRepository struct {
 }
 
 type JudgeRepositoryInterface interface {
-	GetJudgeByEmail(email string) (*JudgeAccountRepository, error)
+	GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 	CreateJudgeAccount(input *RegisterNewJudgeDTO) (*JudgeAccountRepository, error)
-	UpdateJudgeProfile(email string, input dtos.UpdateJudgeDTO) error
+	UpdateJudgeAccount(email string, input *UpdateJudgeDTO) error
 	GetJudges() ([]*JudgeAccountRepository, error)
 	DeleteJudgeAccount(identifier string) (*JudgeAccountRepository, error)
-	GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
-	UpdateJudgeAccountInfoByEmail(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
-	UpdateJudgePasswordByEmail(filter *UpdateAccountFilter, newPasswordHash string) (*JudgeAccountRepository, error)
+	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
+	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
+	UpdateJudgePassword(filter *UpdateAccountFilter, newPasswordHash string) (*JudgeAccountRepository, error)
 }
