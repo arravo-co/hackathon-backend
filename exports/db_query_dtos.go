@@ -117,15 +117,19 @@ type CreateTeamParticipantAccountData struct {
 }
 
 type CreateParticipantRecordData struct {
-	ParticipantId    string          `bson:"participant_id"`
-	ParticipantEmail string          `bson:"participant_email,omitempty"`
-	TeamLeadEmail    string          `bson:"team_lead_email,omitempty"`
-	TeamName         string          `bson:"team_name,omitempty"`
-	CoParticipants   []CoParticipant `bson:"co_participants,omitempty"`
-	Type             string          `bson:"type"`
-	HackathonId      string          `bson:"hackathon_id"`
-	GithubAddress    string          `bson:"github_address,omitempty"`
-	ReviewRanking    int             `bson:"review_ranking"`
+	ParticipantId     string
+	ParticipantEmail  string
+	TeamLeadFirstName string
+	TeamLeadLastName  string
+	TeamLeadGender    string
+	TeamLeadAccountId string
+	TeamLeadEmail     string
+	TeamName          string
+	CoParticipants    []CoParticipant
+	Type              string
+	HackathonId       string
+	GithubAddress     string
+	ReviewRanking     int
 }
 
 type TeamParticipantRecordCreatedData struct {

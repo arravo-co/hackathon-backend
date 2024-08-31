@@ -7,6 +7,7 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -69,6 +70,7 @@ func (q *Query) GetAccountByEmail(email string) (*exports.AccountDocument, error
 	result := accountCol.FindOne(ctx, filterStruct)
 	accountDoc := exports.AccountDocument{}
 	err = result.Decode(&accountDoc)
+	//panic(fmt.Sprintf("%#v", accountDoc))
 	return &accountDoc, err
 }
 
@@ -168,7 +170,7 @@ func (q *Query) CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAcco
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	acc.Id = result.InsertedID
+	acc.Id = result.InsertedID.(primitive.ObjectID)
 	return &acc, err
 }
 
@@ -315,7 +317,7 @@ func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	acc.Id = result.InsertedID
+	acc.Id = result.InsertedID.(primitive.ObjectID)
 	return acc, err
 }
 

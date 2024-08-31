@@ -102,9 +102,9 @@ type CompletePasswordRecoverySuccessResponseData struct {
 }
 
 type DeleteTeamMemberSuccessResponse struct {
-	Code    int                       `json:"code"`
-	Message string                    `json:"message"`
-	Data    *entity.TeamMemberAccount `json:"data"`
+	Code    int                                     `json:"code"`
+	Message string                                  `json:"message"`
+	Data    *entity.TeamMemberWithParticipantRecord `json:"data"`
 }
 
 type DeleteTeamMemberFailResponse struct {

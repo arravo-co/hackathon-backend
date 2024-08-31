@@ -10,6 +10,7 @@ import (
 	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/seeders"
 	"github.com/arravoco/hackathon_backend/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,7 +30,7 @@ func TestUpdateAccountInfoByEmail(t *testing.T) {
 		CleanupDB(dbInstance)
 	})
 	q := GetQueryInstance(dbInstance)
-	accInDB, err := CreateFakeJudgeAccount(dbInstance)
+	accInDB, _, err := seeders.CreateFakeJudgeAccount(dbInstance)
 	if err != nil {
 		panic(err)
 	}
@@ -98,32 +99,33 @@ func TestUpdateAccountInfoByEmail(t *testing.T) {
 
 }
 
-func CreateFakeJudgeAccount(dbInstance *mongo.Database) (*exports.AccountDocument, error) {
-	accountCol := dbInstance.Collection("accounts")
-	ctx := context.Context(context.Background())
-	acc := &exports.AccountDocument{
-		Email:           "test@test.com",
-		PasswordHash:    "",
-		FirstName:       "john",
-		LastName:        "doe",
-		Gender:          "MALE",
-		HackathonId:     "HACKATHON_ID_001",
-		Role:            "JUDGE",
-		PhoneNumber:     "+2347068968932",
-		IsEmailVerified: false,
-		Status:          "EMAIL_UNVERIFIED",
-		Bio:             "Short bio",
-	}
-	result, err := accountCol.InsertOne(ctx, acc)
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-		return nil, err
-	}
-	fmt.Printf("%#v", result.InsertedID)
-	acc.Id = result.InsertedID
-	return acc, err
-}
+func TestGetAccountInfoByEmail(t *testing.T) {
 
+	SetupDefaultTestEnv()
+	db_url := os.Getenv("MONGODB_URL")
+	cfg := &exports.MongoDBConnConfig{
+		Url:    db_url,
+		DBName: "hackathon_db",
+	}
+	dbInstance := GetMongoInstance(cfg)
+	defer t.Cleanup(func() {
+		CleanupDB(dbInstance)
+	})
+	q := GetQueryInstance(dbInstance)
+	accInDB, _, err := seeders.CreateFakeJudgeAccount(dbInstance)
+	if err != nil {
+		panic(err)
+	}
+
+	acc, err := q.GetAccountByEmail(accInDB.Email)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if acc.Id.Hex() != accInDB.Id.Hex() {
+
+	}
+}
 func SetupDefaultTestEnv() {
 	fp, err := utils.FindProjectRoot(".test.env")
 	if err != nil {

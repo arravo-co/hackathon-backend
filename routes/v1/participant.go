@@ -58,9 +58,9 @@ type FailResponse struct {
 }
 
 type GetTeamMembersSuccessResponse struct {
-	Code    int                        `json:"code"`
-	Message string                     `json:"message"`
-	Data    []entity.TeamMemberAccount `json:"data"`
+	Code    int                                      `json:"code"`
+	Message string                                   `json:"message"`
+	Data    []entity.TeamMemberWithParticipantRecord `json:"data"`
 }
 
 // @Title Register New Participant

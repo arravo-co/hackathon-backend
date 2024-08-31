@@ -19,3 +19,23 @@ type UpdateJudgeDTO struct {
 	Bio               string
 	ProfilePictureUrl string
 }
+
+type CompleteNewTeamMemberRegistrationDTO struct {
+	FirstName        string   `validate:"required"`
+	LastName         string   `validate:"required"`
+	Email            string   `validate:"email"`
+	Password         string   `validate:"min=5"`
+	PhoneNumber      string   `validate:"e164"`
+	ConfirmPassword  string   `validate:"eqfield=Password"`
+	Gender           string   `validate:"oneof= MALE FEMALE"`
+	Skillset         []string `validate:"min=1"`
+	State            string   `validate:"required"`
+	DOB              string   `validate:"required"`
+	ParticipantId    string   `validate:"required"`
+	TeamLeadEmail    string   `validate:"email"`
+	HackathonId      string   `validate:"required"`
+	TeamRole         string   `validate:"oneof= TEAM_MEMBER"`
+	EmploymentStatus string   `validate:"required"`
+	ExperienceLevel  string   `validate:"required"`
+	Motivation       string   `validate:"required"`
+}

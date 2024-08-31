@@ -34,21 +34,21 @@ type AuthUtilsBasicLoginSuccessData struct {
 	Gender              string    `json:"gender"`
 	State               string    `json:"state"`
 	passwordHash        string
-	Role                string       `json:"role"`
-	HackathonId         string       `json:"hackathon_id"`
-	Status              string       `json:"status"`
-	PhoneNumber         string       `json:"phone_number"`
-	Age                 int          `json:"age"`
-	DOB                 time.Time    `json:"dob"`
-	ParticipantId       string       `json:"participant_id"`
-	TeamLeadEmail       string       `json:"team_lead_email"`
-	TeamName            string       `json:"team_name"`
-	TeamRole            string       `json:"team_role"`
-	Type                string       `json:"type"`
-	CoParticipantEmails []string     `json:"co_participant_emails"`
-	ParticipantEmail    string       `json:"participant_email"`
-	InviteList          []InviteInfo `json:"invite_list"`
-	Skillset            []string     `json:"skillset"`
+	Role                string                              `json:"role"`
+	HackathonId         string                              `json:"hackathon_id"`
+	Status              string                              `json:"status"`
+	PhoneNumber         string                              `json:"phone_number"`
+	Age                 int                                 `json:"age"`
+	DOB                 time.Time                           `json:"dob"`
+	ParticipantId       string                              `json:"participant_id"`
+	TeamLeadEmail       string                              `json:"team_lead_email"`
+	TeamName            string                              `json:"team_name"`
+	TeamRole            string                              `json:"team_role"`
+	Type                string                              `json:"type"`
+	CoParticipantEmails []string                            `json:"co_participant_emails"`
+	ParticipantEmail    string                              `json:"participant_email"`
+	InviteList          []ParticipantDocumentTeamInviteInfo `json:"invite_list"`
+	Skillset            []string                            `json:"skillset"`
 	Solution            *struct {
 		Id               string `json:"id"`
 		Title            string `json:"title"`

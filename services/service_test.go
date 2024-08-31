@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/seeders"
 	testsetup "github.com/arravoco/hackathon_backend/test_setup"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -68,7 +69,7 @@ func TestUpdateJudgeInfo(t *testing.T) {
 	})
 	q := testsetup.GetQueryInstance(dbInstance)
 	judgeAccountRepository := testsetup.GetJudgeAccountRepositoryWithQueryInstance(q)
-	accInDB, _, err := testsetup.CreateFakeJudgeAccount(dbInstance)
+	accInDB, _, err := seeders.CreateFakeJudgeAccount(dbInstance)
 	if err != nil {
 		panic(err)
 	}
@@ -162,7 +163,7 @@ func TestGetJudgeByEmail(t *testing.T) {
 	})
 	q := testsetup.GetQueryInstance(dbInstance)
 	judgeAccountRepository := testsetup.GetJudgeAccountRepositoryWithQueryInstance(q)
-	accInDB, _, err := testsetup.CreateFakeJudgeAccount(dbInstance)
+	accInDB, _, err := seeders.CreateFakeJudgeAccount(dbInstance)
 	if err != nil {
 		panic(err)
 	}
@@ -171,11 +172,35 @@ func TestGetJudgeByEmail(t *testing.T) {
 
 	judgeEnt, err := service.GetJudgeByEmail(accInDB.Email)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err.Error())
+	}
+
+	if judgeEnt.Id != accInDB.Id.Hex() {
+		t.Fatalf("expected id to be %s, got %s", accInDB.Id.Hex(), judgeEnt.Id)
 	}
 
 	if judgeEnt.Email != accInDB.Email {
 		t.Fatalf("expected email address to be %s, got %s", accInDB.Email, judgeEnt.Email)
+	}
+
+	if judgeEnt.LastName != accInDB.LastName {
+		t.Fatalf("expected last name to be %s, got %s", accInDB.LastName, judgeEnt.LastName)
+	}
+
+	if judgeEnt.FirstName != accInDB.FirstName {
+		t.Fatalf("expected firstname to be %s, got %s", accInDB.FirstName, judgeEnt.FirstName)
+	}
+
+	if judgeEnt.Bio != accInDB.Bio {
+		t.Fatalf("expected bio to be %s, got %s", accInDB.Bio, judgeEnt.Bio)
+	}
+
+	if judgeEnt.HackathonId != accInDB.HackathonId {
+		t.Fatalf("expected hackathon id to be %s, got %s", accInDB.HackathonId, judgeEnt.HackathonId)
+	}
+
+	if judgeEnt.PhoneNumber != accInDB.PhoneNumber {
+		t.Fatalf("expected phone number to be %s, got %s", accInDB.PhoneNumber, judgeEnt.PhoneNumber)
 	}
 }
 

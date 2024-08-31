@@ -13,6 +13,7 @@ import (
 	"github.com/arravoco/hackathon_backend/repository"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/jaswdr/faker"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -117,6 +118,7 @@ func CreateFakeJudgeAccount(dbInstance *mongo.Database) (*exports.AccountDocumen
 	ctx := context.Context(context.Background())
 
 	fake := faker.New()
+
 	person := fake.Person()
 	var gender string
 	rand.Shuffle(2, func(i, j int) {
@@ -145,7 +147,7 @@ func CreateFakeJudgeAccount(dbInstance *mongo.Database) (*exports.AccountDocumen
 		return nil, "", err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	acc.Id = result.InsertedID
+	acc.Id = result.InsertedID.(primitive.ObjectID)
 	fmt.Printf("%#v", acc)
 	return acc, password, err
 }

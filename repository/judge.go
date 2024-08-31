@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/go-playground/validator/v10"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var validate *validator.Validate = validator.New()
@@ -68,7 +67,7 @@ func (dt *JudgeAccountRepository) CreateJudgeAccount(input *exports.RegisterNewJ
 	if err != nil {
 		return nil, err
 	}
-	id := dataResponse.Id.(primitive.ObjectID).Hex()
+	id := dataResponse.Id.Hex()
 	judge := &exports.JudgeAccountRepository{
 		Id:                id,
 		FirstName:         dataResponse.FirstName,
@@ -79,6 +78,7 @@ func (dt *JudgeAccountRepository) CreateJudgeAccount(input *exports.RegisterNewJ
 		HackathonId:       dataInput.HackathonId,
 		PhoneNumber:       dataInput.PhoneNumber,
 		ProfilePictureUrl: dataInput.ProfilePictureUrl,
+		PasswordHash:      dataInput.PasswordHash,
 		IsEmailVerified:   dataResponse.IsEmailVerified,
 		Role:              dataResponse.Role,
 		Status:            dataResponse.Status,
@@ -153,6 +153,7 @@ func (dt *JudgeAccountRepository) GetJudges() ([]*exports.JudgeAccountRepository
 			State:             acc.State,
 			PhoneNumber:       acc.PhoneNumber,
 			ProfilePictureUrl: acc.ProfilePictureUrl,
+			PasswordHash:      acc.PasswordHash,
 			Bio:               acc.Bio,
 			CreatedAt:         acc.CreatedAt,
 			UpdatedAt:         acc.UpdatedAt,
@@ -165,7 +166,30 @@ func (dt *JudgeAccountRepository) DeleteJudgeAccount(identifier string) (*export
 	return nil, nil
 }
 func (dt *JudgeAccountRepository) GetJudgeAccountByEmail(email string) (*exports.JudgeAccountRepository, error) {
-	return nil, nil
+	acc, err := dt.DB.GetAccountByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	id := acc.Id.Hex()
+	j := &exports.JudgeAccountRepository{
+		Id:                id,
+		Email:             acc.Email,
+		LastName:          acc.LastName,
+		FirstName:         acc.FirstName,
+		Bio:               acc.Bio,
+		PhoneNumber:       acc.PhoneNumber,
+		Status:            acc.Status,
+		Role:              acc.Role,
+		PasswordHash:      acc.PasswordHash,
+		State:             acc.State,
+		HackathonId:       acc.HackathonId,
+		IsEmailVerified:   acc.IsEmailVerified,
+		ProfilePictureUrl: acc.ProfilePictureUrl,
+		Gender:            acc.Gender,
+		CreatedAt:         acc.CreatedAt,
+		UpdatedAt:         acc.UpdatedAt,
+	}
+	return j, nil
 }
 
 func (dt *JudgeAccountRepository) UpdateJudgePassword(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.JudgeAccountRepository, error) {

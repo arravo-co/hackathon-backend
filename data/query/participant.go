@@ -25,10 +25,9 @@ func (q *Query) CreateParticipantRecord(dataToSave *exports.CreateParticipantRec
 		Type:             dataToSave.Type,
 		TeamLeadEmail:    dataToSave.TeamLeadEmail,
 		TeamName:         dataToSave.TeamName,
-		CoParticipants:   dataToSave.CoParticipants,
 		GithubAddress:    dataToSave.GithubAddress,
 		ParticipantEmail: dataToSave.ParticipantEmail,
-		InviteList:       []exports.InviteInfo{},
+		InviteList:       []exports.ParticipantDocumentTeamInviteInfo{},
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
 		Status:           "UNREVIEWED",
@@ -38,7 +37,7 @@ func (q *Query) CreateParticipantRecord(dataToSave *exports.CreateParticipantRec
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
 	}
-	dat.Id = result.InsertedID
+	dat.Id = result.InsertedID.(primitive.ObjectID)
 	return &dat, nil
 }
 
@@ -48,7 +47,7 @@ func (q *Query) GetParticipantsRecords() ([]exports.ParticipantDocument, error) 
 	if err != nil {
 		return nil, err
 	}
-	dat := &[]exports.ParticipantDocument{}
+	dat := []exports.ParticipantDocument{}
 	result, err := participantCol.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -57,12 +56,190 @@ func (q *Query) GetParticipantsRecords() ([]exports.ParticipantDocument, error) 
 		fmt.Printf("\n%s\n", result.Err())
 		return nil, result.Err()
 	}
-	err = result.All(context.Background(), dat)
+	err = result.All(context.Background(), &dat)
 	if err != nil {
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
 	}
-	return *dat, nil
+	return dat, nil
+}
+
+func (q *Query) GetParticipantsWithAccountsAggregate(opts interface{}) ([]exports.ParticipantTeamMembersWithAccountsAggregateDocument, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
+	if err != nil {
+		return nil, err
+	}
+	ctx := context.Context(context.Background())
+	var result []exports.ParticipantTeamMembersWithAccountsAggregateDocument
+	pipeline := bson.A{
+		bson.D{
+			{"$lookup",
+				bson.D{
+					{"from", "accounts"},
+					{"localField", "participant_id"},
+					{"foreignField", "participant_id"},
+					{"as", "accounts"},
+				},
+			},
+		},
+		bson.D{{"$addFields", bson.D{{"solution_id_as_object_id", bson.D{{"$toObjectId", "$solution_id"}}}}}},
+		bson.D{
+			{"$lookup",
+				bson.D{
+					{"from", "solutions"},
+					{"localField", "solution_id_as_object_id"},
+					{"foreignField", "_id"},
+					{"as", "solutions"},
+				},
+			},
+		},
+		bson.D{{"$addFields", bson.D{{"solution_document", bson.D{{"$first", "$solutions"}}}}}},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"team_lead_info",
+						bson.D{
+							{"$first",
+								bson.A{
+									bson.D{
+										{"$filter",
+											bson.D{
+												{"input", "$accounts"},
+												{"as", "acc"},
+												{"cond",
+													bson.D{
+														{"$eq",
+															bson.A{
+																"$$acc.email",
+																"$team_lead_email",
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					{"co_participants",
+						bson.D{
+							{"$filter",
+								bson.D{
+									{"input", "$accounts"},
+									{"as", "acc"},
+									{"cond",
+										bson.D{
+											{"$ne",
+												bson.A{
+													"$$acc.email",
+													"$team_lead_email",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$addFields",
+				bson.D{
+					{"team_lead_info.id", bson.D{{"$toString", "$team_lead_info._id"}}},
+					{"co_participants.id",
+						bson.D{
+							{"$first",
+								bson.D{
+									{"$map",
+										bson.D{
+											{"input", "$co_participants"},
+											{"as", "co_part"},
+											{"in", bson.D{{"$toString", "$$co_part._id"}}},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$match",
+				bson.D{
+					{"$expr",
+						bson.D{
+							{"$and",
+								bson.A{
+									bson.D{
+										{"$eq",
+											bson.A{
+												"$type",
+												bson.D{
+													{"$ifNull",
+														bson.A{
+															"TEAM",
+															"$type",
+														},
+													},
+												},
+											},
+										},
+									},
+									bson.D{
+										{"$eq",
+											bson.A{
+												"$status",
+												bson.D{
+													{"$ifNull",
+														bson.A{
+															"UNREVIEWED",
+															"$status",
+														},
+													},
+												},
+											},
+										},
+									},
+									bson.D{
+										{"$regexMatch",
+											bson.D{
+												{"input", "status"},
+												{"regex", ""},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.D{
+			{"$unset",
+				bson.A{
+					"solutions",
+					"accounts",
+					"solution_id_as_object_id",
+				},
+			},
+		},
+	}
+
+	cursor, err := participantCol.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(context.Background(), &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (q *Query) GetParticipantsRecordsAggregate() ([]exports.ParticipantAccountWithCoParticipantsDocument, error) {
@@ -304,7 +481,7 @@ func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData)
 		"invite_list.email": bson.M{"$nin": bson.A{dataToSave.Email}},
 	}
 	upd := bson.M{
-		"$addToSet": bson.M{"invite_list": exports.InviteInfo{Email: dataToSave.Email,
+		"$addToSet": bson.M{"invite_list": exports.ParticipantDocumentTeamInviteInfo{Email: dataToSave.Email,
 			InviterId: dataToSave.InviterEmail, Time: time.Now()}},
 		"$set": bson.M{"updated_at": time.Now()},
 	}
@@ -437,6 +614,6 @@ func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData
 	if err := resultPartDoc.Decode(&partDoc); err != nil {
 		return nil, err
 	}
-	partDoc.Solution = solDoc
+	partDoc.Solution = exports.ParticipantDocumentParticipantSelectedSolution{}
 	return &partDoc, err
 }

@@ -20,9 +20,10 @@ type SolutionRepository interface {
 }
 
 type Service struct {
-	ParticipantRepository  ParticipantRepository
-	JudgeAccountRepository exports.JudgeRepositoryInterface
-	SolutionRepository     SolutionRepository
+	ParticipantRecordRepository  exports.ParticipantRepositoryInterface
+	JudgeAccountRepository       exports.JudgeRepositoryInterface
+	ParticipantAccountRepository exports.ParticipantAccountRepositoryInterface
+	SolutionRepository           SolutionRepository
 }
 
 type ServiceConfig struct {
@@ -35,9 +36,9 @@ var service *Service
 
 func NewService(cfg *ServiceConfig) *Service {
 	return &Service{
-		ParticipantRepository:  cfg.ParticipantRepository,
-		JudgeAccountRepository: cfg.JudgeAccountRepository,
-		SolutionRepository:     cfg.SolutionRepository,
+		ParticipantRecordRepository: cfg.ParticipantRepository,
+		JudgeAccountRepository:      cfg.JudgeAccountRepository,
+		SolutionRepository:          cfg.SolutionRepository,
 	}
 }
 
@@ -153,6 +154,8 @@ func (s *Service) GetJudgeByEmail(email string) (*entity.Judge, error) {
 		ProfilePictureUrl: fetched.ProfilePictureUrl,
 		Role:              fetched.Role,
 		Status:            fetched.Status,
+		Bio:               fetched.Bio,
+		IsEmailVerified:   fetched.IsEmailVerified,
 		CreatedAt:         fetched.CreatedAt,
 		UpdatedAt:         fetched.UpdatedAt,
 	}

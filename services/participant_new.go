@@ -1,11 +1,8 @@
 package services
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"slices"
-	"strings"
 	"time"
 
 	"github.com/arravoco/hackathon_backend/cache"
@@ -20,45 +17,7 @@ import (
 	valueobjects "github.com/arravoco/hackathon_backend/value_objects"
 )
 
-type CompleteNewTeamMemberRegistrationEntityData struct {
-	FirstName        string
-	LastName         string
-	Email            string
-	Password         string
-	PhoneNumber      string
-	ConfirmPassword  string
-	Gender           string
-	Skillset         []string
-	State            string
-	DOB              string
-	ParticipantId    string
-	TeamLeadEmail    string
-	HackathonId      string
-	TeamRole         string
-	EmploymentStatus string
-	ExperienceLevel  string
-	Motivation       string
-}
-
-type ParticipantService struct {
-	ParticipantRepository *repository.ParticipantRepository
-	AccountRepository     *repository.AccountRepository
-	SolutionRepository    *repository.SolutionRepository
-}
-
-func NewParticipantService() *ParticipantService {
-	q := query.GetDefaultQuery()
-	part := repository.NewParticipantRepository(q)
-	acc := repository.NewAccountRepository(q)
-	sol := repository.NewSolutionRepository(q)
-	return &ParticipantService{
-		ParticipantRepository: part,
-		AccountRepository:     acc,
-		SolutionRepository:    sol,
-	}
-}
-
-func (s *ParticipantService) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationEntityData) (*entity.Participant, error) {
+func (s *Service) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationDTO) (*entity.Participant, error) {
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
@@ -71,7 +30,7 @@ func (s *ParticipantService) CompleteNewTeamMemberRegistration(input *CompleteNe
 	if isEmailInCache {
 		//return nil, errors.New("email is already existing")
 	}
-	partDoc, err := s.ParticipantRepository.AddMemberToParticipatingTeam(&exports.AddMemberToParticipatingTeamData{
+	partDoc, err := s.ParticipantRecordRepository.AddMemberInfoToParticipatingTeamRecord(&exports.AddMemberToParticipatingTeamData{
 		HackathonId:   input.HackathonId,
 		ParticipantId: input.ParticipantId,
 		Email:         input.Email,
@@ -81,20 +40,18 @@ func (s *ParticipantService) CompleteNewTeamMemberRegistration(input *CompleteNe
 	if err != nil {
 		return nil, err
 	}
-	acc, err := s.AccountRepository.CreateTeamMemberAccount(&exports.CreateTeamMemberAccountData{
-		CreateAccountData: exports.CreateAccountData{
-			Email:        input.Email,
-			LastName:     input.LastName,
-			FirstName:    input.FirstName,
-			PasswordHash: passwordHash,
-			Gender:       input.Gender,
-			Role:         "PARTICIPANT",
-			PhoneNumber:  input.PhoneNumber,
-			HackathonId:  input.HackathonId,
-			State:        input.State,
-			Status:       "EMAIL_VERIFIED",
-		},
-		TeamRole:         "TEAM_MEMBER",
+	acc, err := s.ParticipantAccountRepository.CreateCoParticipantAccount(&exports.RegisterNewParticipantAccountDTO{
+
+		Email:       input.Email,
+		LastName:    input.LastName,
+		FirstName:   input.FirstName,
+		Gender:      input.Gender,
+		Role:        "PARTICIPANT",
+		PhoneNumber: input.PhoneNumber,
+		HackathonId: input.HackathonId,
+		State:       input.State,
+		Status:      "EMAIL_VERIFIED",
+		//TeamRole:         "TEAM_MEMBER",
 		DOB:              dob,
 		ParticipantId:    input.ParticipantId,
 		Skillset:         input.Skillset,
@@ -141,7 +98,7 @@ func (s *ParticipantService) CompleteNewTeamMemberRegistration(input *CompleteNe
 	}, nil
 }
 
-func InviteToTeam(q query.Query, dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
+func (s *Service) InviteToTeam(q query.Query, dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
 	partRepo := repository.NewParticipantRepository(&q)
 	partEnt, err := partRepo.FillParticipantInfo(dataInput.InviterEmail)
 	if err != nil {
@@ -176,7 +133,7 @@ func InviteToTeam(q query.Query, dataInput *exports.AddToTeamInviteListData) (in
 	return res, nil
 }
 
-func (s *ParticipantService) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*entity.Participant, error) {
+func (s *Service) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*entity.Participant, error) {
 	teamMembers := []exports.TeamParticipantInfo{}
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
@@ -236,7 +193,7 @@ func (s *ParticipantService) RegisterTeamLead(input dtos.RegisterNewParticipantD
 		Type:             "TEAM",
 	}
 
-	particicipantDoc, err := s.ParticipantRepository.CreateParticipantRecord(dataInput)
+	particicipantDoc, err := s.ParticipantRecordRepository.CreateParticipantRecord(dataInput)
 	if err != nil {
 		return nil, err
 	}
@@ -284,8 +241,8 @@ func (s *ParticipantService) RegisterTeamLead(input dtos.RegisterNewParticipantD
 	}, err
 }
 
-func (s *ParticipantService) RemoveMemberFromTeam(dataInput *repository.RemoveMemberFromTeamData) (*entity.TeamMemberWithParticipantRecord, error) {
-	_, err := s.ParticipantRepository.RemoveMemberFromTeam(dataInput)
+func (s *Service) RemoveMemberFromTeam(dataInput *repository.RemoveMemberFromTeamData) (*entity.TeamMemberWithParticipantRecord, error) {
+	_, err := s.ParticipantRecordRepository.RemoveCoparticipantFromParticipantRecord(dataInput)
 	if err != nil {
 		return nil, err
 	}
@@ -294,23 +251,23 @@ func (s *ParticipantService) RemoveMemberFromTeam(dataInput *repository.RemoveMe
 	return info, err
 }
 
-func (s *ParticipantService) SelectionTeamSolution(dataInput *exports.SelectTeamSolutionData) (*entity.Solution, error) {
+func (s *Service) SelectionTeamSolution(dataInput *exports.SelectTeamSolutionData) (*entity.Solution, error) {
 	fmt.Println(dataInput)
-	solEnt, err := s.ParticipantRepository.SelectSolutionForTeam(dataInput)
+	solEnt, err := s.ParticipantRecordRepository.SelectSolutionForTeam(dataInput)
 	if err != nil {
 		return nil, err
 	}
 	return solEnt, err
 }
 
-func (s *ParticipantService) FillParticipantInfo(id string) (*entity.Participant, error) {
-	ent, err := s.ParticipantRepository.FillParticipantInfo(id)
+func (s *Service) FillParticipantInfo(id string) (*entity.Participant, error) {
+	ent, err := s.ParticipantRecordRepository.FillParticipantInfo(id)
 	// emit created event
 
 	return ent, err
 }
 
-func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberWithParticipantRecord {
+func (s *Service) FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberWithParticipantRecord {
 	info := &entity.TeamMemberWithParticipantRecord{}
 	info.Email = account.Email
 	info.Status = account.Status
@@ -327,7 +284,7 @@ func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberWith
 	return info
 }
 
-func (s *ParticipantService) GetTeamMembersInfo(p *entity.Participant) ([]entity.TeamMemberWithParticipantRecord, error) {
+func (s *Service) GetTeamMembersInfo(p *entity.Participant) ([]entity.TeamMemberWithParticipantRecord, error) {
 	team := []entity.TeamMemberWithParticipantRecord{}
 	fmt.Println(p.CoParticipants)
 	var emails []string
@@ -344,53 +301,26 @@ func (s *ParticipantService) GetTeamMembersInfo(p *entity.Participant) ([]entity
 	return team, err
 }
 
-func ReconcileParticipantInfo(p *entity.Participant, accountDataInput *exports.AccountDocument, particicipantDataInput *exports.ParticipantDocument) error {
-	_, err := data.UpdateParticipantInfoByEmail(&exports.UpdateAccountFilter{Email: p.Email}, &exports.UpdateAccountDocument{
-		FirstName:       accountDataInput.FirstName,
-		LastName:        accountDataInput.LastName,
-		Gender:          accountDataInput.Gender,
-		State:           accountDataInput.State,
-		GithubAddress:   particicipantDataInput.GithubAddress,
-		LinkedInAddress: accountDataInput.LinkedInAddress,
-	})
-	return err
-}
-
-func (s *ParticipantService) GetParticipantInfo(participantId string) (*entity.Participant, error) {
-	participant, err := s.ParticipantRepository.GetParticipantInfo(participantId)
+func (s *Service) GetParticipantInfo(participantId string) (*entity.Participant, error) {
+	participant, err := s.ParticipantRecordRepository.GetParticipantInfo(participantId)
 
 	return participant, err
 }
 
-func GenerateParticipantID(emails []string) (string, error) {
-	slices.Sort[[]string](emails)
-	joined := strings.Join(emails, ":")
-	h := sha256.New()
-	_, err := h.Write([]byte(joined))
-	if err != nil {
-		return "", err
-	}
-	hashByte := h.Sum(nil)
-	hashedString := fmt.Sprintf("%x", hashByte)
-	slicesOfHash := strings.Split(hashedString, "")
-	prefixSlices := slicesOfHash[0:5]
-	postFix := slicesOfHash[len(slicesOfHash)-5:]
-	sub := strings.Join(append(prefixSlices, postFix...), "")
-	return sub, nil
-}
-
-func (s *ParticipantService) CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*entity.TeamMemberWithParticipantRecord, error) {
-	tmAccRepo, err := s.AccountRepository.CreateTeamMemberAccount(dataToSave)
+func (s *Service) CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*entity.TeamMemberWithParticipantRecord, error) {
+	tmAccRepo, err := s.ParticipantAccountRepository.CreateCoParticipantAccount(&exports.RegisterNewParticipantAccountDTO{})
 	if err != nil {
 		return nil, err
 	}
-	return tmAccRepo, nil
+	fmt.Println(tmAccRepo)
+	return nil, nil
 }
 
-func (s *ParticipantService) GetParticipantsInfo() ([]entity.Participant, error) {
-	return s.ParticipantRepository.GetParticipantsInfo()
-}
-
-func (s *ParticipantService) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
-	return s.ParticipantRepository.InviteToTeam(dataInput)
+func (s *Service) GetParticipantsInfo() ([]entity.Participant, error) {
+	parts, err := s.ParticipantRecordRepository.GetParticipantsRecords()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(parts)
+	return nil, nil
 }

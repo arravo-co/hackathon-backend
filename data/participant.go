@@ -9,25 +9,33 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*exports.ParticipantDocument, error) {
+//ParticipantDocumentTeamCoParticipantInfo
+
+type ParticipantData struct {
+	AccountCollection *mongo.Collection
+}
+
+func (p *ParticipantData) CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*exports.ParticipantDocument, error) {
 	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
 	}
 	dat := exports.ParticipantDocument{
-		ParticipantId:    dataToSave.ParticipantId,
-		HackathonId:      dataToSave.HackathonId,
-		Type:             dataToSave.Type,
-		TeamLeadEmail:    dataToSave.TeamLeadEmail,
-		TeamName:         dataToSave.TeamName,
-		CoParticipants:   dataToSave.CoParticipants,
+		ParticipantId: dataToSave.ParticipantId,
+		HackathonId:   dataToSave.HackathonId,
+		Type:          dataToSave.Type,
+		TeamLeadEmail: dataToSave.TeamLeadEmail,
+		TeamName:      dataToSave.TeamName,
+		//CoParticipants:   dataToSave.CoParticipants,
 		GithubAddress:    dataToSave.GithubAddress,
 		ParticipantEmail: dataToSave.ParticipantEmail,
-		InviteList:       []exports.InviteInfo{},
+		InviteList:       []exports.ParticipantDocumentTeamInviteInfo{},
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
 		Status:           "UNREVIEWED",
@@ -37,11 +45,11 @@ func CreateParticipantRecord(dataToSave *exports.CreateParticipantRecordData) (*
 		fmt.Printf("\n%s\n", err.Error())
 		return nil, err
 	}
-	dat.Id = result.InsertedID
+	dat.Id = result.InsertedID.(primitive.ObjectID)
 	return &dat, nil
 }
 
-func GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
+func (p *ParticipantData) GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
 	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
@@ -64,7 +72,7 @@ func GetParticipantsRecords() ([]exports.ParticipantDocument, error) {
 	return *dat, nil
 }
 
-func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
+func (p *ParticipantData) GetParticipantRecord(participantId string) (*exports.ParticipantDocument, error) {
 	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
@@ -84,7 +92,7 @@ func GetParticipantRecord(participantId string) (*exports.ParticipantDocument, e
 	return &dat, nil
 }
 
-func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface{}, error) {
+func (p *ParticipantData) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface{}, error) {
 	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
@@ -96,7 +104,7 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 		"invite_list.email": bson.M{"$nin": bson.A{dataToSave.Email}},
 	}
 	upd := bson.M{
-		"$addToSet": bson.M{"invite_list": exports.InviteInfo{Email: dataToSave.Email,
+		"$addToSet": bson.M{"invite_list": exports.ParticipantDocumentTeamInviteInfo{Email: dataToSave.Email,
 			InviterId: dataToSave.InviterEmail, Time: time.Now()}},
 		"$set": bson.M{"updated_at": time.Now()},
 	}
@@ -119,7 +127,7 @@ func AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface
 	return result, err
 }
 
-func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
+func (p *ParticipantData) AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
 	partDoc := &exports.ParticipantDocument{}
 	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
@@ -149,7 +157,7 @@ func AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTe
 	return partDoc, err
 }
 
-func RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParticipatingTeamData) (interface{}, error) {
+func (p *ParticipantData) RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemberFromParticipatingTeamData) (interface{}, error) {
 	participantCol, err := DefaultDatasource.GetParticipantCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {

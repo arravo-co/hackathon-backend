@@ -8,66 +8,65 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arravoco/hackathon_backend/cache"
-	"github.com/arravoco/hackathon_backend/config"
+	//"gitee.com/golang-module/carbon"
+
 	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
-	"github.com/arravoco/hackathon_backend/events"
 	"github.com/arravoco/hackathon_backend/exports"
-	valueobjects "github.com/arravoco/hackathon_backend/value_objects"
+	//"github.com/golang-module/carbon"
 )
 
 // AddMemberToParticipatingTeam
 type ParticipantRepository struct {
 	DB                  *query.Query
 	Entity              *entity.Participant
-	FirstName           string               `json:"first_name"`
-	LastName            string               `json:"last_name"`
-	Email               string               `json:"email"`
-	Gender              string               `json:"gender"`
-	State               string               `json:"state"`
-	Age                 int                  `json:"age"`
-	DOB                 time.Time            `json:"dob"`
-	AccountRole         string               `json:"role"`
-	ParticipantId       string               `json:"participant_id"`
-	TeamLeadEmail       string               `json:"team_lead_email"`
-	TeamName            string               `json:"team_name"`
-	TeamRole            string               `json:"team_role"`
-	HackathonId         string               `json:"hackathon_id"`
-	ParticipantType     string               `json:"type"`
-	CoParticipants      []CoParticipantInfo  `json:"co_participants"`
-	ParticipantEmail    string               `json:"participant_email"`
-	InviteList          []exports.InviteInfo `json:"invite_list"`
-	AccountStatus       string               `json:"account_status"`
-	ParticipationStatus string               `json:"participation_status"`
-	Skillset            []string             `json:"skillset"`
-	PhoneNumber         string               `json:"phone_number"`
-	EmploymentStatus    string               `json:"employment_status"`
-	ExperienceLevel     string               `json:"experience_level"`
-	Motivation          string               `json:"motivation"`
-	HackathonExperience string               `json:"hackathon_experience"`
-	YearsOfExperience   int                  `json:"years_of_experience"`
-	FieldOfStudy        string               `json:"field_of_study"`
-	PreviousProjects    []string             `json:"previous_projects"`
-	Solution            *SolutionRepository  `json:"solution"`
-	CreatedAt           time.Time            `json:"created_at"`
-	UpdatedAt           time.Time            `json:"updated_at"`
+	FirstName           string                                      `json:"first_name"`
+	LastName            string                                      `json:"last_name"`
+	Email               string                                      `json:"email"`
+	Gender              string                                      `json:"gender"`
+	State               string                                      `json:"state"`
+	Age                 int                                         `json:"age"`
+	DOB                 time.Time                                   `json:"dob"`
+	AccountRole         string                                      `json:"role"`
+	ParticipantId       string                                      `json:"participant_id"`
+	TeamLeadEmail       string                                      `json:"team_lead_email"`
+	TeamName            string                                      `json:"team_name"`
+	TeamRole            string                                      `json:"team_role"`
+	HackathonId         string                                      `json:"hackathon_id"`
+	ParticipantType     string                                      `json:"type"`
+	CoParticipants      []CoParticipantInfo                         `json:"co_participants"`
+	ParticipantEmail    string                                      `json:"participant_email"`
+	InviteList          []exports.ParticipantDocumentTeamInviteInfo `json:"invite_list"`
+	AccountStatus       string                                      `json:"account_status"`
+	ParticipationStatus string                                      `json:"participation_status"`
+	Skillset            []string                                    `json:"skillset"`
+	PhoneNumber         string                                      `json:"phone_number"`
+	EmploymentStatus    string                                      `json:"employment_status"`
+	ExperienceLevel     string                                      `json:"experience_level"`
+	Motivation          string                                      `json:"motivation"`
+	HackathonExperience string                                      `json:"hackathon_experience"`
+	YearsOfExperience   int                                         `json:"years_of_experience"`
+	FieldOfStudy        string                                      `json:"field_of_study"`
+	PreviousProjects    []string                                    `json:"previous_projects"`
+	Solution            *SolutionRepository                         `json:"solution"`
+	CreatedAt           time.Time                                   `json:"created_at"`
+	UpdatedAt           time.Time                                   `json:"updated_at"`
 }
 type ParticipantRecord struct {
-	ParticipantId       string               `json:"participant_id"`
-	TeamLeadEmail       string               `json:"team_lead_email"`
-	TeamName            string               `json:"team_name"`
-	TeamRole            string               `json:"team_role"`
-	HackathonId         string               `json:"hackathon_id"`
-	ParticipantType     string               `json:"type"`
-	CoParticipants      []CoParticipantInfo  `json:"co_participants"`
-	ParticipantEmail    string               `json:"participant_email"`
-	InviteList          []exports.InviteInfo `json:"invite_list"`
-	ParticipationStatus string               `json:"participation_status"`
-	CreatedAt           time.Time            `json:"created_at"`
-	UpdatedAt           time.Time            `json:"updated_at"`
+	ParticipantId       string                                      `json:"participant_id"`
+	TeamLeadEmail       string                                      `json:"team_lead_email"`
+	TeamName            string                                      `json:"team_name"`
+	TeamRole            string                                      `json:"team_role"`
+	HackathonId         string                                      `json:"hackathon_id"`
+	ParticipantType     string                                      `json:"type"`
+	CoParticipants      []CoParticipantInfo                         `json:"co_participants"`
+	ParticipantEmail    string                                      `json:"participant_email"`
+	InviteList          []exports.ParticipantDocumentTeamInviteInfo `json:"invite_list"`
+	ParticipationStatus string                                      `json:"participation_status"`
+	CreatedAt           time.Time                                   `json:"created_at"`
+	UpdatedAt           time.Time                                   `json:"updated_at"`
 }
 type CoParticipantInfo struct {
 	FirstName           string    `json:"first_name"`
@@ -132,11 +131,7 @@ func NewParticipantRepository(q *query.Query) *ParticipantRepository {
 	}
 }
 
-func (repo *ParticipantRepository) SetEntity(ent *entity.Participant) {
-	repo.Entity = ent
-}
-
-func (p *ParticipantRepository) AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
+func (p *ParticipantRepository) AddMemberInfoToParticipatingTeamRecord(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error) {
 	partDoc, err := p.DB.AddMemberToParticipatingTeam(dataToSave)
 	if err != nil {
 		return nil, err
@@ -163,7 +158,7 @@ func (p ParticipantRepository) CreateParticipantRecord(dataInput *exports.Create
 	}, nil
 }
 
-func (p ParticipantRepository) InviteToTeam(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
+func (p ParticipantRepository) AddToTeamInviteList(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
 	res, err := p.DB.AddToTeamInviteList(dataInput)
 	if err != nil {
 		return nil, err
@@ -192,213 +187,7 @@ func (p ParticipantRepository) InviteToTeam(dataInput *exports.AddToTeamInviteLi
 	return res, nil
 }
 
-func (p *ParticipantRepository) RegisterIndividual(input dtos.RegisterNewParticipantDTO) (*ParticipantRepository, error) {
-	passwordHash, _ := exports.GenerateHashPassword(input.Password)
-	participantId, err := GenerateParticipantID([]string{input.Email})
-	if err != nil {
-		return nil, err
-	}
-	dob, err := time.Parse("2006-01-02", input.DOB)
-	if err == nil {
-		return nil, err
-	}
-	dataInput := &exports.CreateParticipantAccountData{
-		CreateAccountData: exports.CreateAccountData{
-			Email:        input.Email,
-			PasswordHash: passwordHash,
-			FirstName:    input.FirstName,
-			LastName:     input.LastName,
-			Gender:       input.Gender,
-			State:        input.State,
-			Role:         "PARTICIPANT",
-			HackathonId:  config.GetHackathonId(),
-			Status:       "EMAIL_UNVERIFIED",
-		},
-		DOB:                 dob,
-		Skillset:            input.Skillset,
-		ParticipantId:       participantId,
-		Motivation:          input.Motivation,
-		YearsOfExperience:   input.YearsOfExperience,
-		PreviousProjects:    input.PreviousProjects,
-		HackathonExperience: input.HackathonExperience,
-		FieldOfStudy:        input.FieldOfStudy,
-		ExperienceLevel:     input.ExperienceLevel,
-		EmploymentStatus:    input.EmploymentStatus,
-	}
-	isEmailInCache := cache.FindEmailInCache(dataInput.Email)
-	if isEmailInCache {
-		//return nil, errors.New("email is already existing")
-	}
-	accCreated, err := data.CreateParticipantAccount(dataInput)
-	if err != nil {
-		return nil, err
-	}
-	addedToCache := cache.AddEmailToCache(dataInput.Email)
-
-	if !addedToCache {
-		exports.MySugarLogger.Warnln("Email is already in cache")
-	}
-	partDoc, err := data.CreateParticipantRecord(&exports.CreateParticipantRecordData{
-		HackathonId:      config.GetHackathonId(),
-		Type:             "INDIVIDUAL",
-		ParticipantEmail: input.Email,
-		ParticipantId:    participantId,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	events.EmitParticipantAccountCreated(&exports.ParticipantAccountCreatedEventData{
-		ParticipantEmail: accCreated.Email,
-		LastName:         accCreated.LastName,
-		FirstName:        accCreated.FirstName,
-		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
-		ParticipantType:  "INDIVIDUAL",
-	})
-	/*
-		dt := struct {
-			FirstName string `json:"message"`
-		}{FirstName: dataResponse.FirstName}
-		by, _ := json.Marshal(&dt)
-		err = producer.Publish("participant_register", by)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	*/
-	return &ParticipantRepository{
-		HackathonId:         dataInput.HackathonId,
-		ParticipantType:     partDoc.Type,
-		AccountStatus:       accCreated.Status,
-		ParticipantId:       participantId,
-		Email:               dataInput.Email,
-		LastName:            dataInput.LastName,
-		FirstName:           dataInput.FirstName,
-		Gender:              dataInput.Gender,
-		DOB:                 dob,
-		Age:                 time.Now().Year() - dataInput.DOB.Year(),
-		AccountRole:         dataInput.Role,
-		State:               dataInput.State,
-		ParticipationStatus: partDoc.Status,
-		Skillset:            accCreated.Skillset,
-		PhoneNumber:         accCreated.PhoneNumber,
-		Motivation:          dataInput.Motivation,
-		YearsOfExperience:   dataInput.YearsOfExperience,
-		HackathonExperience: dataInput.HackathonExperience,
-		FieldOfStudy:        dataInput.FieldOfStudy,
-		PreviousProjects:    dataInput.PreviousProjects,
-		ExperienceLevel:     dataInput.ExperienceLevel,
-		EmploymentStatus:    dataInput.EmploymentStatus,
-		CreatedAt:           accCreated.CreatedAt,
-		UpdatedAt:           accCreated.UpdatedAt,
-	}, nil
-}
-
-func (p *ParticipantRepository) RegisterTeamLead(input dtos.RegisterNewParticipantDTO) (*ParticipantRepository, error) {
-	teamMembers := []exports.TeamParticipantInfo{}
-	passwordHash, err := exports.GenerateHashPassword(input.Password)
-	if err != nil {
-		return nil, err
-	}
-	participantId, err := GenerateParticipantID([]string{input.Email})
-	if err != nil {
-		return nil, err
-	}
-
-	areEmailsInCache := cache.FindEmailInCache(input.Email)
-	if !areEmailsInCache {
-		//return nil, errors.New("email already exists")
-	}
-
-	dob, err := time.Parse("2006-04-02", input.DOB)
-	if err == nil {
-		return nil, err
-	}
-	accRepo := NewAccountRepository(p.DB)
-	acc, err := accRepo.CreateParticipantAccount(&exports.CreateParticipantAccountData{
-		ParticipantId:       participantId,
-		Skillset:            input.Skillset,
-		DOB:                 dob,
-		Motivation:          input.Motivation,
-		EmploymentStatus:    input.EmploymentStatus,
-		ExperienceLevel:     input.ExperienceLevel,
-		YearsOfExperience:   input.YearsOfExperience,
-		HackathonExperience: input.HackathonExperience,
-		PreviousProjects:    input.PreviousProjects,
-		FieldOfStudy:        input.FieldOfStudy,
-		CreateAccountData: exports.CreateAccountData{
-			Email:        input.Email,
-			FirstName:    input.FirstName,
-			LastName:     input.LastName,
-			Role:         "PARTICIPANT",
-			Gender:       input.Gender,
-			PasswordHash: passwordHash,
-			State:        input.State,
-			PhoneNumber:  input.PhoneNumber,
-			HackathonId:  config.GetHackathonId(),
-			Status:       "EMAIL_UNVERIFIED",
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	dataInput := &exports.CreateParticipantRecordData{
-		TeamLeadEmail:    input.Email,
-		HackathonId:      config.GetHackathonId(),
-		TeamName:         input.TeamName,
-		CoParticipants:   []exports.CoParticipant{},
-		ParticipantId:    participantId,
-		ParticipantEmail: input.Email,
-		Type:             "TEAM",
-	}
-
-	particicipantDoc, err := p.DB.CreateParticipantRecord(dataInput)
-	if err != nil {
-		return nil, err
-	}
-	// emit created event
-
-	events.EmitParticipantAccountCreated(&exports.ParticipantAccountCreatedEventData{
-		TeamParticipants: teamMembers,
-		TeamLeadEmail:    input.Email,
-		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
-		ParticipantEmail: input.Email,
-		TeamName:         input.TeamName,
-		TeamRole:         "TEAM_LEAD",
-		ParticipantType:  "TEAM",
-	})
-
-	return &ParticipantRepository{
-		Email:               input.Email,
-		HackathonId:         dataInput.HackathonId,
-		ParticipationStatus: particicipantDoc.Status,
-		AccountRole:         "PARTICIPANT",
-		ParticipantType:     particicipantDoc.Type,
-		FirstName:           input.FirstName,
-		LastName:            input.LastName,
-		Gender:              input.Gender,
-		State:               input.State,
-		Skillset:            input.Skillset,
-		PhoneNumber:         input.PhoneNumber,
-		DOB:                 dob,
-		Age:                 time.Now().Year() - dob.Year(),
-		TeamLeadEmail:       particicipantDoc.TeamLeadEmail,
-		TeamName:            particicipantDoc.TeamName,
-		ParticipantId:       participantId,
-		ParticipantEmail:    particicipantDoc.ParticipantEmail,
-		TeamRole:            "TEAM_LEAD",
-		CoParticipants:      []CoParticipantInfo{},
-		Motivation:          input.Motivation,
-		YearsOfExperience:   input.YearsOfExperience,
-		FieldOfStudy:        input.FieldOfStudy,
-		HackathonExperience: input.HackathonExperience,
-		PreviousProjects:    input.PreviousProjects,
-		ExperienceLevel:     input.ExperienceLevel,
-		EmploymentStatus:    input.EmploymentStatus,
-		CreatedAt:           acc.CreatedAt,
-		UpdatedAt:           acc.UpdatedAt,
-	}, err
-}
-
+/*
 func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entity.Participant, error) {
 	p := &entity.Participant{}
 	accountData, err := data.GetAccountByEmail(idOrEmail)
@@ -491,10 +280,10 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 	// emit created event
 
 	return p, nil
-}
+}*/
 
-func (p *ParticipantRepository) UpdateParticipantInfo(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
-	_, err := data.UpdateParticipantInfoByEmail(&exports.UpdateAccountFilter{Email: p.Email}, &exports.UpdateAccountDocument{
+func (p *ParticipantRepository) UpdateParticipantRecord(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
+	_, err := p.DB.UpdateParticipantInfoByEmail(&exports.UpdateAccountFilter{Email: p.Email}, &exports.UpdateAccountDocument{
 		FirstName:       dataInput.FirstName,
 		LastName:        dataInput.LastName,
 		Gender:          dataInput.Gender,
@@ -515,157 +304,68 @@ func GenerateParticipantID(emails []string) (string, error) {
 	}
 	hashByte := h.Sum(nil)
 	hashedString := fmt.Sprintf("%x", hashByte)
-	fmt.Println("hashedString")
-	fmt.Println(joined)
-	fmt.Println(hashedString)
-	fmt.Println("hashedString")
 	slicesOfHash := strings.Split(hashedString, "")
 	prefixSlices := slicesOfHash[0:5]
 	postFix := slicesOfHash[len(slicesOfHash)-5:]
-	sub := strings.Join(append(prefixSlices, postFix...), "")
+	sub := strings.Join([]string{"PARTICIPANT_ID_", strings.Join(append(prefixSlices, postFix...), "")}, "")
 	return sub, nil
 }
 
-func (s *ParticipantRepository) GetParticipantInfo(participantId string) (*entity.Participant, error) {
+func (s *ParticipantRepository) GetParticipantRecord(participantId string) (*exports.ParticipantRecordRepository, error) {
 	participant, err := s.DB.GetParticipantRecord(participantId)
 	if err != nil {
 		return nil, err
 	}
-	partIds := []string{participant.ParticipantId}
-
-	accs, err := data.GetAccountsByParticipantIds(partIds)
 	if err != nil {
 		return nil, err
 	}
-	pE := entity.Participant{}
-	cs := []CoParticipantInfo{}
-
-	for _, a := range accs {
-		if participant.TeamLeadEmail == a.Email || participant.ParticipantEmail == a.Email {
-			pE.FirstName = a.FirstName
-			pE.LastName = a.LastName
-			pE.Email = a.Email
-			pE.ParticipationStatus = participant.Status
-			pE.AccountRole = a.Role
-			pE.TeamLeadEmail = participant.TeamLeadEmail
-			pE.TeamName = participant.TeamName
-			pE.State = a.State
-			pE.DOB = a.DOB
-			pE.Age = time.Now().Year() - a.DOB.Year()
-			pE.Gender = a.Gender
-			pE.HackathonId = a.HackathonId
-			pE.AccountStatus = a.Status
-			pE.InviteList = participant.InviteList
-			pE.Skillset = a.Skillset
-			pE.PhoneNumber = a.PhoneNumber
-			pE.ParticipantId = participant.ParticipantId
-			pE.ParticipantType = participant.Type
-			pE.Motivation = a.Motivation
-			pE.ExperienceLevel = a.ExperienceLevel
-			pE.EmploymentStatus = a.EmploymentStatus
-			pE.Motivation = a.Motivation
-			pE.YearsOfExperience = a.YearsOfExperience
-			pE.HackathonExperience = a.HackathonExperience
-			pE.PreviousProjects = a.PreviousProjects
-			pE.CreatedAt = a.CreatedAt
-			pE.UpdatedAt = a.UpdatedAt
-			if participant.Type == "TEAM" {
-				pE.TeamRole = "TEAM_LEAD"
-			}
-		} else {
-			for _, c := range participant.CoParticipants {
-				if c.Email == a.Email {
-					cs = append(cs, CoParticipantInfo{
-						FirstName:           a.FirstName,
-						Email:               c.Email,
-						LastName:            a.LastName,
-						PhoneNumber:         a.PhoneNumber,
-						Gender:              a.Gender,
-						State:               a.State,
-						DOB:                 a.DOB,
-						Age:                 time.Now().Year() - a.DOB.Year(),
-						AccountStatus:       a.Status,
-						ParticipantId:       a.ParticipantId,
-						HackathonId:         a.HackathonId,
-						TeamRole:            c.Role,
-						AccountRole:         a.Role,
-						Skillset:            a.Skillset,
-						Motivation:          a.Motivation,
-						YearsOfExperience:   a.YearsOfExperience,
-						FieldOfStudy:        a.FieldOfStudy,
-						HackathonExperience: a.HackathonExperience,
-						PreviousProjects:    a.PreviousProjects,
-						ExperienceLevel:     a.ExperienceLevel,
-						EmploymentStatus:    a.EmploymentStatus,
-						CreatedAt:           a.CreatedAt,
-						UpdatedAt:           a.UpdatedAt,
-					})
-				}
-			}
-		}
+	pE := &exports.ParticipantRecordRepository{
+		ParticipantId:    participant.ParticipantId,
+		TeamName:         participant.TeamName,
+		ParticipantEmail: participant.ParticipantEmail,
+		TeamLeadEmail:    participant.TeamLeadEmail,
+		Id:               participant.Id.Hex(),
+		ParticipantType:  participant.Type,
+		SolutionId:       participant.SolutionId,
+		HackathonId:      participant.HackathonId,
+		InviteList:       participant.InviteList,
+		Status:           participant.Status,
+		ReviewRanking:    participant.ReviewRanking,
+		CoParticipants:   participant.CoParticipants,
+		CreatedAt:        participant.CreatedAt,
+		UpdatedAt:        participant.UpdatedAt,
 	}
 
-	return &pE, err
+	return pE, err
 }
 
-func (s *ParticipantRepository) GetParticipantsInfo() ([]entity.Participant, error) {
-	partDocs, err := s.DB.GetParticipantsRecordsAggregate()
+func (s *ParticipantRepository) GetParticipantsRecords() ([]exports.ParticipantRecordRepository, error) {
+	partDocs, err := s.DB.GetParticipantsRecords()
 
-	var participants []entity.Participant
-	for _, part := range partDocs {
-		participants = append(participants, entity.Participant{
-			Email:               part.Email,
-			FirstName:           part.FirstName,
-			LastName:            part.LastName,
-			Gender:              part.Gender,
-			DOB:                 part.DOB,
-			TeamLeadEmail:       part.TeamName,
-			AccountRole:         part.Role,
-			ParticipantId:       part.ParticipantId,
-			ParticipantEmail:    part.ParticipantEmail,
-			TeamName:            part.TeamName,
-			TeamRole:            "TEAM_LEAD",
-			PhoneNumber:         part.PhoneNumber,
-			ParticipantType:     part.Type,
-			Motivation:          part.Motivation,
-			YearsOfExperience:   part.YearsOfExperience,
-			HackathonExperience: part.HackathonExperience,
-			PreviousProjects:    part.PreviousProjects,
-			FieldOfStudy:        part.FieldOfStudy,
-			CoParticipants: func(arr []exports.CoParticipantAggregateDocument) []valueobjects.CoParticipantInfo {
-				var items []valueobjects.CoParticipantInfo
-				for _, ar := range arr {
-					items = append(items, valueobjects.CoParticipantInfo{
-						HackathonId:         ar.HackathonId,
-						Email:               ar.Email,
-						FirstName:           ar.FirstName,
-						LastName:            ar.LastName,
-						Gender:              ar.Gender,
-						State:               ar.State,
-						AccountRole:         ar.AccountRole,
-						TeamRole:            ar.TeamRole,
-						Motivation:          ar.Motivation,
-						DOB:                 ar.DOB,
-						Skillset:            ar.Skillset,
-						YearsOfExperience:   ar.YearsOfExperience,
-						FieldOfStudy:        ar.FieldOfStudy,
-						HackathonExperience: ar.HackathonExperience,
-						PreviousProjects:    ar.PreviousProjects,
-						EmploymentStatus:    ar.EmploymentStatus,
-						ExperienceLevel:     ar.ExperienceLevel,
-						PhoneNumber:         ar.PhoneNumber,
-						CreatedAt:           ar.CreatedAt,
-						UpdatedAt:           ar.UpdatedAt,
-					})
-				}
-				return items
-			}(part.CoParticipants),
+	var participants []exports.ParticipantRecordRepository
+	for _, participant := range partDocs {
+		participants = append(participants, exports.ParticipantRecordRepository{
+
+			ParticipantId:    participant.ParticipantId,
+			TeamName:         participant.TeamName,
+			ParticipantEmail: participant.ParticipantEmail,
+			TeamLeadEmail:    participant.TeamLeadEmail,
+			Id:               participant.Id.Hex(),
+			ParticipantType:  participant.Type,
+			SolutionId:       participant.SolutionId,
+			HackathonId:      participant.HackathonId,
+			InviteList:       participant.InviteList,
+			Status:           participant.Status,
+			ReviewRanking:    participant.ReviewRanking,
+			CoParticipants:   participant.CoParticipants,
+			CreatedAt:        participant.CreatedAt,
+			UpdatedAt:        participant.UpdatedAt,
 		})
 	}
 	return participants, err
 }
 
-func (s *ParticipantRepository) RemoveMemberFromTeam(dataInput *RemoveMemberFromTeamData) (*entity.TeamMemberAccount, error) {
+func (s *ParticipantRepository) RemoveCoparticipantFromParticipantRecord(dataInput *RemoveMemberFromTeamData) (*entity.TeamMemberWithParticipantRecord, error) {
 	_, err := s.DB.RemoveMemberFromParticipatingTeam(&exports.RemoveMemberFromParticipatingTeamData{
 		HackathonId:   dataInput.HackathonId,
 		MemberEmail:   dataInput.MemberEmail,
@@ -681,7 +381,7 @@ func (s *ParticipantRepository) RemoveMemberFromTeam(dataInput *RemoveMemberFrom
 
 //
 
-func (s *ParticipantRepository) SelectSolutionForTeam(dataInput *exports.SelectTeamSolutionData) (*entity.Solution, error) {
+func (s *ParticipantRepository) AddSolutionIdToParticipantRecord(dataInput *exports.SelectTeamSolutionData) (*entity.Solution, error) {
 
 	partDoc, err := s.DB.SelectSolutionForTeam(&exports.SelectTeamSolutionData{
 		HackathonId:   dataInput.HackathonId,
@@ -701,8 +401,8 @@ func (s *ParticipantRepository) SelectSolutionForTeam(dataInput *exports.SelectT
 	}, nil
 }
 
-func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberAccount {
-	info := &entity.TeamMemberAccount{}
+func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberWithParticipantRecord {
+	info := &entity.TeamMemberWithParticipantRecord{}
 	info.Email = account.Email
 	info.Status = account.Status
 	info.FirstName = account.FirstName
@@ -720,4 +420,50 @@ func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberAcco
 	// emit created event
 
 	return info
+}
+
+func (s *ParticipantRepository) GetSingleParticipantRecordAndMemberAccountsInfo(participant_id string) (*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
+	arggs, err := s.DB.GetParticipantsWithAccountsAggregate(nil)
+	if err != nil {
+		return nil, err
+	}
+	if arggs != nil {
+		return nil, nil
+	}
+	arg := arggs[0]
+
+	team_lead_info := exports.TeamLeadInfoParticipantRecordRepositoryAggregate{
+		Email:         arg.TeamLeadInfo.Email,
+		AccountId:     arg.TeamLeadInfo.AccountId,
+		FirstName:     arg.TeamLeadInfo.FirstName,
+		LastName:      arg.TeamLeadInfo.LastName,
+		Gender:        arg.TeamLeadInfo.Gender,
+		CreatedAt:     arg.TeamLeadInfo.CreatedAt,
+		UpdateAt:      arg.TeamLeadInfo.UpdateAt,
+		Skillset:      arg.TeamLeadInfo.Skillset,
+		AccountStatus: arg.TeamLeadInfo.AccountStatus,
+		AccountRole:   arg.TeamLeadInfo.AccountRole,
+	}
+	arr := &exports.ParticipantTeamMembersWithAccountsAggregate{
+		Id:                arggs[0].Id.String(),
+		TeamLeadEmail:     arggs[0].TeamLeadEmail,
+		TeamName:          arggs[0].TeamName,
+		TeamLeadFirstName: arggs[0].TeamLeadFirstName,
+		TeamLeadLastName:  arggs[0].TeamLeadLastName,
+		TeamLeadGender:    arggs[0].TeamLeadGender,
+		TeamLeadAccountId: arggs[0].TeamLeadAccountId,
+		TeamLeadInfo:      team_lead_info,
+	}
+	return arr, nil
+}
+func (s *ParticipantRepository) GetMultipleParticipantRecordAndMemberAccountsInfo(dataInput interface{}) (*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
+	arggs, err := s.DB.GetParticipantsWithAccountsAggregate(nil)
+	if err != nil {
+		return nil, err
+	}
+	var arr []*exports.ParticipantTeamMembersWithAccountsAggregate
+	for _, v := range arggs {
+
+	}
+	return arr, nil
 }
