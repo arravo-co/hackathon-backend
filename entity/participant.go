@@ -6,14 +6,14 @@ import (
 
 // AddMemberToParticipatingTeam
 type Participant struct {
-	FirstName           string                               `json:"first_name"`
-	LastName            string                               `json:"last_name"`
-	Email               string                               `json:"email"`
-	Gender              string                               `json:"gender"`
-	State               string                               `json:"state"`
-	Age                 int                                  `json:"age"`
-	DOB                 time.Time                            `json:"dob"`
-	AccountRole         string                               `json:"role"`
+	//FirstName           string                               `json:"first_name"`
+	//LastName            string                               `json:"last_name"`
+	//Email               string                               `json:"email"`
+	//Gender              string                               `json:"gender"`
+	//State               string                               `json:"state"`
+	//Age                 int                                  `json:"age"`
+	//DOB                 time.Time                            `json:"dob"`
+	//AccountRole         string                               `json:"role"`
 	ParticipantId       string                               `json:"participant_id"`
 	TeamLeadEmail       string                               `json:"team_lead_email"`
 	TeamName            string                               `json:"team_name"`
@@ -26,20 +26,10 @@ type Participant struct {
 	AccountStatus       string                               `json:"account_status"`
 	ParticipationStatus string                               `json:"participation_status"`
 	ReviewRanking       int                                  `json:"review_ranking"`
-	Skillset            []string                             `json:"skillset"`
-	PhoneNumber         string                               `json:"phone_number"`
-	EmploymentStatus    string                               `json:"employment_status"`
-	ExperienceLevel     string                               `json:"experience_level"`
-	Motivation          string                               `json:"motivation"`
-	HackathonExperience string                               `json:"hackathon_experience"`
-	YearsOfExperience   int                                  `json:"years_of_experience"`
-	FieldOfStudy        string                               `json:"field_of_study"`
-	PreviousProjects    []string                             `json:"previous_projects"`
-	IsEmailVerified     bool                                 `json:"is_email_verified"`
-	EmailVerifiedAt     time.Time                            `json:"email_verified_at"`
-	Solution            *ParticipartSelectedSolution         `json:"solution"`
-	CreatedAt           time.Time                            `json:"created_at"`
-	UpdatedAt           time.Time                            `json:"updated_at"`
+	TeamLeadInfo        ParticipantEntityTeamLeadInfo
+	Solution            *ParticipantEntitySelectedSolution `json:"solution"`
+	CreatedAt           time.Time                          `json:"created_at"`
+	UpdatedAt           time.Time                          `json:"updated_at"`
 }
 
 type ParticipantEntityCoParticipantInfo struct {
@@ -73,8 +63,25 @@ type InviteInfo struct {
 	Time      time.Time `bson:"time,omitempty" json:"time,omitempty"`
 	InviterId string    `bson:"inviter_id,omitempty" json:"inviter_id,omitempty"`
 }
+type ParticipantEntityTeamLeadInfo struct {
+	HackathonId   string
+	AccountId     string
+	Email         string
+	FirstName     string
+	LastName      string
+	Gender        string
+	PhoneNumber   string
+	Skillset      []string
+	AccountStatus string
+	AccountRole   string
+	TeamRole      string
+	PasswordHash  string
+	State         string
+	CreatedAt     string
+	UpdateAt      string
+}
 
-type ParticipartSelectedSolution struct {
+type ParticipantEntitySelectedSolution struct {
 	Id               string    `json:"id"`
 	HackathonId      string    `json:"hackathon_id"`
 	Title            string    `json:"name"`

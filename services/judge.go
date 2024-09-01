@@ -3,61 +3,12 @@ package services
 import (
 	"errors"
 
-	"github.com/arravoco/hackathon_backend/di"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/go-playground/validator/v10"
 )
 
-type ParticipantRepository interface {
-	AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantDocument, error)
-}
-
-type AccountRepository interface {
-}
-
-type SolutionRepository interface {
-}
-
-type Service struct {
-	ParticipantRecordRepository  exports.ParticipantRepositoryInterface
-	JudgeAccountRepository       exports.JudgeRepositoryInterface
-	ParticipantAccountRepository exports.ParticipantAccountRepositoryInterface
-	SolutionRepository           SolutionRepository
-}
-
-type ServiceConfig struct {
-	ParticipantRepository  ParticipantRepository
-	JudgeAccountRepository exports.JudgeRepositoryInterface
-	SolutionRepository     SolutionRepository
-}
-
-var service *Service
-
-func NewService(cfg *ServiceConfig) *Service {
-	return &Service{
-		ParticipantRecordRepository: cfg.ParticipantRepository,
-		JudgeAccountRepository:      cfg.JudgeAccountRepository,
-		SolutionRepository:          cfg.SolutionRepository,
-	}
-}
-
-func GetServiceWithDefaultRepositories() *Service {
-	if service != nil {
-		return service
-	}
-	var judge exports.JudgeRepositoryInterface = di.GetDefaultJudgeRepository()
-	var cfg *ServiceConfig = &ServiceConfig{
-		JudgeAccountRepository: judge,
-	}
-	service = NewService(cfg)
-	return service
-}
-
-var validate *validator.Validate
-
 func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeDTO) (*entity.Judge, error) {
-	validate = validator.New()
 	err := validate.Struct(dataInput)
 	if err != nil {
 		return nil, err

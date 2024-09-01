@@ -92,8 +92,29 @@ func RegisterParticipant(c echo.Context) error {
 			Message: "Only teams are allowed to register",
 		})
 	} else if data.Type == "TEAM" {
-		partServ := services.NewParticipantService()
-		responseData, err = partServ.RegisterTeamLead(data)
+		serv := services.GetServiceWithDefaultRepositories()
+		responseData, err = serv.RegisterTeamLead(&services.RegisterNewParticipantDTO{
+			FirstName:           data.FirstName,
+			LastName:            data.LastName,
+			Gender:              data.Gender,
+			Password:            data.Password,
+			ConfirmPassword:     data.ConfirmPassword,
+			PhoneNumber:         data.PhoneNumber,
+			PreviousProjects:    data.PreviousProjects,
+			Skillset:            data.Skillset,
+			State:               data.State,
+			TeamSize:            data.TeamSize,
+			DOB:                 data.DOB,
+			EmploymentStatus:    data.EmploymentStatus,
+			Email:               data.Email,
+			ExperienceLevel:     data.ExperienceLevel,
+			HackathonExperience: data.HackathonExperience,
+			YearsOfExperience:   data.YearsOfExperience,
+			FieldOfStudy:        data.FieldOfStudy,
+			Type:                data.Type,
+			TeamName:            data.TeamName,
+			Motivation:          data.Motivation,
+		})
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
 				Code:    echo.ErrBadRequest.Code,
@@ -101,8 +122,8 @@ func RegisterParticipant(c echo.Context) error {
 			})
 		}
 	}
-	fmt.Println(err)
 	if err != nil {
+		fmt.Println(err)
 		return c.JSON(http.StatusBadRequest, &RegisterParticipantFailResponse{
 			Code:    echo.ErrBadRequest.Code,
 			Message: err.Error(),
@@ -147,8 +168,8 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 		})
 	}
 
-	partServ := services.NewParticipantService()
-	resData, err := partServ.CompleteNewTeamMemberRegistration(&services.CompleteNewTeamMemberRegistrationEntityData{
+	serv := services.GetServiceWithDefaultRepositories()
+	resData, err := serv.CompleteNewTeamMemberRegistration(&services.CompleteNewTeamMemberRegistrationDTO{
 		FirstName:     data.FirstName,
 		Email:         data.Email,
 		LastName:      data.LastName,
@@ -187,14 +208,14 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 // @ Router			/api/v1/participants/{participantId}/team              [get]
 func GetTeamMembersInfo(ctx echo.Context) error {
 	participantId := ctx.Param("participantId")
-	partServ := services.NewParticipantService()
-	participant, err := partServ.FillParticipantInfo(participantId)
+	serv := services.GetServiceWithDefaultRepositories()
+	participant, err := serv.GetParticipantInfo(participantId)
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{
 			Message: "Failed to fetch team members information",
 		})
 	}
-	mems, err := partServ.GetTeamMembersInfo(participant)
+	mems, err := serv.GetTeamMembersInfo(participant)
 
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{
@@ -215,8 +236,8 @@ func GetTeamMembersInfo(ctx echo.Context) error {
 // @Failure 400 object RegisterAnotherAdminResponseData "Failed to get participant info"
 // @Router /api/v1/participants [get]
 func GetParticipants(c echo.Context) error {
-	partServ := services.NewParticipantService()
-	participants, err := partServ.GetParticipantsInfo()
+	serv := services.GetServiceWithDefaultRepositories()
+	participants, err := serv.GetParticipantsInfo()
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,
@@ -239,8 +260,8 @@ func GetParticipants(c echo.Context) error {
 // @Router /api/v1/participants/{participantId} [get]
 func GetParticipant(c echo.Context) error {
 	participantId := c.Param("participantId")
-	partServ := services.NewParticipantService()
-	participant, err := partServ.GetParticipantInfo(participantId)
+	serv := services.GetServiceWithDefaultRepositories()
+	participant, err := serv.GetParticipantInfo(participantId)
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,

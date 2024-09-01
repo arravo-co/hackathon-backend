@@ -3,10 +3,12 @@ package utils
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/arravoco/hackathon_backend/config"
@@ -200,4 +202,21 @@ func FindProjectRoot(marker string) (string, error) {
 	}
 
 	return "", fmt.Errorf("marker %s not found", marker)
+}
+
+func GenerateParticipantID(emails []string) (string, error) {
+	slices.Sort[[]string](emails)
+	joined := strings.Join(emails, ":")
+	h := sha256.New()
+	_, err := h.Write([]byte(joined))
+	if err != nil {
+		return "", err
+	}
+	hashByte := h.Sum(nil)
+	hashedString := fmt.Sprintf("%x", hashByte)
+	slicesOfHash := strings.Split(hashedString, "")
+	prefixSlices := slicesOfHash[0:5]
+	postFix := slicesOfHash[len(slicesOfHash)-5:]
+	sub := strings.Join([]string{"PARTICIPANT_ID_", strings.Join(append(prefixSlices, postFix...), "")}, "")
+	return sub, nil
 }

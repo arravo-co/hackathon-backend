@@ -4,7 +4,6 @@ import (
 	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/dtos"
-	"github.com/arravoco/hackathon_backend/events"
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
@@ -52,13 +51,13 @@ func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
 	if err != nil {
 		return err
 	}
-	// raise event
+	/* raise event
 	events.EmitAdminAccountCreated(&exports.AdminAccountCreatedEventData{
 		Email:     acc.Email,
 		LastName:  acc.LastName,
 		FirstName: acc.FirstName,
 		EventData: exports.EventData{EventName: string(events.AdminAccountCreatedEvent)},
-	})
+	})*/
 
 	ad.passwordHash = acc.PasswordHash
 	ad.Email = acc.Email
@@ -91,14 +90,14 @@ func (ad *Admin) AdminCreateNewAdminProfile(dataInput *dtos.CreateNewAdminByAuth
 	if err != nil {
 		return err
 	}
-	// raise event
+	/* raise event
 	events.EmitAdminAccountCreatedByAdmin(&exports.AdminAccountCreatedByAdminEventData{
 		Email:       acc.Email,
 		AdminName:   acc.FirstName,
 		EventData:   exports.EventData{EventName: string(events.AdminAccountCreatedByAdminEvent)},
 		Password:    password,
 		InviterName: acc.FirstName,
-	})
+	})*/
 
 	ad.passwordHash = acc.PasswordHash
 	ad.Email = acc.Email
@@ -117,7 +116,7 @@ func (ad *Admin) AdminCreateNewJudgeProfile(dataInput *dtos.CreateNewJudgeByAdmi
 	if err != nil {
 		return err
 	}
-	acc, err := data.CreateJudgeAccount(&exports.CreateJudgeAccountData{
+	_, err = data.CreateJudgeAccount(&exports.CreateJudgeAccountData{
 		CreateAccountData: exports.CreateAccountData{
 			Role:         "JUDGE",
 			Email:        dataInput.Email,
@@ -133,7 +132,7 @@ func (ad *Admin) AdminCreateNewJudgeProfile(dataInput *dtos.CreateNewJudgeByAdmi
 	if err != nil {
 		return err
 	}
-	// raise event
+	/* raise event
 	events.EmitJudgeAccountCreatedByAdmin(&exports.JudgeAccountCreatedByAdminEventData{
 		InviteeEmail: acc.Email,
 		JudgeName:    acc.FirstName,
@@ -141,7 +140,7 @@ func (ad *Admin) AdminCreateNewJudgeProfile(dataInput *dtos.CreateNewJudgeByAdmi
 		InviterName:  acc.FirstName,
 		EventData:    exports.EventData{EventName: string(events.JudgeAccountCreatedByAdminEvent)},
 		Password:     password,
-	})
+	})*/
 
 	return nil
 }

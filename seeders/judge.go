@@ -46,6 +46,6 @@ func CreateFakeJudgeAccount(dbInstance *mongo.Database) (*exports.AccountDocumen
 	}
 	fmt.Printf("%#v", result.InsertedID)
 	acc.Id = result.InsertedID.(primitive.ObjectID)
-	fmt.Printf("%#v", acc)
+	//fmt.Printf("%#v", acc)
 	return acc, password, err
 }

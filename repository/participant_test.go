@@ -1,29 +1,66 @@
 package repository
 
 import (
+	"os"
 	"testing"
 
-	"github.com/arravoco/hackathon_backend/dtos"
+	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/seeders"
+	"github.com/arravoco/hackathon_backend/testdbsetup"
+	//testsetup "github.com/arravoco/hackathon_backend/test_setup"
 )
 
 func TestRegisterTeamLead(t *testing.T) {
-	p := ParticipantRepository{}
-	args := dtos.RegisterNewParticipantDTO{
-		FirstName: "Temitope",
-		LastName:  "Alabi",
-		Password:  "david",
-		Skillset:  []string{"nodejs", "sql"},
-		State:     "OSUN",
+}
+
+func TestCreateTeamMemberAccount(t *testing.T) {
+
+}
+
+func TestGetSingleParticipantRecordAndMemberAccountsInfo(t *testing.T) {
+
+	testdbsetup.SetupDefaultTestEnv()
+	db_url := os.Getenv("MONGODB_URL")
+	cfg := &exports.MongoDBConnConfig{
+		Url:    db_url,
+		DBName: "hackathon_db",
+	}
+	dbInstance := testdbsetup.GetMongoInstance(cfg)
+	defer t.Cleanup(func() {
+		testdbsetup.CleanupDB(dbInstance)
+	})
+	q := testdbsetup.GetQueryInstance(dbInstance)
+	partRepo := NewParticipantRepository(q)
+	status := "UNREVIEWED"
+	opts := &seeders.CreateParticpantAccountOpts{
+		Status: &status,
+	}
+	accInDB, _, err := seeders.CreateFakeParticipantAccount(dbInstance, opts)
+	if err != nil {
+		panic(err)
+	}
+	teamLeadInfo := seeders.TeamLeadInfoToCreateTeamParticipant{
+		TeamName:      "Good team",
+		Email:         accInDB.Email,
+		ParticipantId: accInDB.ParticipantId,
+		HackathonId:   accInDB.HackathonId,
+	}
+	partInDB, err := seeders.CreateAccountLinkedTeamParticipantDocument(dbInstance, nil, teamLeadInfo, nil, nil)
+	if err != nil {
+		panic(err)
 	}
 
-	t.Run("RegisterTeamLead", func(t *testing.T) {
+	recs, err := partRepo.GetMultipleParticipantRecordAndMemberAccountsInfo(exports.GetParticipantsWithAccountsAggregateFilterOpts{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		res, err := p.RegisterTeamLead(args)
-		if err != nil {
-			t.Errorf("%s", err.Error())
+	for _, item := range recs {
+		if item.HackathonId != partInDB.HackathonId {
+			t.Fatalf("hackathon id does not match. expected %v, got %v", item.HackathonId, partInDB.HackathonId)
 		}
-		if res.HackathonId != "" {
-
+		if item.TeamName != partInDB.TeamName {
+			t.Fatalf("hackathon id does not match. expected %v, got %v", item.HackathonId, partInDB.HackathonId)
 		}
-	})
+	}
 }

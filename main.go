@@ -6,13 +6,10 @@ import (
 	"strings"
 
 	"github.com/arravoco/hackathon_backend/config"
-	"github.com/arravoco/hackathon_backend/data"
 	"github.com/arravoco/hackathon_backend/db"
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/jobs"
-	"github.com/arravoco/hackathon_backend/publish"
-	rabbitutils "github.com/arravoco/hackathon_backend/rabbitUtils"
 	"github.com/arravoco/hackathon_backend/rmqUtils"
 
 	//"github.com/arravoco/hackathon_backend/jobs"
@@ -54,12 +51,12 @@ func main() {
 	e.Logger.Info(port)
 
 	db.SetupRedis()
-	rmqUtils.SetupDefaultQueue()
+	/*rmqUtils.SetupDefaultQueue()
 	data.SetupDefaultDataSource()
-	rabbitutils.SetupRMQ()
+	rabbitutils.SetupDefaultRMQ()
 	rabbitutils.DeclareAllQueues()
-	publish.SetPublisher(&rabbitutils.Publisher{})
-	go rabbitutils.ListenToAllQueues()
+	publish.SetPublisher(&rabbitutils.RMQPublisher{})
+	go rabbitutils.ListenToAllQueues()*/
 	//panic("Intentionally crashed")
 	e.Logger.Fatal(e.Start(getURL(port)))
 }

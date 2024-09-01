@@ -94,28 +94,29 @@ type ParticipantDocumentTeamCoParticipantInfo struct {
 }
 
 type ParticipantRecordRepository struct {
-	DB                ParticipantRepositoryInterface
-	Id                string
-	ParticipantId     string
-	ParticipantType   string
-	SolutionId        string
-	GithubAddress     string
-	ReviewRanking     int
-	TeamLeadFirstName string
-	TeamLeadLastName  string
-	TeamLeadGender    string
+	DB              ParticipantRepositoryInterface
+	Id              string
+	ParticipantId   string
+	ParticipantType string
+	SolutionId      string
+	GithubAddress   string
+	ReviewRanking   int
+	//TeamLeadFirstName string
+	//TeamLeadLastName  string
+	//TeamLeadGender    string
 	TeamLeadAccountId string
 	TeamLeadEmail     string
 	TeamName          string
-	TeamRole          string
-	HackathonId       string
-	CoParticipants    []ParticipantDocumentTeamCoParticipantInfo
-	ParticipantEmail  string
-	InviteList        []ParticipantDocumentTeamInviteInfo
-	Status            string
-	Solution          *ParticipantDocumentParticipantSelectedSolution
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	//TeamRole          string
+	Type             string
+	HackathonId      string
+	CoParticipants   []ParticipantDocumentTeamCoParticipantInfo
+	ParticipantEmail string
+	InviteList       []ParticipantDocumentTeamInviteInfo
+	Status           string
+	Solution         *ParticipantDocumentParticipantSelectedSolution
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type ParticipantTeamMembersWithAccountsAggregate struct {
@@ -155,6 +156,7 @@ type TeamLeadInfoParticipantRecordRepositoryAggregate struct {
 	Skillset      []string
 	AccountStatus string
 	AccountRole   string
+	TeamRole      string
 	PasswordHash  string
 	State         string
 	CreatedAt     string
@@ -173,6 +175,7 @@ type CoParticipantAggregateData struct {
 	Skillset      []string
 	AccountStatus string
 	AccountRole   string
+	TeamRole      string
 	PasswordHash  string
 	State         string
 	CreatedAt     string
@@ -180,10 +183,13 @@ type CoParticipantAggregateData struct {
 }
 type ParticipantAccountRepositoryInterface interface {
 	GetParticipantAccountByEmail(email string) (*ParticipantAccountRepository, error)
-	CreateCoParticipantAccount(input *RegisterNewParticipantAccountDTO) (*ParticipantAccountRepository, error)
+	GetParticipantAccountsByEmail(emails []string) ([]*ParticipantAccountRepository, error)
+	CreateParticipantAccount(input *CreateParticipantAccountData) (*ParticipantAccountRepository, error)
+	//CreateCoParticipantAccount(input *RegisterNewParticipantAccountDTO) (*ParticipantAccountRepository, error)
 	UpdateParticipantAccount(email string, input *UpdateParticipantDTO) error
 	GetParticipantAccounts() ([]*ParticipantAccountRepository, error)
 	DeleteParticipantAccount(identifier string) (*ParticipantAccountRepository, error)
+	MarkParticipantAccountAsDeleted(identifier string) (*ParticipantAccountRepository, error)
 	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
 	UpdateParticipantPassword(filter *UpdateAccountFilter, newPasswordHash string) (*ParticipantAccountRepository, error)
@@ -196,8 +202,8 @@ type ParticipantRepositoryInterface interface {
 	CreateParticipantRecord(dataInput *CreateParticipantRecordData) (*ParticipantRecordRepository, error)
 	GetParticipantRecord(participantId string) (*ParticipantRecordRepository, error)
 	GetParticipantsRecords() ([]ParticipantRecordRepository, error)
-	RegisterIndividual(input RegisterNewParticipantAccountDTO) (*ParticipantRecordRepository, error)
-	RegisterTeamLead(input RegisterNewParticipantAccountDTO) (*ParticipantRecordRepository, error)
+	//RegisterIndividual(input RegisterNewParticipantAccountDTO) (*ParticipantRecordRepository, error)
+	//RegisterTeamLead(input RegisterNewParticipantAccountDTO) (*ParticipantRecordRepository, error)
 	RemoveCoparticipantFromParticipantRecord(dataInput *RemoveMemberFromTeamData) (*ParticipantRecordRepository, error)
-	GetParticipantRecordAndMemberAccountsInfo(dataInput interface{}) (*ParticipantTeamMembersWithAccountsAggregateDocument, error)
+	GetSingleParticipantRecordAndMemberAccountsInfo(participant_id string) (*ParticipantTeamMembersWithAccountsAggregate, error)
 }

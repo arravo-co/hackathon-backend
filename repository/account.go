@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/arravoco/hackathon_backend/data/query"
-	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
@@ -53,59 +52,4 @@ func NewAccountRepository(q *query.Query) *AccountRepository {
 	return &AccountRepository{
 		DB: q,
 	}
-}
-
-func (acc *AccountRepository) CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAccountData) (*entity.TeamMemberWithParticipantRecord, error) {
-	acDoc, err := acc.DB.CreateTeamMemberAccount(dataToSave)
-	if err != nil {
-		return nil, err
-	}
-	accId := acDoc.Id.Hex()
-	return &entity.TeamMemberWithParticipantRecord{
-		Email:             acDoc.Email,
-		AccountId:         accId,
-		FirstName:         acDoc.FirstName,
-		LastName:          acDoc.LastName,
-		Gender:            acDoc.Gender,
-		PhoneNumber:       acDoc.PhoneNumber,
-		ParticipantId:     acDoc.ParticipantId,
-		Skillset:          acDoc.Skillset,
-		HackathonId:       acDoc.HackathonId,
-		State:             acDoc.State,
-		Status:            acDoc.Status,
-		DOB:               acDoc.DOB,
-		TeamRole:          dataToSave.TeamRole,
-		AccountRole:       dataToSave.Role,
-		IsEmailVerified:   acDoc.IsEmailVerified,
-		IsEmailVerifiedAt: acDoc.IsEmailVerifiedAt,
-		LinkedInAddress:   acDoc.LinkedInAddress,
-		CreatedAt:         acDoc.CreatedAt,
-		UpdatedAt:         acDoc.UpdatedAt,
-	}, nil
-}
-
-func (acc *AccountRepository) CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*entity.Participant, error) {
-
-	accountCol, err := acc.DB.CreateParticipantAccount(dataToSave)
-	if err != nil {
-		return nil, err
-	}
-	return &entity.Participant{
-		FirstName:           accountCol.FirstName,
-		LastName:            accountCol.LastName,
-		DOB:                 accountCol.DOB,
-		Gender:              accountCol.Gender,
-		State:               accountCol.State,
-		ParticipantId:       accountCol.ParticipantId,
-		PhoneNumber:         accountCol.PhoneNumber,
-		Email:               accountCol.Email,
-		Motivation:          accountCol.Motivation,
-		HackathonExperience: accountCol.HackathonExperience,
-		FieldOfStudy:        accountCol.FieldOfStudy,
-		YearsOfExperience:   accountCol.YearsOfExperience,
-		PreviousProjects:    accountCol.PreviousProjects,
-		IsEmailVerified:     accountCol.IsEmailVerified,
-		CreatedAt:           accountCol.CreatedAt,
-		UpdatedAt:           accountCol.UpdatedAt,
-	}, nil
 }

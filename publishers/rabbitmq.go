@@ -1,4 +1,4 @@
-package rabbitutils
+package publishers
 
 import (
 	"context"
@@ -124,7 +124,7 @@ func ConsumeQueue(q_name string, consumer_name string) (<-chan amqp.Delivery, er
 	return resChan, err
 }
 
-func Publish(exchange string, key string, body []byte) error {
+func Publish(ProducerChannel *amqp.Channel, exchange string, key string, body []byte) error {
 	err := ProducerChannel.PublishWithContext(context.Background(), exchange, key, false, false, amqp.Publishing{
 		Body:        body,
 		ContentType: "application/json",
@@ -138,7 +138,7 @@ func Publish(exchange string, key string, body []byte) error {
 }
 
 func (p *RMQPublisher) Publish(ops exports.PublisherConfig, body []byte) error {
-	err := Publish(ops.RabbitMQExchange, ops.RabbitMQKey, body)
+	err := Publish(p.Channel, ops.RabbitMQExchange, ops.RabbitMQKey, body)
 	//ProducerChannel.NotifyPublish()
 	if err != nil {
 		return err
@@ -179,44 +179,6 @@ func DeclareAllQueues() {
 	}
 	log.Println(uploadSolutionPicQueue)
 	//
-}
-
-func ListenToAllQueues() {
-	chUploadPicQicJobDelivery, err := ConsumeQueue("upload.profile_picture.cloudinary", GetConsumerTag())
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	chWelcomeEmailToJudgeDelivery, err := ConsumeQueue("send.judge.created.admin.welcome_email", GetConsumerTag())
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	//send.participant.created.welcome_email_verification_email
-	chCoordinateParticipantWelcomeVerDelivery, err := ConsumeQueue("send.participant.created.welcome_email_verification_email", GetConsumerTag())
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	chUploadSolutionPicQueue, err := ConsumeQueue("upload.solution_picture.cloudinary", GetConsumerTag())
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	for {
-		select {
-		case response := <-chUploadPicQicJobDelivery:
-			fmt.Printf(response.ConsumerTag)
-			HandleJudgeProfilePicUploadConsumption(&response)
-		case response := <-chWelcomeEmailToJudgeDelivery:
-			HandleSendEmailToJudgeConsumption(&response)
-		case response := <-chCoordinateParticipantWelcomeVerDelivery:
-			fmt.Printf(response.ConsumerTag)
-		case response := <-chUploadSolutionPicQueue:
-			HandleSolutionPicUploadConsumption(&response)
-			//HandleCoordinateParticipantWelcomeVerificationConsumption(&response)
-		}
-	}
 }
 
 func GetConsumerTag() string {

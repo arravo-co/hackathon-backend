@@ -38,7 +38,8 @@ type ParticipantTeamMembersWithAccountsAggregateDocument struct {
 		PhoneNumber   string   `bson:"phone_number"`
 		Skillset      []string `bson:"skillset"`
 		AccountStatus string   `bson:"status"`
-		AccountRole   string   `bson:"role"`
+		AccountRole   string   `bson:"account_role"`
+		TeamRole      string   `bson:"team_role"`
 		PasswordHash  string   `bson:"password_hash"`
 		State         string   `bson:"state"`
 		CreatedAt     string   `bson:"created_at"`
@@ -54,10 +55,15 @@ type ParticipantTeamMembersWithAccountsAggregateDocument struct {
 		PhoneNumber   string   `bson:"phone_number"`
 		Skillset      []string `bson:"skillset"`
 		AccountStatus string   `bson:"status"`
-		AccountRole   string   `bson:"role"`
+		AccountRole   string   `bson:"account_role"`
+		TeamRole      string   `bson:"team_role"`
 		PasswordHash  string   `bson:"password_hash"`
 		State         string   `bson:"state"`
 		CreatedAt     string   `bson:"created_at"`
 		UpdateAt      string   `bson:"update_at"`
 	} `bson:"co_participants,omitempty"`
+}
+
+type GetParticipantsWithAccountsAggregateFilterOpts struct {
+	ParticipantStatus *string
 }

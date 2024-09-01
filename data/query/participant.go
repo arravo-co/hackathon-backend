@@ -64,7 +64,7 @@ func (q *Query) GetParticipantsRecords() ([]exports.ParticipantDocument, error) 
 	return dat, nil
 }
 
-func (q *Query) GetParticipantsWithAccountsAggregate(opts interface{}) ([]exports.ParticipantTeamMembersWithAccountsAggregateDocument, error) {
+func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipantsWithAccountsAggregateFilterOpts) ([]exports.ParticipantTeamMembersWithAccountsAggregateDocument, error) {
 	participantCol, err := q.Datasource.GetParticipantCollection()
 	if err != nil {
 		return nil, err
@@ -125,16 +125,98 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts interface{}) ([]export
 					},
 					{"co_participants",
 						bson.D{
-							{"$filter",
+							{"$let",
 								bson.D{
-									{"input", "$accounts"},
-									{"as", "acc"},
-									{"cond",
+									{"vars",
 										bson.D{
-											{"$ne",
-												bson.A{
-													"$$acc.email",
-													"$team_lead_email",
+											{"co_parts",
+												bson.D{
+													{"$filter",
+														bson.D{
+															{"input", "$accounts"},
+															{"as", "acc"},
+															{"cond",
+																bson.D{
+																	{"$ne",
+																		bson.A{
+																			"$$acc.email",
+																			"$team_lead_email",
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									{"in",
+										bson.D{
+											{"$map",
+												bson.D{
+													{"input", "$$co_parts"},
+													{"as", "item"},
+													{"in",
+														bson.D{
+															{"$mergeObjects",
+																bson.A{
+																	bson.D{
+																		{"$mergeObjects",
+																			bson.A{
+																				"$$item",
+																				bson.D{{"account_role", "$$item.role"}},
+																			},
+																		},
+																	},
+																	bson.D{
+																		{"$let",
+																			bson.D{
+																				{"vars",
+																					bson.D{
+																						{"obj",
+																							bson.D{
+																								{"$first",
+																									bson.D{
+																										{"$filter",
+																											bson.D{
+																												{"input", "$co_participants"},
+																												{"as", "acc"},
+																												{"cond",
+																													bson.D{
+																														{"$eq",
+																															bson.A{
+																																"$$item.email",
+																																"$$acc.email",
+																															},
+																														},
+																													},
+																												},
+																											},
+																										},
+																									},
+																								},
+																							},
+																						},
+																					},
+																				},
+																				{"in",
+																					bson.D{
+																						{"$mergeObjects",
+																							bson.A{
+																								"$$obj",
+																								bson.D{{"team_role", "$$obj.role"}},
+																							},
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
 												},
 											},
 										},
@@ -146,11 +228,27 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts interface{}) ([]export
 				},
 			},
 		},
+		bson.D{{"$addFields", bson.D{{"account_role.account_role", "$team_lead_info.role"}}}},
 		bson.D{
 			{"$addFields",
 				bson.D{
 					{"team_lead_info.id", bson.D{{"$toString", "$team_lead_info._id"}}},
 					{"co_participants.id",
+						bson.D{
+							{"$first",
+								bson.D{
+									{"$map",
+										bson.D{
+											{"input", "$co_participants"},
+											{"as", "co_part"},
+											{"in", bson.D{{"$toString", "$$co_part._id"}}},
+										},
+									},
+								},
+							},
+						},
+					},
+					{"co_participants.i",
 						bson.D{
 							{"$first",
 								bson.D{
@@ -197,7 +295,7 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts interface{}) ([]export
 												bson.D{
 													{"$ifNull",
 														bson.A{
-															"UNREVIEWED",
+															opts.ParticipantStatus,
 															"$status",
 														},
 													},

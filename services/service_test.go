@@ -9,7 +9,8 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/seeders"
-	testsetup "github.com/arravoco/hackathon_backend/test_setup"
+	testsetup "github.com/arravoco/hackathon_backend/testdbsetup"
+	testrepos "github.com/arravoco/hackathon_backend/testdbsetup/test_repos"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -22,7 +23,7 @@ func TestRegisterJudge(t *testing.T) {
 	}
 	dbInstance := testsetup.GetMongoInstance(cfg)
 	q := testsetup.GetQueryInstance(dbInstance)
-	judgeAccountRepository := testsetup.GetJudgeAccountRepositoryWithQueryInstance(q)
+	judgeAccountRepository := testrepos.GetJudgeAccountRepositoryWithQueryInstance(q)
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
 	})
@@ -68,7 +69,7 @@ func TestUpdateJudgeInfo(t *testing.T) {
 		testsetup.CleanupDB(dbInstance)
 	})
 	q := testsetup.GetQueryInstance(dbInstance)
-	judgeAccountRepository := testsetup.GetJudgeAccountRepositoryWithQueryInstance(q)
+	judgeAccountRepository := testrepos.GetJudgeAccountRepositoryWithQueryInstance(q)
 	accInDB, _, err := seeders.CreateFakeJudgeAccount(dbInstance)
 	if err != nil {
 		panic(err)
@@ -162,7 +163,7 @@ func TestGetJudgeByEmail(t *testing.T) {
 		testsetup.CleanupDB(dbInstance)
 	})
 	q := testsetup.GetQueryInstance(dbInstance)
-	judgeAccountRepository := testsetup.GetJudgeAccountRepositoryWithQueryInstance(q)
+	judgeAccountRepository := testrepos.GetJudgeAccountRepositoryWithQueryInstance(q)
 	accInDB, _, err := seeders.CreateFakeJudgeAccount(dbInstance)
 	if err != nil {
 		panic(err)
@@ -217,8 +218,8 @@ func TestGetJudges(t *testing.T) {
 		testsetup.CleanupDB(dbInstance)
 	})
 	q := testsetup.GetQueryInstance(dbInstance)
-	judgeAccountRepository := testsetup.GetJudgeAccountRepositoryWithQueryInstance(q)
-	_, _, err := testsetup.CreateFakeJudgeAccount(dbInstance)
+	judgeAccountRepository := testrepos.GetJudgeAccountRepositoryWithQueryInstance(q)
+	_, _, err := seeders.CreateFakeJudgeAccount(dbInstance)
 	if err != nil {
 		panic(err)
 	}

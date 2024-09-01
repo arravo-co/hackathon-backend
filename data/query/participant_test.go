@@ -76,7 +76,7 @@ func TestGetParticipantsWithAccountsAggregate(t *testing.T) {
 		panic(err)
 	}
 
-	recs, err := q.GetParticipantsWithAccountsAggregate(nil)
+	recs, err := q.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{})
 	if err != nil {
 		t.Fatal(err)
 	}

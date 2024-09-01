@@ -30,6 +30,7 @@ type ParticipantAccountCreatedEventData struct {
 	FirstName        string
 	LastName         string
 	ParticipantEmail string
+	ParticipantId    string
 	TeamParticipants []TeamParticipantInfo
 	TeamLeadEmail    string
 	TeamName         string

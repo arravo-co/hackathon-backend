@@ -3,9 +3,7 @@ package jobs
 import (
 	"fmt"
 
-	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/repository"
 	"github.com/arravoco/hackathon_backend/services"
 	"github.com/arravoco/hackathon_backend/utils"
 )
@@ -18,12 +16,13 @@ func ConsumeUploadJudgeProfilePicQueue(payloadStruct *exports.UploadJudgeProfile
 	}
 	fmt.Println(uploadResult)
 
-	judge, err := repository.GetJudgeByEmail(payloadStruct.Email)
+	serv := services.GetServiceWithDefaultRepositories()
+	judge, err := serv.GetJudgeByEmail(payloadStruct.Email)
 	if err != nil {
 		return err
 	}
 	fmt.Println("Here at this stage.")
-	err = judge.UpdateJudgeProfile(dtos.UpdateJudgeDTO{
+	_, err = serv.UpdateJudgeInfo(judge.Email, &services.UpdateJudgeDTO{
 		ProfilePictureUrl: uploadResult.SecureURL,
 	})
 	if err != nil {
