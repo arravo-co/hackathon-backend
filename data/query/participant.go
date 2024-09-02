@@ -65,12 +65,25 @@ func (q *Query) GetParticipantsRecords() ([]exports.ParticipantDocument, error) 
 }
 
 func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipantsWithAccountsAggregateFilterOpts) ([]exports.ParticipantTeamMembersWithAccountsAggregateDocument, error) {
+	fmt.Printf("\n\n%s\n\n", *opts.Solution_Like)
 	participantCol, err := q.Datasource.GetParticipantCollection()
 	if err != nil {
 		return nil, err
 	}
 	ctx := context.Context(context.Background())
 	var result []exports.ParticipantTeamMembersWithAccountsAggregateDocument
+	var participation_status string
+	var solution_like string
+	var limit int = 1_000_000
+	if opts.ParticipantStatus != nil {
+		participation_status = *opts.ParticipantStatus
+	}
+	if opts.Limit != nil {
+		limit = *opts.Limit
+	}
+	if opts.Solution_Like != nil {
+		solution_like = *opts.Solution_Like
+	}
 	pipeline := bson.A{
 		bson.D{
 			{"$lookup",
@@ -228,7 +241,6 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipant
 				},
 			},
 		},
-		bson.D{{"$addFields", bson.D{{"account_role.account_role", "$team_lead_info.role"}}}},
 		bson.D{
 			{"$addFields",
 				bson.D{
@@ -295,19 +307,67 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipant
 												bson.D{
 													{"$ifNull",
 														bson.A{
-															opts.ParticipantStatus,
+															participation_status,
 															"$status",
 														},
 													},
 												},
 											},
 										},
+									}, bson.D{{
+										"$or",
+										bson.A{
+											bson.D{
+												{"$regexMatch",
+													bson.D{
+														{"input", "$solution_document.title"},
+														{"options", "i"},
+														{"regex", "Solution"},
+													},
+												},
+											},
+											bson.D{
+												{"$regexMatch",
+													bson.D{
+														{"input", "$solution_document.objective"},
+														{"options", "i"},
+														{"regex", solution_like},
+													},
+												},
+											},
+											bson.D{
+												{"$regexMatch",
+													bson.D{
+														{"input", "$solution_document.description"},
+														{"options", "i"},
+														{"regex", solution_like},
+													},
+												},
+											},
+										},
+									},
 									},
 									bson.D{
-										{"$regexMatch",
-											bson.D{
-												{"input", "status"},
-												{"regex", ""},
+										{"$eq",
+											bson.A{
+												bson.D{
+													{"$ifNull",
+														bson.A{
+															"$review_ranking",
+															0,
+														},
+													},
+												},
+												bson.D{
+													{"$convert",
+														bson.D{
+															{"input", "$review_ranking"},
+															{"onError", 0},
+															{"onNull", 0},
+															{"to", "int"},
+														},
+													},
+												},
 											},
 										},
 									},
@@ -327,6 +387,7 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipant
 				},
 			},
 		},
+		bson.D{{"$limit", limit}},
 	}
 
 	cursor, err := participantCol.Aggregate(ctx, pipeline)
@@ -599,6 +660,7 @@ func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData)
 		fmt.Printf("No changes made")
 		return nil, errors.New("failed to add to invite list: failed to save")
 	}
+	fmt.Println("Added to invite list")
 	return result, err
 }
 
@@ -629,6 +691,7 @@ func (q *Query) AddMemberToParticipatingTeam(dataToSave *exports.AddMemberToPart
 		fmt.Printf("%s\n\n\n\n", err.Error())
 		return nil, err
 	}
+	fmt.Println(fmt.Sprintf("Added to co participants' list %s\n", dataToSave.Email))
 	return partDoc, err
 }
 
@@ -667,7 +730,7 @@ func (q *Query) RemoveMemberFromParticipatingTeam(dataToSave *exports.RemoveMemb
 }
 
 func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData) (*exports.ParticipantDocument, error) {
-	fmt.Println(dataToSave.SolutionId, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+	fmt.Println(dataToSave.SolutionId, dataToSave.ParticipantId, "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
 	solId, err := primitive.ObjectIDFromHex(dataToSave.SolutionId)
 	if err != nil {
 		return nil, err
@@ -686,7 +749,7 @@ func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData
 		return nil, err
 	}
 
-	if solDoc.Title == "" {
+	if solDoc.Id.Hex() != dataToSave.SolutionId {
 		return nil, errors.New("No document with id " + dataToSave.SolutionId)
 	}
 	participantCol, err := q.Datasource.GetParticipantCollection()

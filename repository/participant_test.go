@@ -45,12 +45,14 @@ func TestGetSingleParticipantRecordAndMemberAccountsInfo(t *testing.T) {
 		ParticipantId: accInDB.ParticipantId,
 		HackathonId:   accInDB.HackathonId,
 	}
-	partInDB, err := seeders.CreateAccountLinkedTeamParticipantDocument(dbInstance, nil, teamLeadInfo, nil, nil)
+	partInDB, err := seeders.CreateAccountLinkedTeamParticipantDocument(dbInstance, &seeders.OptsToCreateParticipantRecord{
+		TeamleadInfo: teamLeadInfo,
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	recs, err := partRepo.GetMultipleParticipantRecordAndMemberAccountsInfo(exports.GetParticipantsWithAccountsAggregateFilterOpts{})
+	recs, err := partRepo.GetMultipleParticipantRecordAndMemberAccountsInfo(FilterGetParticipants{})
 	if err != nil {
 		t.Fatal(err)
 	}

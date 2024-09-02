@@ -658,7 +658,7 @@ func InviteMemberToTeam(c echo.Context) error {
 			Message: "Only a participating team can invite new members.",
 		})
 	}
-	responseData, err := serv.InviteToTeam(&exports.AddToTeamInviteListData{
+	responseData, err := serv.InviteToTeam(&services.AddToTeamInviteListData{
 		HackathonId:   hackathonId,
 		ParticipantId: participant.ParticipantId,
 		Email:         data.Email,
@@ -748,11 +748,7 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 func GetMyTeamMembersInfo(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
 	serv := services.GetServiceWithDefaultRepositories()
-	participant, err := serv.GetParticipantInfo(payload.Email)
-	if err != nil {
-		return err
-	}
-	participants, err := serv.GetTeamMembersInfo(participant)
+	participants, err := serv.GetTeamMembersInfo(payload.ParticipantId)
 	fmt.Println(participants)
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{
@@ -858,7 +854,7 @@ func ChooseSolutionForMyTeam(ctx echo.Context) error {
 		})
 	}
 
-	_, err = serv.SelectTeamSolution(&exports.SelectTeamSolutionData{
+	err = serv.SelectTeamSolution(&services.SelectTeamSolutionData{
 		HackathonId:   authPayload.HackathonId,
 		ParticipantId: authPayload.ParticipantId,
 		SolutionId:    solDataBodyPayload.SolutionId,

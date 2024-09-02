@@ -79,3 +79,8 @@ type AddToTeamInviteListData struct {
 	Email            string `bson:"email"`
 	Role             string `bson:"role"`
 }
+type SelectTeamSolutionData struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	SolutionId    string `bson:"solution_id"`
+}

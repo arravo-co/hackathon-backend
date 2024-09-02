@@ -448,11 +448,15 @@ func (s *ParticipantRepository) GetSingleParticipantRecordAndMemberAccountsInfo(
 	arg := arggs[0]
 
 	team_lead_info := exports.TeamLeadInfoParticipantRecordRepositoryAggregate{
-		Email:         arg.TeamLeadInfo.Email,
-		AccountId:     arg.TeamLeadInfo.AccountId,
-		FirstName:     arg.TeamLeadInfo.FirstName,
-		LastName:      arg.TeamLeadInfo.LastName,
-		Gender:        arg.TeamLeadInfo.Gender,
+		Email:     arg.TeamLeadInfo.Email,
+		AccountId: arg.TeamLeadInfo.AccountId,
+		FirstName: arg.TeamLeadInfo.FirstName,
+		LastName:  arg.TeamLeadInfo.LastName,
+		Gender:    arg.TeamLeadInfo.Gender,
+		//PasswordHash:  arg.TeamLeadInfo.PasswordHash,
+		TeamRole: arg.TeamLeadInfo.TeamRole,
+
+		State:         arg.TeamLeadInfo.State,
 		CreatedAt:     arg.TeamLeadInfo.CreatedAt,
 		UpdateAt:      arg.TeamLeadInfo.UpdateAt,
 		Skillset:      arg.TeamLeadInfo.Skillset,
@@ -473,14 +477,16 @@ func (s *ParticipantRepository) GetSingleParticipantRecordAndMemberAccountsInfo(
 			AccountStatus: co.AccountStatus,
 			AccountRole:   co.AccountRole,
 			TeamRole:      co.TeamRole,
-			PasswordHash:  co.PasswordHash,
-			PhoneNumber:   co.PhoneNumber,
-			CreatedAt:     co.CreatedAt,
-			UpdateAt:      co.UpdateAt,
+			//PasswordHash:  co.PasswordHash,
+			PhoneNumber: co.PhoneNumber,
+			CreatedAt:   co.CreatedAt,
+			UpdateAt:    co.UpdateAt,
 		})
 	}
 	arr := &exports.ParticipantTeamMembersWithAccountsAggregate{
 		Id:                arggs[0].Id.String(),
+		ParticipantId:     arggs[0].ParticipantId,
+		ParticipantEmail:  arggs[0].ParticipantEmail,
 		TeamLeadEmail:     arggs[0].TeamLeadEmail,
 		TeamName:          arggs[0].TeamName,
 		TeamLeadFirstName: arggs[0].TeamLeadFirstName,
@@ -494,8 +500,13 @@ func (s *ParticipantRepository) GetSingleParticipantRecordAndMemberAccountsInfo(
 	}
 	return arr, nil
 }
-func (s *ParticipantRepository) GetMultipleParticipantRecordAndMemberAccountsInfo(dataInput interface{}) ([]*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
-	arggs, err := s.DB.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{})
+func (s *ParticipantRepository) GetMultipleParticipantRecordAndMemberAccountsInfo(dataInput FilterGetParticipants) ([]*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
+	arggs, err := s.DB.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{
+		ParticipantStatus: dataInput.Status,
+		ReviewRanking_Eq:  dataInput.ReviewRanking_Eq,
+		ReviewRanking_Top: dataInput.ReviewRanking_Top,
+		Solution_Like:     dataInput.Solution_Like,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -527,14 +538,16 @@ func (s *ParticipantRepository) GetMultipleParticipantRecordAndMemberAccountsInf
 				AccountStatus: co.AccountStatus,
 				AccountRole:   co.AccountRole,
 				TeamRole:      co.TeamRole,
-				PasswordHash:  co.PasswordHash,
-				PhoneNumber:   co.PhoneNumber,
-				CreatedAt:     co.CreatedAt,
-				UpdateAt:      co.UpdateAt,
+				//PasswordHash:  co.PasswordHash,
+				PhoneNumber: co.PhoneNumber,
+				CreatedAt:   co.CreatedAt,
+				UpdateAt:    co.UpdateAt,
 			})
 		}
 		arr = append(arr, &exports.ParticipantTeamMembersWithAccountsAggregate{
 			Id:                arg.Id.String(),
+			ParticipantId:     arg.ParticipantId,
+			ParticipantEmail:  arg.ParticipantEmail,
 			TeamLeadEmail:     arg.TeamLeadEmail,
 			TeamName:          arg.TeamName,
 			TeamLeadFirstName: arg.TeamLeadFirstName,

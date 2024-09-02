@@ -29,41 +29,47 @@ type ParticipantTeamMembersWithAccountsAggregateDocument struct {
 	TeamLeadAccountId string `bson:"team_lead_account_id,omitempty"`
 
 	TeamLeadInfo struct {
-		HackathonId   string   `bson:"team_lead_hackathon_id"`
-		AccountId     string   `bson:"id,omitempty"`
-		Email         string   `bson:"email"`
-		FirstName     string   `bson:"first_name"`
-		LastName      string   `bson:"last_name"`
-		Gender        string   `bson:"gender"`
-		PhoneNumber   string   `bson:"phone_number"`
-		Skillset      []string `bson:"skillset"`
-		AccountStatus string   `bson:"status"`
-		AccountRole   string   `bson:"account_role"`
-		TeamRole      string   `bson:"team_role"`
-		PasswordHash  string   `bson:"password_hash"`
-		State         string   `bson:"state"`
-		CreatedAt     string   `bson:"created_at"`
-		UpdateAt      string   `bson:"update_at"`
+		HackathonId   string    `bson:"team_lead_hackathon_id"`
+		AccountId     string    `bson:"id,omitempty"`
+		Email         string    `bson:"email"`
+		FirstName     string    `bson:"first_name"`
+		LastName      string    `bson:"last_name"`
+		Gender        string    `bson:"gender"`
+		PhoneNumber   string    `bson:"phone_number"`
+		Skillset      []string  `bson:"skillset"`
+		AccountStatus string    `bson:"status"`
+		AccountRole   string    `bson:"account_role"`
+		TeamRole      string    `bson:"team_role"`
+		PasswordHash  string    `bson:"password_hash"`
+		State         string    `bson:"state"`
+		CreatedAt     time.Time `bson:"created_at"`
+		UpdateAt      time.Time `bson:"update_at"`
 	} `bson:"team_lead_info,omitempty"`
 	CoParticipants []struct {
-		HackathonId   string   `bson:"team_lead_hackathon_id"`
-		AccountId     string   `bson:"id,omitempty"`
-		Email         string   `bson:"email"`
-		FirstName     string   `bson:"first_name"`
-		LastName      string   `bson:"last_name"`
-		Gender        string   `bson:"gender"`
-		PhoneNumber   string   `bson:"phone_number"`
-		Skillset      []string `bson:"skillset"`
-		AccountStatus string   `bson:"status"`
-		AccountRole   string   `bson:"account_role"`
-		TeamRole      string   `bson:"team_role"`
-		PasswordHash  string   `bson:"password_hash"`
-		State         string   `bson:"state"`
-		CreatedAt     string   `bson:"created_at"`
-		UpdateAt      string   `bson:"update_at"`
+		HackathonId   string    `bson:"team_lead_hackathon_id"`
+		AccountId     string    `bson:"id,omitempty"`
+		Email         string    `bson:"email"`
+		FirstName     string    `bson:"first_name"`
+		LastName      string    `bson:"last_name"`
+		Gender        string    `bson:"gender"`
+		PhoneNumber   string    `bson:"phone_number"`
+		Skillset      []string  `bson:"skillset"`
+		AccountStatus string    `bson:"status"`
+		AccountRole   string    `bson:"account_role"`
+		TeamRole      string    `bson:"team_role"`
+		PasswordHash  string    `bson:"password_hash"`
+		State         string    `bson:"state"`
+		CreatedAt     time.Time `bson:"created_at"`
+		UpdateAt      time.Time `bson:"update_at"`
 	} `bson:"co_participants,omitempty"`
 }
 
 type GetParticipantsWithAccountsAggregateFilterOpts struct {
-	ParticipantStatus *string
+	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ReviewRanking_Eq         *int
+	ReviewRanking_Top        *int
+	Solution_Like            *string
+	Limit                    *int
+	SortByReviewRanking_Asc  *bool
+	SortByReviewRanking_Desc *bool
 }

@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/arravoco/hackathon_backend/config"
+	"github.com/arravoco/hackathon_backend/consumers"
 	"github.com/arravoco/hackathon_backend/db"
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/jobs"
-	"github.com/arravoco/hackathon_backend/rmqUtils"
+	"github.com/arravoco/hackathon_backend/publishers"
+	"github.com/arravoco/hackathon_backend/rabbitmq"
 
 	//"github.com/arravoco/hackathon_backend/jobs"
 
@@ -23,6 +25,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+type SetupOpts struct {
+	Logger echo.Logger
+}
+
+type AppResources struct {
+	Publisher *publishers.RMQPublisher
+	Consumer  *consumers.RMQConsumer
+}
 
 // @Version 1.0.0
 // @Title Hackathon Backend API
@@ -58,13 +69,41 @@ func main() {
 	publish.SetPublisher(&rabbitutils.RMQPublisher{})
 	go rabbitutils.ListenToAllQueues()*/
 	//panic("Intentionally crashed")
+
 	e.Logger.Fatal(e.Start(getURL(port)))
+}
+
+func Setup(opts SetupOpts) *AppResources {
+	logger := opts.Logger
+	rabbitMQURL := os.Getenv("RABBITMQ_URL")
+	if rabbitMQURL == "" {
+		logger.Fatal("Please specify rabbitMQ URL")
+	}
+	rmqPublisherChannel, err := rabbitmq.GetRMQChannelWithURL(rabbitmq.SetupRMQConfig{
+		Url: rabbitMQURL,
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	rmqConsumerChannel, err := rabbitmq.GetRMQChannelWithURL(rabbitmq.SetupRMQConfig{
+		Url: rabbitMQURL,
+	})
+	if err != nil {
+		logger.Fatal(err)
+	}
+	publisher := publishers.NewRMQPublisherWithChannel(rmqPublisherChannel)
+	consumer := consumers.NewRMQConsumerWithChannel(rmqConsumerChannel)
+	return &AppResources{
+		Publisher: publisher,
+		Consumer:  consumer,
+	}
 }
 
 func getURL(port int) string {
 	return strings.Join([]string{"", strconv.Itoa(port)}, ":")
 }
 
+/*
 func startAllJobs() {
 
 	judgeCreatedByAdminWelcomeEmailTaskConsumer, err := jobs.StartConsumingJudgeCreatedByAdminWelcomeEmailQueue()
@@ -102,4 +141,4 @@ func startAllJobs() {
 			fmt.Println("Invite list task completed successfully")
 		}
 	}
-}
+}*/

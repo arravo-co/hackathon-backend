@@ -4,7 +4,6 @@ import (
 	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SolutionRepository struct {
@@ -25,7 +24,7 @@ func (s *SolutionRepository) CreateSolution(dataInput *exports.CreateSolutionDat
 	}
 
 	return &entity.Solution{
-		Id:               solDoc.Id.(primitive.ObjectID).Hex(),
+		Id:               solDoc.Id.Hex(),
 		Title:            solDoc.Title,
 		Description:      solDoc.Description,
 		HackathonId:      solDoc.HackathonId,
@@ -44,7 +43,7 @@ func (s *SolutionRepository) UpdateSolution(creator_id string, dataInput *export
 	}
 
 	return &entity.Solution{
-		Id:               sol.Id.(primitive.ObjectID).Hex(),
+		Id:               sol.Id.Hex(),
 		Title:            sol.Title,
 		Description:      sol.Description,
 		Objective:        sol.Objective,
@@ -65,7 +64,7 @@ func (s *SolutionRepository) GetSolutionsData(dataInput *exports.GetSolutionsQue
 
 	for _, sol := range solDocs {
 		sols = append(sols, entity.Solution{
-			Id:               sol.Id.(primitive.ObjectID).Hex(),
+			Id:               sol.Id.Hex(),
 			Title:            sol.Title,
 			Description:      sol.Description,
 			Objective:        sol.Objective,
@@ -87,7 +86,7 @@ func (s *SolutionRepository) GetSolutionDataById(id string) (*entity.Solution, e
 	}
 
 	return &entity.Solution{
-		Id:               sol.Id.(primitive.ObjectID).Hex(),
+		Id:               sol.Id.Hex(),
 		Title:            sol.Title,
 		Description:      sol.Description,
 		HackathonId:      sol.HackathonId,
@@ -97,4 +96,11 @@ func (s *SolutionRepository) GetSolutionDataById(id string) (*entity.Solution, e
 		CreatedAt:        sol.CreatedAt,
 		UpdatedAt:        sol.UpdatedAt,
 	}, nil
+}
+
+type FilterGetParticipants struct {
+	Status            *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ReviewRanking_Eq  *int
+	ReviewRanking_Top *int
+	Solution_Like     *string
 }

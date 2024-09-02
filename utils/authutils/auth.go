@@ -13,7 +13,6 @@ import (
 	"github.com/jaevor/go-nanoid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthUtils struct {
@@ -100,7 +99,7 @@ here:
 			SolutionImageUrl string "json:\"solution_image_url\""
 			CreatorId        string "json:\"creator_id\""
 		}{
-			Id:               solDoc.Id.(primitive.ObjectID).Hex(),
+			Id:               solDoc.Id.Hex(),
 			Title:            solDoc.Title,
 			Description:      solDoc.Description,
 			SolutionImageUrl: solDoc.SolutionImageUrl,

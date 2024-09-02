@@ -8,14 +8,17 @@ import (
 	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/jaevor/go-nanoid"
 	"github.com/jaswdr/faker"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CreateParticpantAccountOpts struct {
-	Status      *string
-	HackathonId *string
+	Status        *string
+	HackathonId   *string
+	Email         *string
+	ParticipantId *string
 }
 
 func CreateFakeParticipantAccount(dbInstance *mongo.Database, opts *CreateParticpantAccountOpts) (*exports.AccountDocument, string, error) {
@@ -28,6 +31,9 @@ func CreateFakeParticipantAccount(dbInstance *mongo.Database, opts *CreatePartic
 	var hackathon_id string
 	var account_status string = fake.RandomStringElement([]string{"EMAIL_UNVERIFIED", "EMAIL_VERIFIED"})
 	if opts != nil {
+		if opts.Email != nil {
+			email = *opts.Email
+		}
 		if opts.Status != nil {
 			account_status = *opts.Status
 		}
@@ -51,7 +57,13 @@ func CreateFakeParticipantAccount(dbInstance *mongo.Database, opts *CreatePartic
 		"MID",
 		"SENIOR"})
 	var IsEmailVerified bool = fake.BoolWithChance(50)
-	participant_id := strings.Join([]string{"PARTICIPANT_ID", fake.RandomStringWithLength(10)}, "_") // "PART_ID"
+	var participant_id string
+	if opts.ParticipantId != nil {
+		participant_id = *opts.ParticipantId
+	} else {
+		gen, _ := nanoid.CustomASCII("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 11)
+		participant_id = strings.Join([]string{"PARTICIPANT_ID", gen()}, "_") // "PART_ID"
+	}
 	phone_number := fake.Phone().E164Number()
 	password := fake.Internet().Password()
 	password_hash, _ := exports.GenerateHashPassword(password)

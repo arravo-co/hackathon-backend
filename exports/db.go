@@ -11,7 +11,7 @@ type MongoDBConnConfig struct {
 	DBName string
 }
 type AccountDocument struct {
-	Id                  primitive.ObjectID `bson:"_id"`
+	Id                  primitive.ObjectID `bson:"_id,omitempty"`
 	Email               string             `bson:"email,omitempty"`
 	FirstName           string             `bson:"first_name,omitempty"`
 	LastName            string             `bson:"last_name,omitempty"`
@@ -42,7 +42,7 @@ type AccountDocument struct {
 }
 
 type ParticipantDocument struct {
-	Id               primitive.ObjectID                             `bson:"_id"`
+	Id               primitive.ObjectID                             `bson:"_id,omitempty"`
 	ParticipantId    string                                         `bson:"participant_id"`
 	HackathonId      string                                         `bson:"hackathon_id"`
 	Type             string                                         `bson:"type,omitempty"`
@@ -86,15 +86,15 @@ type ParticipantScoreDocument struct {
 }
 
 type SolutionDocument struct {
-	Id               interface{} `bson:"_id,omitempty" `
-	Title            string      `bson:"title,omitempty"`
-	Objective        string      `bson:"objective,omitempty"`
-	Description      string      `bson:"description,omitempty"`
-	HackathonId      string      `bson:"hackathon_id,omitempty"`
-	CreatorId        string      `bson:"creator_id,omitempty"`
-	SolutionImageUrl string      `bson:"solution_image_url,omitempty"`
-	CreatedAt        time.Time   `bson:"created_at,omitempty"`
-	UpdatedAt        time.Time   `bson:"updated_at,omitempty"`
+	Id               primitive.ObjectID `bson:"_id,omitempty" `
+	Title            string             `bson:"title,omitempty"`
+	Objective        string             `bson:"objective,omitempty"`
+	Description      string             `bson:"description,omitempty"`
+	HackathonId      string             `bson:"hackathon_id,omitempty"`
+	CreatorId        string             `bson:"creator_id,omitempty"`
+	SolutionImageUrl string             `bson:"solution_image_url,omitempty"`
+	CreatedAt        time.Time          `bson:"created_at,omitempty"`
+	UpdatedAt        time.Time          `bson:"updated_at,omitempty"`
 }
 
 type ParticipantAccountWithCoParticipantsDocument struct {

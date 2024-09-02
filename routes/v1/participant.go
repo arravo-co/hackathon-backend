@@ -209,13 +209,7 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 func GetTeamMembersInfo(ctx echo.Context) error {
 	participantId := ctx.Param("participantId")
 	serv := services.GetServiceWithDefaultRepositories()
-	participant, err := serv.GetParticipantInfo(participantId)
-	if err != nil {
-		return ctx.JSON(400, GetTeamMembersSuccessResponse{
-			Message: "Failed to fetch team members information",
-		})
-	}
-	mems, err := serv.GetTeamMembersInfo(participant)
+	mems, err := serv.GetTeamMembersInfo(participantId)
 
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{

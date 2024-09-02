@@ -157,29 +157,41 @@ type TeamLeadInfoParticipantRecordRepositoryAggregate struct {
 	AccountStatus string
 	AccountRole   string
 	TeamRole      string
-	PasswordHash  string
+	passwordHash  string
 	State         string
-	CreatedAt     string
-	UpdateAt      string
+	CreatedAt     time.Time
+	UpdateAt      time.Time
 }
 
 // CreateTeamMemberAccount
 type CoParticipantAggregateData struct {
-	HackathonId   string
-	AccountId     string
-	Email         string
-	FirstName     string
-	LastName      string
-	Gender        string
-	PhoneNumber   string
-	Skillset      []string
-	AccountStatus string
-	AccountRole   string
-	TeamRole      string
-	PasswordHash  string
-	State         string
-	CreatedAt     string
-	UpdateAt      string
+	HackathonId         string
+	AccountId           string
+	Email               string
+	FirstName           string
+	LastName            string
+	Gender              string
+	PhoneNumber         string
+	Skillset            []string
+	AccountStatus       string
+	AccountRole         string
+	TeamRole            string
+	passwordHash        string
+	State               string
+	LinkedInAddress     string
+	ParticipantId       string
+	DOB                 time.Time `bson:"dob,omitempty"`
+	EmploymentStatus    string
+	ExperienceLevel     string
+	Motivation          string
+	HackathonExperience string
+	YearsOfExperience   int
+	FieldOfStudy        string
+	PreviousProjects    []string
+	IsEmailVerified     bool
+	IsEmailVerifiedAt   time.Time
+	CreatedAt           time.Time
+	UpdateAt            time.Time
 }
 type ParticipantAccountRepositoryInterface interface {
 	GetParticipantAccountByEmail(email string) (*ParticipantAccountRepository, error)

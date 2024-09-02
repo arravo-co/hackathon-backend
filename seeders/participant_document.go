@@ -12,8 +12,11 @@ import (
 )
 
 type OptsToCreateParticipantRecord struct {
-	Status     string
-	InviteList []InvitelistQueuePayload
+	Status         string
+	TeamleadInfo   TeamLeadInfoToCreateTeamParticipant
+	CoParticipants []CoParticipantInfoToCreateTeamParticipant
+	InviteList     []InvitelistQueuePayload
+	SolutionId     string
 }
 type InvitelistQueuePayload struct {
 	InviterId string
@@ -44,17 +47,15 @@ type SolutionInfoToCreateParticipantDocument struct {
 }
 
 func CreateAccountLinkedTeamParticipantDocument(dbInstance *mongo.Database,
-	opts *OptsToCreateParticipantRecord,
-	team_lead_info TeamLeadInfoToCreateTeamParticipant,
-	co_parts []CoParticipantInfoToCreateTeamParticipant,
-	solOpts *SolutionInfoToCreateParticipantDocument) (*exports.ParticipantDocument, error) {
-	accountCol := dbInstance.Collection("participants")
+	opts *OptsToCreateParticipantRecord) (*exports.ParticipantDocument, error) {
+	partCol := dbInstance.Collection("participants")
 	ctx := context.Context(context.Background())
 
 	fake := faker.New()
 
 	team_name := fake.Lorem().Sentence(2)
 
+	team_lead_info := opts.TeamleadInfo
 	if team_lead_info.TeamName != "" {
 		team_name = team_lead_info.TeamName
 	}
@@ -63,38 +64,38 @@ func CreateAccountLinkedTeamParticipantDocument(dbInstance *mongo.Database,
 		return nil, fmt.Errorf("team lead email is not set")
 	}
 	status := "UNREVIEWED"
-	var invite_list []exports.ParticipantDocumentTeamInviteInfo
-	if opts != nil {
-		if opts.Status != "" {
-			status = opts.Status
-		}
-
-		if len(opts.InviteList) > 0 {
-			for _, v := range opts.InviteList {
-
-				invite_list = append(invite_list, exports.ParticipantDocumentTeamInviteInfo{
-					Email:     v.Email,
-					InviterId: v.InviterId,
-					Time:      v.Time,
-				})
-			}
-		}
-	}
-	var sol_id string
-	sol := exports.ParticipantDocumentParticipantSelectedSolution{}
-	if solOpts != nil {
-		sol_id = solOpts.Id
-		sol.Id = solOpts.Id
-		sol.Title = solOpts.Title
-		sol.Description = solOpts.Description
-		sol.Objective = solOpts.Objective
-		sol.SolutionImageUrl = solOpts.SolutionImageUrl
-	}
-
 	var co_parts_docs []exports.ParticipantDocumentTeamCoParticipantInfo
-	if co_parts != nil {
-		co_parts_docs = append(co_parts_docs, exports.ParticipantDocumentTeamCoParticipantInfo{})
+	var invite_list []exports.ParticipantDocumentTeamInviteInfo
+
+	if opts.Status != "" {
+		status = opts.Status
 	}
+
+	if len(opts.InviteList) > 0 {
+		for _, v := range opts.InviteList {
+
+			invite_list = append(invite_list, exports.ParticipantDocumentTeamInviteInfo{
+				Email:     v.Email,
+				InviterId: v.InviterId,
+				Time:      v.Time,
+			})
+		}
+	}
+
+	if len(opts.CoParticipants) > 0 {
+		for _, v := range opts.CoParticipants {
+
+			co_parts_docs = append(co_parts_docs, exports.ParticipantDocumentTeamCoParticipantInfo{
+				Email:         v.Email,
+				ParticipantId: v.ParticipantId,
+				HackathonId:   v.HackathonId,
+				CreatedAt:     time.Now(),
+				AddedToTeamAt: time.Now(),
+			})
+		}
+	}
+
+	var sol_id string = opts.SolutionId
 
 	acc := &exports.ParticipantDocument{
 		TeamLeadEmail:  team_lead_info.Email,
@@ -105,17 +106,16 @@ func CreateAccountLinkedTeamParticipantDocument(dbInstance *mongo.Database,
 		Status:         status,
 		CoParticipants: co_parts_docs,
 		SolutionId:     sol_id,
-		Solution:       sol,
 		InviteList:     invite_list,
 	}
 
-	result, err := accountCol.InsertOne(ctx, acc)
+	result, err := partCol.InsertOne(ctx, acc)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
 	acc.Id = result.InsertedID.(primitive.ObjectID)
-	//fmt.Printf("%#v", acc)
+	fmt.Printf("%#v", acc.CoParticipants)
 	return acc, err
 }

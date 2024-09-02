@@ -257,7 +257,7 @@ func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAc
 		fmt.Printf("%s\n", err.Error())
 		return nil, err
 	}
-	fmt.Println("Create")
+	fmt.Println("\nCreate")
 	acc := exports.AccountDocument{
 		Email:               dataToSave.Email,
 		PasswordHash:        dataToSave.PasswordHash,
@@ -281,7 +281,7 @@ func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAc
 		HackathonExperience: dataToSave.HackathonExperience,
 		PreviousProjects:    dataToSave.PreviousProjects,
 	}
-	fmt.Println("acciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+	fmt.Println(fmt.Sprintf("acciiiiiiiiii %s", dataToSave.Email))
 	ctx := context.Context(context.Background())
 	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {
