@@ -471,11 +471,20 @@ func (s *Service) GetMultipleParticipantsWithAccounts(opts *GetParticipantsWithA
 				Motivation:          v.Motivation,
 			})
 		}
+		var invite_list []entity.InviteInfo
+		for _, v := range v.InviteList {
+			invite_list = append(invite_list, entity.InviteInfo{
+				Email:     v.Email,
+				InviterId: v.InviterId,
+				Time:      v.Time,
+			})
+		}
 		partEnts = append(partEnts, entity.Participant{
 			ParticipantId: v.ParticipantId,
 			TeamLeadEmail: v.TeamLeadEmail,
 			TeamName:      v.TeamName,
 			HackathonId:   v.HackathonId,
+			InviteList:    invite_list,
 			TeamLeadInfo: entity.ParticipantEntityTeamLeadInfo{
 				HackathonId:         v.HackathonId,
 				TeamRole:            "TEAM_LEAD",
@@ -505,7 +514,12 @@ func (s *Service) GetMultipleParticipantsWithAccounts(opts *GetParticipantsWithA
 				SolutionImageUrl: v.Solution.SolutionImageUrl,
 				Objective:        v.Solution.Objective,
 			},
-			CoParticipants: co_parts,
+			CoParticipants:      co_parts,
+			ParticipantType:     v.Type,
+			ParticipantEmail:    v.ParticipantEmail,
+			ParticipationStatus: v.Status,
+			CreatedAt:           v.CreatedAt,
+			UpdatedAt:           v.UpdatedAt,
 		})
 	}
 	//fmt.Printf("%#v\n", partEnts)

@@ -152,10 +152,10 @@ type CoParticipantAggregateDocument struct {
 	EmploymentStatus    string    `bson:"employment_status,omitempty"`
 	ExperienceLevel     string    `bson:"experience_level,omitempty"`
 	Motivation          string    `bson:"motivation,omitempty"`
-	HackathonExperience string    `json:"hackathon_experience"`
-	YearsOfExperience   int       `json:"years_of_experience"`
-	FieldOfStudy        string    `json:"field_of_study"`
-	PreviousProjects    []string  `json:"previous_projects"`
+	HackathonExperience string    `bson:"hackathon_experience"`
+	YearsOfExperience   int       `bson:"years_of_experience"`
+	FieldOfStudy        string    `bson:"field_of_study"`
+	PreviousProjects    []string  `bson:"previous_projects"`
 	IsEmailVerified     bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt   time.Time `bson:"is_email_verified_at,omitempty"`
 	Status              string    `bson:"status,omitempty"`
