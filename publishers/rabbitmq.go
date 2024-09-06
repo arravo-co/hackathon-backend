@@ -2,8 +2,8 @@ package publishers
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aidarkhanov/nanoid"
 	"github.com/arravoco/hackathon_backend/exports"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -14,7 +14,7 @@ var ProducerChannel *amqp.Channel
 var ConsumerChannel *amqp.Channel
 
 type RMQPublisher struct {
-	//Config  *exports.PublisherConfig
+	Config  *exports.PublisherConfig
 	Channel *amqp.Channel
 }
 
@@ -43,10 +43,6 @@ func Publish(ProducerChannel *amqp.Channel, exchange string, key string, body []
 		ContentType: "application/json",
 		AppId:       "arravo_hackathon",
 	})
-	//ProducerChannel.NotifyPublish()
-	if err != nil {
-		return err
-	}
 	return err
 }
 
@@ -59,35 +55,44 @@ func (p *RMQPublisher) Publish(ops exports.PublisherConfig, body []byte) error {
 	return err
 }
 
-/*
-func DeclareAllQueues() {
-	q, err := DeclareQueue("upload.profile_picture.cloudinary")
+func (p *RMQPublisher) DeclareAllExchanges() {
+	//c.Channel.
+	err := p.Channel.ExchangeDeclare("judge.registered", amqp.ExchangeDirect, true, false, false, false, nil)
 	if err != nil {
-		log.Fatalln(err.Error())
+		fmt.Println("Error: ", err)
 	}
-	log.Println(q)
-
-	sendJudgeCreatedAdminWelcomeEmailQueue, err := DeclareQueue("send.judge.created.admin.welcome_email")
-	if err != nil {
-		log.Fatalln("Error: ", err.Error())
-	}
-	log.Println(sendJudgeCreatedAdminWelcomeEmailQueue)
-
-	sendParticipantCreatedWelcomeEmailQueue, err := DeclareQueue("send.participant.created.welcome_email_verification_email")
-	if err != nil {
-		log.Fatalln("Error: ", err.Error())
-	}
-	log.Println(sendParticipantCreatedWelcomeEmailQueue)
-
-	uploadSolutionPicQueue, err := DeclareQueue("upload.solution_picture.cloudinary")
-	if err != nil {
-		log.Fatalln("Error: ", err.Error())
-	}
-	log.Println(uploadSolutionPicQueue)
+	fmt.Println("Exchange 'judge.registered' declaration successful")
 	//
-}*/
+}
 
-func GetConsumerTag() string {
-	id := nanoid.Must(nanoid.Generate("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456456789", 10))
-	return id
+func DeclareAllExchanges(channel *amqp.Channel) {
+	//c.Channel.
+	err := channel.ExchangeDeclare(exports.InvitationsExchange, amqp.ExchangeTopic, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	} else {
+		fmt.Printf("Exchange '%s' declaration successful\n", exports.InvitationsExchange)
+	}
+
+	err = channel.ExchangeDeclare(exports.JudgesExchange, amqp.ExchangeTopic, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	} else {
+		fmt.Printf("Exchange '%s' declaration successful\n", exports.JudgesExchange)
+	}
+
+	err = channel.ExchangeDeclare(exports.ParticipantsExchange, amqp.ExchangeTopic, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	} else {
+		fmt.Printf("Exchange '%s' declaration successful\n", exports.ParticipantsExchange)
+	}
+
+	err = channel.ExchangeDeclare(exports.UploadJobsExchange, amqp.ExchangeTopic, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	} else {
+		fmt.Printf("Exchange '%s' declaration successful\n", exports.UploadJobsExchange)
+	}
+	//
 }

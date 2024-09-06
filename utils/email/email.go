@@ -25,53 +25,6 @@ type SendEmailHtmlData struct {
 	Message string
 }
 
-func SendEmailHtml(data *SendEmailHtmlData) error {
-	apiKey := config.GetResendAPIKey()
-
-	client := resend.NewClient(apiKey)
-
-	params := &resend.SendEmailRequest{
-		From:    config.GetResendFromEmail(),
-		To:      []string{data.Email},
-		Subject: data.Subject,
-		Html:    data.Message,
-	}
-
-	sent, err := client.Emails.Send(params)
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-		return err
-	}
-	fmt.Printf("%#v", sent)
-	return nil
-}
-
-func SendEmail(data *SendEmailData) error {
-	h := hermes.Hermes{}
-	email := hermes.Email{
-		Body: *data.Message,
-	}
-	em, _ := h.GenerateHTML(email)
-	apiKey := config.GetResendAPIKey()
-
-	client := resend.NewClient(apiKey)
-
-	params := &resend.SendEmailRequest{
-		From:    config.GetResendFromEmail(),
-		To:      []string{data.Email},
-		Subject: data.Subject,
-		Html:    em,
-	}
-
-	sent, err := client.Emails.Send(params)
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-		return err
-	}
-	fmt.Printf("%#v", sent)
-	return nil
-}
-
 type SendWelcomeEmailData struct {
 	LastName  string
 	FirstName string
@@ -140,12 +93,94 @@ type SendAdminCreatedByAdminWelcomeEmailData struct {
 	Link        string
 }
 
-func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) {
+type SendEmailVerificationEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+	Token     string
+	TokenTTL  time.Time
+	Link      string
+}
+
+type SendEmailVerificationCompleteEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+}
+
+type SendPasswordRecoveryEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+	Token     string
+	Link      string
+	TTL       uint32
+}
+
+type SendPasswordRecoveryCompleteEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+}
+
+func SendEmailHtml(data *SendEmailHtmlData) error {
+	apiKey := config.GetResendAPIKey()
+
+	client := resend.NewClient(apiKey)
+
+	params := &resend.SendEmailRequest{
+		From:    config.GetResendFromEmail(),
+		To:      []string{data.Email},
+		Subject: data.Subject,
+		Html:    data.Message,
+	}
+
+	sent, err := client.Emails.Send(params)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+		return err
+	}
+	fmt.Printf("%#v", sent)
+	return nil
+}
+
+func SendEmail(data *SendEmailData) error {
+	h := hermes.Hermes{}
+	email := hermes.Email{
+		Body: *data.Message,
+	}
+	em, _ := h.GenerateHTML(email)
+	apiKey := config.GetResendAPIKey()
+
+	client := resend.NewClient(apiKey)
+
+	params := &resend.SendEmailRequest{
+		From:    config.GetResendFromEmail(),
+		To:      []string{data.Email},
+		Subject: data.Subject,
+		Html:    em,
+	}
+
+	sent, err := client.Emails.Send(params)
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+		return err
+	}
+	fmt.Printf("%#v", sent)
+	return nil
+}
+
+func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) error {
 	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
 	var buf bytes.Buffer
 	err := tmpl.Execute(&buf, data)
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
 	body := buf.String()
 	err = SendEmailHtml(&SendEmailHtmlData{
@@ -155,7 +190,9 @@ func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) {
 	})
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
+	return nil
 }
 
 func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData) {
@@ -205,16 +242,6 @@ func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {
 	})
 }
 
-type SendEmailVerificationEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-	Token     string
-	TokenTTL  time.Time
-	Link      string
-}
-
 func SendEmailVerificationEmail(dataInput *SendEmailVerificationEmailData) {
 
 	body := hermes.Body{
@@ -250,13 +277,6 @@ func SendEmailVerificationEmail(dataInput *SendEmailVerificationEmailData) {
 	})
 }
 
-type SendEmailVerificationCompleteEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-}
-
 func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationCompleteEmailData) {
 	body := hermes.Body{
 		Name: strings.Join([]string{}, " "),
@@ -277,16 +297,6 @@ func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationComplete
 	})
 }
 
-type SendPasswordRecoveryEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-	Token     string
-	Link      string
-	TTL       uint32
-}
-
 func SendPasswordRecoveryEmail(data *SendPasswordRecoveryEmailData) error {
 	tmpl := template.Must(template.ParseFiles("templates/password_recovery.go.tmpl"))
 	var buf bytes.Buffer
@@ -304,13 +314,6 @@ func SendPasswordRecoveryEmail(data *SendPasswordRecoveryEmailData) error {
 		Subject: data.Subject,
 	})
 	return err
-}
-
-type SendPasswordRecoveryCompleteEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
 }
 
 func SendPasswordRecoveryCompleteEmail(dataInput *SendPasswordRecoveryCompleteEmailData) {

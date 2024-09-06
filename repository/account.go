@@ -1,55 +1,166 @@
 package repository
 
 import (
-	"time"
+
+	//"gitee.com/golang-module/carbon"
 
 	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/exports"
+	//"github.com/golang-module/carbon"
 )
 
-/*
-type Datasource interface {
-	DeleteAccount(identifier string) (*exports.AccountDocument, error)
-	FindAccountIdentifier(identifier string) (*exports.AccountDocument, error)
-	GetAccountByEmail(email string) (*exports.AccountDocument, error)
-	GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error)
-	CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.CreateJudgeAccountData, error)
-}
-*/
-// AddMemberToParticipatingTeam
 type AccountRepository struct {
-	DB                  *query.Query
-	FirstName           string                                      `json:"first_name"`
-	LastName            string                                      `json:"last_name"`
-	Email               string                                      `json:"email"`
-	Gender              string                                      `json:"gender"`
-	State               string                                      `json:"state"`
-	Age                 int                                         `json:"age"`
-	DOB                 time.Time                                   `json:"dob"`
-	AccountRole         string                                      `json:"role"`
-	ParticipantId       string                                      `json:"participant_id"`
-	TeamLeadEmail       string                                      `json:"team_lead_email"`
-	TeamName            string                                      `json:"team_name"`
-	TeamRole            string                                      `json:"team_role"`
-	HackathonId         string                                      `json:"hackathon_id"`
-	ParticipantType     string                                      `json:"type"`
-	CoParticipants      []CoParticipantInfo                         `json:"co_participants"`
-	ParticipantEmail    string                                      `json:"participant_email"`
-	InviteList          []exports.ParticipantDocumentTeamInviteInfo `json:"invite_list"`
-	AccountStatus       string                                      `json:"account_status"`
-	ParticipationStatus string                                      `json:"participation_status"`
-	Skillset            []string                                    `json:"skillset"`
-	PhoneNumber         string                                      `json:"phone_number"`
-	EmploymentStatus    string                                      `json:"employment_status"`
-	ExperienceLevel     string                                      `json:"experience_level"`
-	Motivation          string                                      `json:"motivation"`
-	Solution            *SolutionRepository                         `json:"solution"`
-	CreatedAt           time.Time                                   `json:"created_at"`
-	UpdatedAt           time.Time                                   `json:"updated_at"`
+	DB *query.Query
 }
 
 func NewAccountRepository(q *query.Query) *AccountRepository {
 	return &AccountRepository{
 		DB: q,
 	}
+}
+
+func (p *AccountRepository) CreateAccount(input *exports.CreateAccountData) (*exports.AccountRepository, error) {
+	accDoc, err := p.DB.CreateAccount(input)
+	if err != nil {
+		return nil, err
+	}
+
+	// emit created event
+
+	return &exports.AccountRepository{
+		Id:                  accDoc.Id.Hex(),
+		Email:               accDoc.Email,
+		LastName:            accDoc.LastName,
+		FirstName:           accDoc.FirstName,
+		Gender:              accDoc.Gender,
+		PasswordHash:        accDoc.PasswordHash,
+		Status:              accDoc.Status,
+		State:               accDoc.State,
+		LinkedInAddress:     accDoc.LinkedInAddress,
+		DOB:                 accDoc.DOB,
+		EmploymentStatus:    accDoc.EmploymentStatus,
+		IsEmailVerified:     accDoc.IsEmailVerified,
+		IsEmailVerifiedAt:   accDoc.IsEmailVerifiedAt,
+		ExperienceLevel:     accDoc.ExperienceLevel,
+		HackathonExperience: accDoc.HackathonExperience,
+		YearsOfExperience:   accDoc.YearsOfExperience,
+		Motivation:          accDoc.Motivation,
+		CreatedAt:           accDoc.CreatedAt,
+		UpdatedAt:           accDoc.UpdatedAt,
+	}, nil
+}
+
+func (p *AccountRepository) FindAccountIdentifier(identifier string) (*exports.AccountRepository, error) {
+	accDoc, err := p.DB.FindAccountIdentifier(identifier)
+	if err != nil {
+		return nil, err
+	}
+
+	return &exports.AccountRepository{
+		Id:                  accDoc.Id.Hex(),
+		Email:               accDoc.Email,
+		LastName:            accDoc.LastName,
+		FirstName:           accDoc.FirstName,
+		Gender:              accDoc.Gender,
+		PasswordHash:        accDoc.PasswordHash,
+		Status:              accDoc.Status,
+		State:               accDoc.State,
+		LinkedInAddress:     accDoc.LinkedInAddress,
+		DOB:                 accDoc.DOB,
+		EmploymentStatus:    accDoc.EmploymentStatus,
+		IsEmailVerified:     accDoc.IsEmailVerified,
+		IsEmailVerifiedAt:   accDoc.IsEmailVerifiedAt,
+		ExperienceLevel:     accDoc.ExperienceLevel,
+		HackathonExperience: accDoc.HackathonExperience,
+		YearsOfExperience:   accDoc.YearsOfExperience,
+		Motivation:          accDoc.Motivation,
+		CreatedAt:           accDoc.CreatedAt,
+		UpdatedAt:           accDoc.UpdatedAt,
+		Role:                accDoc.Role,
+		ParticipantId:       accDoc.ParticipantId,
+		PhoneNumber:         accDoc.PhoneNumber,
+		ProfilePictureUrl:   accDoc.ProfilePictureUrl,
+		HackathonId:         accDoc.HackathonId,
+	}, nil
+}
+
+func MarkAccountAsDeleted(identifier string) (*exports.AccountRepository, error) {
+	return nil, nil
+}
+
+func (p *AccountRepository) GetAccountByEmail(email string) (*exports.AccountRepository, error) {
+	accDoc, err := p.DB.GetAccountByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &exports.AccountRepository{
+		Id:                  accDoc.Id.Hex(),
+		Email:               accDoc.Email,
+		LastName:            accDoc.LastName,
+		FirstName:           accDoc.FirstName,
+		Gender:              accDoc.Gender,
+		PasswordHash:        accDoc.PasswordHash,
+		Status:              accDoc.Status,
+		State:               accDoc.State,
+		LinkedInAddress:     accDoc.LinkedInAddress,
+		DOB:                 accDoc.DOB,
+		EmploymentStatus:    accDoc.EmploymentStatus,
+		IsEmailVerified:     accDoc.IsEmailVerified,
+		IsEmailVerifiedAt:   accDoc.IsEmailVerifiedAt,
+		ExperienceLevel:     accDoc.ExperienceLevel,
+		HackathonExperience: accDoc.HackathonExperience,
+		YearsOfExperience:   accDoc.YearsOfExperience,
+		Motivation:          accDoc.Motivation,
+		CreatedAt:           accDoc.CreatedAt,
+		UpdatedAt:           accDoc.UpdatedAt,
+	}, nil
+}
+func (p *AccountRepository) GetAccountsByEmail(emails []string) ([]*exports.AccountRepository, error) {
+	return nil, nil
+}
+func (p *AccountRepository) UpdateAccount(filter *exports.UpdateAccountFilter, input *exports.UpdateAccountDTO) error {
+	p.DB.UpdateAccountInfoByEmail(filter, &exports.UpdateAccountDocument{
+		IsEmailVerified:   input.IsEmailVerified,
+		IsEmailVerifiedAt: input.IsEmailVerifiedAt,
+		FirstName:         input.FirstName,
+		LastName:          input.LastName,
+		Bio:               input.Bio,
+		State:             input.State,
+		Gender:            input.Gender,
+	})
+	return nil
+}
+
+func (p *AccountRepository) UpdatePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.AccountRepository, error) {
+	accDoc, err := p.DB.UpdatePasswordByEmail(filter, newPasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return &exports.AccountRepository{
+		Id:                  accDoc.Id.Hex(),
+		Email:               accDoc.Email,
+		LastName:            accDoc.LastName,
+		FirstName:           accDoc.FirstName,
+		Gender:              accDoc.Gender,
+		PasswordHash:        accDoc.PasswordHash,
+		Status:              accDoc.Status,
+		State:               accDoc.State,
+		LinkedInAddress:     accDoc.LinkedInAddress,
+		DOB:                 accDoc.DOB,
+		EmploymentStatus:    accDoc.EmploymentStatus,
+		IsEmailVerified:     accDoc.IsEmailVerified,
+		IsEmailVerifiedAt:   accDoc.IsEmailVerifiedAt,
+		ExperienceLevel:     accDoc.ExperienceLevel,
+		HackathonExperience: accDoc.HackathonExperience,
+		YearsOfExperience:   accDoc.YearsOfExperience,
+		Motivation:          accDoc.Motivation,
+		CreatedAt:           accDoc.CreatedAt,
+		UpdatedAt:           accDoc.UpdatedAt,
+	}, nil
+}
+
+func (p *AccountRepository) DeleteAccount(identifier string) (*exports.AccountRepository, error) {
+	return nil, nil
 }

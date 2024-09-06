@@ -27,16 +27,33 @@ func TestRegisterJudge(t *testing.T) {
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
 	})
-	service := NewService(&ServiceConfig{JudgeAccountRepository: judgeAccountRepository})
-	dataInput := &exports.RegisterNewJudgeDTO{
-		FirstName: "john",
-		LastName:  "doe",
-		Password:  "password",
-		Gender:    "MALE",
-		Email:     "test2@test.com",
-		Bio:       "Good bio",
+
+	/*
+		rmq_url := os.Getenv("RABBITMQ_URL")
+		ch, err := rabbitmq.GetRMQChannelWithURL(rabbitmq.SetupRMQConfig{
+			Url: rmq_url,
+		})
+		if err != nil {
+			panic(err)
+		}
+		publisher := publishers.NewRMQPublisherWithChannel(ch)*/
+
+	service := NewService(&ServiceConfig{
+		JudgeAccountRepository: judgeAccountRepository,
+		//Publisher:              publisher,
+	})
+	dataInput := &RegisterNewJudgeByAdminDTO{
+		FirstName:       "john",
+		LastName:        "doe",
+		Password:        "password",
+		ConfirmPassword: "password",
+		Gender:          "MALE",
+		Email:           "trinitietp@gmail.com",
+		Bio:             "Good bio",
+		InviterEmail:    "temitope.alabi@arravo.co",
+		InviterName:     "trinitietp",
 	}
-	judgeRepo, err := service.JudgeAccountRepository.CreateJudgeAccount(dataInput)
+	judgeRepo, err := service.RegisterNewJudge(dataInput)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,6 +72,7 @@ func TestRegisterJudge(t *testing.T) {
 	if judgeRepo.Bio == "" {
 		t.Fatal(errors.New("bio not returned"))
 	}
+
 }
 
 func TestUpdateJudgeInfo(t *testing.T) {

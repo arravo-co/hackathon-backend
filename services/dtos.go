@@ -1,14 +1,18 @@
 package services
 
-type RegisterNewJudgeDTO struct {
+import "time"
+
+type RegisterNewJudgeByAdminDTO struct {
 	FirstName       string `validate:"min=2,required" json:"first_name"`
 	LastName        string `validate:"min=2,required" json:"last_name"`
 	Email           string `validate:"email,required" json:"email"`
 	Password        string `validate:"min=7" json:"password"`
 	ConfirmPassword string `validate:"eqfield=Password" json:"confirm_password"`
 	Gender          string `validate:"oneof=MALE FEMALE" json:"gender"`
-	State           string `json:"state"`
-	Bio             string `json:"bio"`
+	State           string
+	Bio             string
+	InviterEmail    string `validate:"required"`
+	InviterName     string `validate:"required"`
 }
 
 type UpdateJudgeDTO struct {
@@ -83,4 +87,47 @@ type SelectTeamSolutionData struct {
 	HackathonId   string `bson:"hackathon_id"`
 	ParticipantId string `bson:"participant_id"`
 	SolutionId    string `bson:"solution_id"`
+}
+
+type GetParticipantsWithAccountsAggregateFilterOpts struct {
+	ParticipantId            *string
+	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ParticipantType          *string `validate:"omitempty, oneof TEAM "`
+	ReviewRanking_Eq         *int
+	ReviewRanking_Top        *int
+	Solution_Like            *string
+	Limit                    *int
+	SortByReviewRanking_Asc  *bool
+	SortByReviewRanking_Desc *bool
+}
+
+type JudgeRegisteredPublishPayload struct {
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	Password    string `json:"password"`
+	InviterName string `json:"inviter_name"`
+}
+
+type ParticipantRegisteredPayload struct {
+	Email            string
+	Password         string
+	FirstName        string
+	LastName         string
+	ParticipantEmail string
+	ParticipantId    string
+	//TeamParticipants []TeamParticipantInfo
+	TeamLeadEmail   string
+	TeamName        string
+	TeamRole        string
+	ParticipantType string
+}
+
+type AddedToInviteListPayload struct {
+	ParticipantId      string    `json:"participant_id"`
+	HackathonId        string    `json:"hackathon_id"`
+	TeamLeadEmailEmail string    `json:"teamlead_email"`
+	InviterEmail       string    `json:"inviter_email"`
+	InviteeEmail       string    `json:"invitee_email"`
+	InviterName        string    `json:"inviter_name"`
+	TimeSent           time.Time `json:"time_sent"`
 }

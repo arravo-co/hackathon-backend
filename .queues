@@ -12,7 +12,7 @@ Service/Provider: service to perform action on, or to handle resource/entity (cl
 QUEUES:
 
 upload.profile_picture.cloudinary: Upload picture to cloudinary
-send.judge.created.admin.welcome_email: Send email to judge created by admin
+send.judge.registered.admin.welcome_email: Send email to judge created by admin
 send.participant.created.welcome_email_verification_email: task to generate email token, send email verification token
 
 

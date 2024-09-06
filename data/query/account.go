@@ -236,7 +236,7 @@ func (q *Query) CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (
 	return acc, nil
 }
 
-func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
+func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
@@ -248,7 +248,14 @@ func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (interface{
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	return dataToSave, nil
+	var acc exports.AccountDocument
+	resultFind := accountCol.FindOne(context.Background(), bson.M{"email": dataToSave.Email})
+	err = resultFind.Decode(&acc)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	return &acc, nil
 }
 
 func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*exports.AccountDocument, error) {

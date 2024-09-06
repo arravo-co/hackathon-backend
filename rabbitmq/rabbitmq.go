@@ -34,3 +34,13 @@ func GetRMQChannelWithURL(opts SetupRMQConfig) (*amqp.Channel, error) {
 	}
 	return ch, err
 }
+
+func GetRMQConnWithURL(opts SetupRMQConfig) (*amqp.Connection, error) {
+
+	conn, err := amqp.Dial(opts.Url)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println("Connected to RabbitMQ")
+	return conn, err
+}

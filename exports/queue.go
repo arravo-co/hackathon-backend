@@ -12,6 +12,17 @@ type InvitelistQueuePayload struct {
 	TimeSent           time.Time `json:"time_sent"`
 }
 
+type ParticipantWelcomeEmailQueuePayload struct {
+	Email       string    `json:"email"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
+	Password    string    `json:"password"`
+	TTL         time.Time `json:"ttl"`
+	Link        string    `json:"link"`
+	Token       string    `json:"token"`
+	InviterName string    `json:"inviter_name"`
+}
+
 type AdminWelcomeEmailQueuePayload struct {
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
@@ -25,14 +36,11 @@ type AdminCreatedByAdminWelcomeEmailQueuePayload struct {
 	Password    string `json:"password"`
 }
 
-type JudgeCreatedByAdminWelcomeEmailQueuePayload struct {
-	Email       string    `json:"email"`
-	Name        string    `json:"name"`
-	Password    string    `json:"password"`
-	TTL         time.Time `json:"ttl"`
-	Link        string    `json:"link"`
-	Token       string    `json:"token"`
-	InviterName string    `json:"inviter_name"`
+type JudgeRegisteredPayload struct {
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	Password    string `json:"password"`
+	InviterName string `json:"inviter_name"`
 }
 
 type PlayQueuePayload struct {

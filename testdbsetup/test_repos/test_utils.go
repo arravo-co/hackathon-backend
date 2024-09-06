@@ -19,7 +19,7 @@ func GetParticipantAccountRepositoryWithQueryInstance(q *query.Query) exports.Pa
 }
 
 func GetParticipantRepositoryWithQueryInstance(q *query.Query) exports.ParticipantRepositoryInterface {
-	var partAccRepoInstance *repository.ParticipantRepository = repository.NewParticipantRepository(q)
-	var judgeAccountRepository exports.ParticipantRepositoryInterface = partAccRepoInstance
-	return judgeAccountRepository
+	var partRepoInstance *repository.ParticipantRecordRepository = repository.NewParticipantRecordRepository(q)
+	var participantRepository exports.ParticipantRepositoryInterface = partRepoInstance
+	return participantRepository
 }

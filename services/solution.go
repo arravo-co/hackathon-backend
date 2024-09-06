@@ -8,7 +8,7 @@ import (
 )
 
 type SolutionService struct {
-	ParticipantRepository *repository.ParticipantRepository
+	ParticipantRepository *repository.ParticipantRecordRepository
 	AccountRepository     *repository.AccountRepository
 	SolutionRepository    *repository.SolutionRepository
 }
@@ -16,7 +16,7 @@ type SolutionService struct {
 func NewSolutionService() *SolutionService {
 
 	q := query.GetDefaultQuery()
-	part := repository.NewParticipantRepository(q)
+	part := repository.NewParticipantRecordRepository(q)
 	acc := repository.NewAccountRepository(q)
 	sol := repository.NewSolutionRepository(q)
 	return &SolutionService{

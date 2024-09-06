@@ -70,6 +70,34 @@ func (p *ParticipantAccountRepository) CreateParticipantAccount(input *exports.C
 	}, err
 }
 
+func (p *ParticipantAccountRepository) FindAccountIdentifier(identifier string) (*exports.ParticipantAccountRepository, error) {
+	partAccDoc, err := p.DB.FindAccountIdentifier(identifier)
+	if err != nil {
+		return nil, err
+	}
+
+	return &exports.ParticipantAccountRepository{
+		Email:               partAccDoc.Email,
+		LastName:            partAccDoc.LastName,
+		FirstName:           partAccDoc.FirstName,
+		Gender:              partAccDoc.Gender,
+		PasswordHash:        partAccDoc.PasswordHash,
+		Status:              partAccDoc.Status,
+		State:               partAccDoc.State,
+		LinkedInAddress:     partAccDoc.LinkedInAddress,
+		DOB:                 partAccDoc.DOB,
+		EmploymentStatus:    partAccDoc.EmploymentStatus,
+		IsEmailVerified:     partAccDoc.IsEmailVerified,
+		IsEmailVerifiedAt:   partAccDoc.IsEmailVerifiedAt,
+		ExperienceLevel:     partAccDoc.ExperienceLevel,
+		HackathonExperience: partAccDoc.HackathonExperience,
+		YearsOfExperience:   partAccDoc.YearsOfExperience,
+		Motivation:          partAccDoc.Motivation,
+		CreatedAt:           partAccDoc.CreatedAt,
+		UpdatedAt:           partAccDoc.UpdatedAt,
+	}, nil
+}
+
 func MarkParticipantAccountAsDeleted(identifier string) (*exports.ParticipantAccountRepository, error) {
 	return nil, nil
 }

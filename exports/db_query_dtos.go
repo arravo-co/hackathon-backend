@@ -213,3 +213,14 @@ type RegisterNewParticipantDTO struct {
 	FieldOfStudy        string   `json:"field_of_study"`
 	PreviousProjects    []string `json:"previous_projects"`
 }
+
+type GetParticipantsFilterOpts struct {
+	ParticipantId            *string
+	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ReviewRanking_Eq         *int
+	ReviewRanking_Top        *int
+	Solution_Like            *string
+	Limit                    *int
+	SortByReviewRanking_Asc  *bool
+	SortByReviewRanking_Desc *bool
+}

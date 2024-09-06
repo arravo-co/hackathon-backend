@@ -1,21 +1,10 @@
 package jobs
 
-import (
-	"encoding/json"
-	"fmt"
-	"time"
-
-	"github.com/adjust/rmq/v5"
-	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/rmqUtils"
-	"github.com/arravoco/hackathon_backend/utils"
-	"github.com/arravoco/hackathon_backend/utils/email"
-)
-
 type JudgeCreatedByAdminWelcomeEmailTaskConsumer struct {
 	Ch chan interface{}
 }
 
+/*
 func StartConsumingJudgeCreatedByAdminWelcomeEmailQueue() (*JudgeCreatedByAdminWelcomeEmailTaskConsumer, error) {
 	fmt.Println("send_judge_created_by_admin_welcome_email started")
 	queue, err := rmqUtils.GetQueue("send_judge_created_by_admin_welcome_email")
@@ -36,12 +25,13 @@ func StartConsumingJudgeCreatedByAdminWelcomeEmailQueue() (*JudgeCreatedByAdminW
 	}
 	fmt.Println(str)
 	return taskConsumer, nil
-}
+}*/
 
+/*
 func (c *JudgeCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 	payload := d.Payload()
 
-	payloadStruct := exports.JudgeCreatedByAdminWelcomeEmailQueuePayload{}
+	payloadStruct := exports.JudgeCreatedPublishPayload{}
 	err := json.Unmarshal([]byte(payload), &payloadStruct)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -78,3 +68,4 @@ func (c *JudgeCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 	d.Ack()
 	c.Ch <- struct{}{}
 }
+*/

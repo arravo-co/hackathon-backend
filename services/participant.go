@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -10,9 +11,15 @@ import (
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/repository"
 	"github.com/arravoco/hackathon_backend/utils"
+	"github.com/jaevor/go-nanoid"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 func (s *Service) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationDTO) (*entity.Participant, error) {
+	err := validate.Struct(input)
+	if err != nil {
+		return nil, err
+	}
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
@@ -37,7 +44,7 @@ func (s *Service) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMember
 		return nil, err
 	}
 	//fmt.Println("uyfrrdrrszwswwseaesrsrrerrtdtyfyguguugufydtrsesezzesrdtdtfyfgugugugugyfiyfyfyyyyfyfyffu")
-	_, err = s.ParticipantAccountRepository.CreateParticipantAccount(&exports.CreateParticipantAccountData{
+	partAcc, err := s.ParticipantAccountRepository.CreateParticipantAccount(&exports.CreateParticipantAccountData{
 		CreateAccountData: exports.CreateAccountData{
 			Email:        input.Email,
 			LastName:     input.LastName,
@@ -74,11 +81,52 @@ func (s *Service) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMember
 		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
 		ParticipantType:  "TEAM",
 	})*/
-	partEnt, err := s.GetParticipantInfo(partDoc.ParticipantId)
+
+	pubData := &exports.ParticipantRegisteredPublishPayload{
+		AccountId:        partAcc.Id,
+		Email:            input.Email,
+		LastName:         input.LastName,
+		FirstName:        input.FirstName,
+		ParticipantId:    input.ParticipantId,
+		ParticipantEmail: partDoc.ParticipantEmail,
+		ParticipantType:  partDoc.Type,
+		TeamLeadEmail:    partDoc.TeamLeadEmail,
+		TeamRole:         input.TeamRole,
+		TeamName:         partDoc.TeamName,
+	}
+
+	by, err := json.Marshal(pubData)
+	if err != nil {
+		fmt.Printf("Failed to marshal: %v\n", err)
+	} else {
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.ParticipantsExchange,
+			KeyName:      exports.ParticipantRegisteredRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.ParticipantsExchange,
+			KeyName:      exports.ParticipantSendWelcomeEmailRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	partEnt, err := s.GetSingleParticipantWithAccountsInfo(partDoc.ParticipantId)
 	return partEnt, nil
 }
 
-func (s *Service) InviteToTeam(dataInput *AddToTeamInviteListData) (interface{}, error) {
+func (s *Service) InviteToTeam(dataInput *AddToTeamInviteListData) (*entity.Participant, error) {
 	err := validate.Struct(dataInput)
 	if err != nil {
 		return nil, err
@@ -93,7 +141,7 @@ func (s *Service) InviteToTeam(dataInput *AddToTeamInviteListData) (interface{},
 	if part.Status == "UNREVIEWED" {
 		return nil, fmt.Errorf("an unreviewed participant cannot have invite new members")
 	}
-	res, err := s.ParticipantRecordRepository.AddToTeamInviteList(&exports.AddToTeamInviteListData{
+	_, err = s.ParticipantRecordRepository.AddToTeamInviteList(&exports.AddToTeamInviteListData{
 		Email:            dataInput.Email,
 		ParticipantId:    dataInput.ParticipantId,
 		InviterEmail:     dataInput.InviterEmail,
@@ -103,12 +151,7 @@ func (s *Service) InviteToTeam(dataInput *AddToTeamInviteListData) (interface{},
 	if err != nil {
 		return nil, err
 	}
-	/*
-		queue, err := data.GetQueue("invite_list")
-		if err != nil {
-			//fmt.Printf("%s\n", err.Error())
-		} else {}*/
-	queuePayload := exports.InvitelistQueuePayload{
+	queuePayload := exports.AddedToInvitelistPublishPayload{
 		InviterEmail:       dataInput.InviterEmail,
 		InviterName:        dataInput.InviterFirstName,
 		InviteeEmail:       dataInput.Email,
@@ -117,17 +160,36 @@ func (s *Service) InviteToTeam(dataInput *AddToTeamInviteListData) (interface{},
 		TeamLeadEmailEmail: dataInput.InviterEmail,
 		TimeSent:           time.Now(),
 	}
-	byt, err := json.Marshal(queuePayload)
+	by, err := json.Marshal(queuePayload)
 	if err != nil {
-		fmt.Println(err.Error())
-	}
-	err = s.Publisher.Publish(exports.PublisherConfig{}, byt)
-	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Printf("Failed to marshal: %v\n", err)
+	} else {
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.InvitationsExchange,
+			KeyName:      exports.ParticipantInvitedRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.InvitationsExchange,
+			KeyName:      exports.ParticipantSendInvitationEmailRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
 	}
 
-	//partEnt, err := s.GetParticipantInfo(partDoc.ParticipantId)
-	return res, nil
+	partEnt, err := s.GetSingleParticipantWithAccountsInfo(part.ParticipantId)
+	return partEnt, err
 }
 
 func (s *Service) RegisterTeamLead(input *RegisterNewParticipantDTO) (*entity.Participant, error) {
@@ -135,7 +197,6 @@ func (s *Service) RegisterTeamLead(input *RegisterNewParticipantDTO) (*entity.Pa
 	if err != nil {
 		return nil, err
 	}
-	teamMembers := []exports.TeamParticipantInfo{}
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
@@ -149,7 +210,7 @@ func (s *Service) RegisterTeamLead(input *RegisterNewParticipantDTO) (*entity.Pa
 		fmt.Println("\nhere: ", err.Error())
 		return nil, err
 	}
-	_, err = s.ParticipantAccountRepository.CreateParticipantAccount(&exports.CreateParticipantAccountData{
+	partAcc, err := s.ParticipantAccountRepository.CreateParticipantAccount(&exports.CreateParticipantAccountData{
 		ParticipantId:       participantId,
 		Skillset:            input.Skillset,
 		DOB:                 dob,
@@ -178,24 +239,6 @@ func (s *Service) RegisterTeamLead(input *RegisterNewParticipantDTO) (*entity.Pa
 		return nil, err
 	}
 
-	pubData := &exports.ParticipantAccountCreatedEventData{
-		TeamParticipants: teamMembers,
-		TeamLeadEmail:    input.Email,
-		EventData:        exports.EventData{EventName: "ParticipantAccountCreated"},
-		ParticipantEmail: input.Email,
-		TeamName:         input.TeamName,
-		TeamRole:         "TEAM_LEAD",
-		ParticipantType:  "TEAM",
-	}
-	by, err := json.Marshal(pubData)
-	if err != nil {
-		fmt.Println("failed to marshal to publish")
-	}
-	//panic("About to pusblish")
-	err = s.Publisher.Publish(exports.PublisherConfig{}, by)
-	if err != nil {
-		fmt.Println("failed to publish")
-	}
 	dataInput := &exports.CreateParticipantRecordData{
 		TeamLeadEmail:    input.Email,
 		HackathonId:      config.GetHackathonId(),
@@ -206,12 +249,53 @@ func (s *Service) RegisterTeamLead(input *RegisterNewParticipantDTO) (*entity.Pa
 		Type:             "TEAM",
 	}
 
-	_, err = s.ParticipantRecordRepository.CreateParticipantRecord(dataInput)
+	partDoc, err := s.ParticipantRecordRepository.CreateParticipantRecord(dataInput)
 	if err != nil {
 		return nil, err
 	}
 
-	partEnt, err := s.GetParticipantInfo(participantId)
+	pubData := &exports.ParticipantRegisteredPublishPayload{
+		AccountId:        partAcc.Id,
+		Email:            input.Email,
+		LastName:         input.LastName,
+		FirstName:        input.FirstName,
+		ParticipantId:    participantId,
+		ParticipantEmail: partDoc.ParticipantEmail,
+		ParticipantType:  partDoc.Type,
+		TeamLeadEmail:    partDoc.TeamLeadEmail,
+		TeamRole:         "TEAM_LEAD",
+		TeamName:         partDoc.TeamName,
+	}
+
+	by, err := json.Marshal(pubData)
+	if err != nil {
+		fmt.Printf("Failed to marshal: %v\n", err)
+	} else {
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.ParticipantsExchange,
+			KeyName:      exports.ParticipantRegisteredRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.ParticipantsExchange,
+			KeyName:      exports.ParticipantSendWelcomeEmailRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
+	}
+
+	partEnt, err := s.GetSingleParticipantWithAccountsInfo(participantId)
 	return partEnt, err
 }
 
@@ -290,24 +374,33 @@ func (s *Service) GetTeamMembersInfo(participant_id string) ([]entity.TeamMember
 	return team, err
 }
 
-func (s *Service) GetParticipantInfo(participantId string) (*entity.Participant, error) {
+func (s *Service) GetSingleParticipantWithAccountsInfo(participantId string) (*entity.Participant, error) {
 	part, err := s.ParticipantRecordRepository.GetSingleParticipantRecordAndMemberAccountsInfo(participantId)
+	if err != nil {
+		return nil, err
+	}
+	if part == nil {
+		return nil, fmt.Errorf("participant with id %v not found", participantId)
+	}
 	var co_parts []entity.ParticipantEntityCoParticipantInfo
-	for _, v := range part.CoParticipants {
-		co_parts = append(co_parts, entity.ParticipantEntityCoParticipantInfo{
-			AccountStatus:       v.AccountStatus,
-			Email:               v.Email,
-			FirstName:           v.FirstName,
-			LastName:            v.LastName,
-			Gender:              v.Gender,
-			State:               v.State,
-			EmploymentStatus:    v.EmploymentStatus,
-			ExperienceLevel:     v.ExperienceLevel,
-			HackathonExperience: v.HackathonExperience,
-			YearsOfExperience:   v.YearsOfExperience,
-			CreatedAt:           v.CreatedAt,
-			UpdatedAt:           v.UpdateAt,
-		})
+	if part.CoParticipants != nil {
+
+		for _, v := range part.CoParticipants {
+			co_parts = append(co_parts, entity.ParticipantEntityCoParticipantInfo{
+				AccountStatus:       v.AccountStatus,
+				Email:               v.Email,
+				FirstName:           v.FirstName,
+				LastName:            v.LastName,
+				Gender:              v.Gender,
+				State:               v.State,
+				EmploymentStatus:    v.EmploymentStatus,
+				ExperienceLevel:     v.ExperienceLevel,
+				HackathonExperience: v.HackathonExperience,
+				YearsOfExperience:   v.YearsOfExperience,
+				CreatedAt:           v.CreatedAt,
+				UpdatedAt:           v.UpdateAt,
+			})
+		}
 	}
 	partEnt := &entity.Participant{
 		ParticipantId:       part.ParticipantId,
@@ -341,15 +434,189 @@ func (s *Service) GetParticipantInfo(participantId string) (*entity.Participant,
 	return partEnt, err
 }
 
-func (s *Service) GetParticipantsInfo() ([]entity.Participant, error) {
-	parts, err := s.ParticipantRecordRepository.GetParticipantsRecords()
+func (s *Service) GetMultipleParticipantsWithAccounts(opts *GetParticipantsWithAccountsAggregateFilterOpts) ([]entity.Participant, error) {
+	parts, err := s.ParticipantRecordRepository.
+		GetMultipleParticipantRecordAndMemberAccountsInfo(
+			exports.GetParticipantsWithAccountsAggregateFilterOpts(*opts))
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(parts)
-	return nil, nil
+	//fmt.Printf("%#v\n", parts)
+	var partEnts []entity.Participant
+	for _, v := range parts {
+		var co_parts []entity.ParticipantEntityCoParticipantInfo
+		for _, v := range v.CoParticipants {
+			co_parts = append(co_parts, entity.ParticipantEntityCoParticipantInfo{
+				ParticipantId:       v.ParticipantId,
+				PhoneNumber:         v.PhoneNumber,
+				PreviousProjects:    v.PreviousProjects,
+				HackathonId:         v.HackathonId,
+				HackathonExperience: v.HackathonExperience,
+				YearsOfExperience:   v.YearsOfExperience,
+				DOB:                 v.DOB,
+				Email:               v.Email,
+				EmploymentStatus:    v.EmploymentStatus,
+				ExperienceLevel:     v.ExperienceLevel,
+				LastName:            v.LastName,
+				FirstName:           v.FirstName,
+				FieldOfStudy:        v.FieldOfStudy,
+				State:               v.State,
+				Skillset:            v.Skillset,
+				AccountStatus:       v.AccountStatus,
+				AccountId:           v.AccountId,
+				AccountRole:         v.AccountRole,
+				CreatedAt:           v.CreatedAt,
+				UpdatedAt:           v.UpdateAt,
+				TeamRole:            v.TeamRole,
+				Motivation:          v.Motivation,
+			})
+		}
+		partEnts = append(partEnts, entity.Participant{
+			ParticipantId: v.ParticipantId,
+			TeamLeadEmail: v.TeamLeadEmail,
+			TeamName:      v.TeamName,
+			HackathonId:   v.HackathonId,
+			TeamLeadInfo: entity.ParticipantEntityTeamLeadInfo{
+				HackathonId:         v.HackathonId,
+				TeamRole:            "TEAM_LEAD",
+				FirstName:           v.TeamLeadInfo.FirstName,
+				LastName:            v.TeamLeadInfo.LastName,
+				Gender:              v.TeamLeadInfo.Gender,
+				Skillset:            v.TeamLeadInfo.Skillset,
+				PhoneNumber:         v.TeamLeadInfo.PhoneNumber,
+				AccountId:           v.TeamLeadInfo.AccountId,
+				AccountStatus:       v.TeamLeadInfo.AccountStatus,
+				AccountRole:         v.TeamLeadInfo.AccountStatus,
+				YearsOfExperience:   v.TeamLeadInfo.YearsOfExperience,
+				HackathonExperience: v.TeamLeadInfo.HackathonExperience,
+				EmploymentStatus:    v.TeamLeadInfo.EmploymentStatus,
+				Email:               v.TeamLeadInfo.Email,
+				ExperienceLevel:     v.TeamLeadInfo.ExperienceLevel,
+				IsEmailVerified:     v.TeamLeadInfo.IsEmailVerified,
+				IsEmailVerifiedAt:   v.TeamLeadInfo.IsEmailVerifiedAt,
+				CreatedAt:           v.TeamLeadInfo.CreatedAt,
+				ParticipantId:       v.TeamLeadInfo.ParticipantId,
+				UpdateAt:            v.TeamLeadInfo.UpdateAt,
+				Motivation:          v.TeamLeadInfo.Motivation,
+			}, Solution: &entity.ParticipantEntitySelectedSolution{
+				HackathonId:      v.Solution.HackathonId,
+				Title:            v.Solution.Title,
+				Description:      v.Solution.Description,
+				SolutionImageUrl: v.Solution.SolutionImageUrl,
+				Objective:        v.Solution.Objective,
+			},
+			CoParticipants: co_parts,
+		})
+	}
+	//fmt.Printf("%#v\n", partEnts)
+	fmt.Println("---------------------------------------------------------------------------")
+	return partEnts, nil
 }
 
 func (s *Service) UpdateParticipantInfo(input *AuthParticipantInfoUpdateDTO) (interface{}, error) {
 	return nil, nil
+}
+
+func PublishParticipantRegistered(tokenRepo exports.TokenRepositoryInterface, rmqConn *amqp091.Connection, data *ParticipantRegisteredPayload) error {
+	fmt.Println("\n\nGot here\n.")
+	ttl := time.Now().Add(time.Minute * 15)
+	tokenFunc, _ := nanoid.Custom("1234567890", 6)
+	token := tokenFunc()
+	tokenData, err := tokenRepo.UpsertToken(&exports.UpsertTokenData{
+		Token:          token,
+		TokenType:      "EMAIL",
+		TokenTypeValue: data.Email,
+		TTL:            ttl,
+		Status:         "PENDING",
+		Scope:          "EMAIL_VERIFICATION",
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
+		Token: tokenData.Token,
+		TTL:   tokenData.TTL,
+		Email: tokenData.TokenTypeValue,
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	payload := exports.ParticipantWelcomeEmailQueuePayload{
+		Email:     data.Email,
+		FirstName: data.FirstName,
+		LastName:  data.LastName,
+		TTL:       tokenData.TTL,
+		Token:     tokenData.Token,
+		Link:      link,
+	}
+
+	by, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Print(err.Error())
+		return err
+	}
+	ch, err := rmqConn.Channel()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	exchange_name := "participant.registered"
+	key_name := "particpant.send.welcome_email"
+	err = ch.ExchangeDeclare(exchange_name, amqp091.ExchangeDirect, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = ch.PublishWithContext(context.Background(),
+		exchange_name, key_name, false, false, amqp091.Publishing{
+			Body:        by,
+			ContentType: "application/json",
+		})
+	if err != nil {
+		fmt.Print(err.Error())
+		return err
+	}
+	fmt.Println("Published details")
+
+	return nil
+}
+
+func PublishParticipantInvited(tokenRepo exports.TokenRepositoryInterface, rmqConn *amqp091.Connection, data *exports.ParticipantInvitedEmailPayload) error {
+	by, err := json.Marshal(data)
+	if err != nil {
+		fmt.Print(err.Error())
+		return err
+	}
+	ch, err := rmqConn.Channel()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	exchange_name := "participant.invited"
+	key_name := "particpant.send.invite_email"
+	err = ch.ExchangeDeclare(exchange_name, amqp091.ExchangeDirect, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = ch.PublishWithContext(context.Background(),
+		exchange_name, key_name, false, false, amqp091.Publishing{
+			Body:        by,
+			ContentType: "application/json",
+		})
+	if err != nil {
+		fmt.Print(err.Error())
+		return err
+	}
+	fmt.Printf("Published details: %s\n", exchange_name)
+
+	return nil
 }

@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/arravoco/hackathon_backend/config"
+	consumerhandlers "github.com/arravoco/hackathon_backend/consumer_handlers"
 	"github.com/arravoco/hackathon_backend/consumers"
-	"github.com/arravoco/hackathon_backend/db"
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/publishers"
-	"github.com/arravoco/hackathon_backend/rabbitmq"
+	"github.com/arravoco/hackathon_backend/resources"
 
 	//"github.com/arravoco/hackathon_backend/jobs"
 
@@ -25,15 +25,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
-
-type SetupOpts struct {
-	Logger echo.Logger
-}
-
-type AppResources struct {
-	Publisher *publishers.RMQPublisher
-	Consumer  *consumers.RMQConsumer
-}
 
 // @Version 1.0.0
 // @Title Hackathon Backend API
@@ -50,6 +41,12 @@ func main() {
 	prometheus.MustRegister(exports.MyFirstCounter)
 	security.GenerateKeys()
 
+	/*rmqUtils.SetupDefaultQueue()
+	data.SetupDefaultDataSource()
+	rabbitutils.SetupDefaultRMQ()
+	rabbitutils.DeclareAllQueues()
+	publish.SetPublisher(&rabbitutils.RMQPublisher{})*/
+	//panic("Intentionally crashed")
 	e := echo.New()
 	port := config.GetPort()
 	routes_v1.StartAllRoutes(e)
@@ -60,85 +57,68 @@ func main() {
 	})
 	fmt.Println("Starting metrics")
 	e.Logger.Info(port)
+	res := resources.GetDefaultResources()
+	publishChannel, err := res.RabbitMQConn.Channel()
+	if err != nil {
+		res.Logger.Fatal(err.Error())
+	}
+	/*rmqPushlisher := publishers.NewRMQPublisherWithChannel(publishChannel)
+	rmqPushlisher.DeclareAllExchanges()
+	res.Logger.Sugar().Infoln(rmqPushlisher)*/
 
-	db.SetupRedis()
-	/*rmqUtils.SetupDefaultQueue()
-	data.SetupDefaultDataSource()
-	rabbitutils.SetupDefaultRMQ()
-	rabbitutils.DeclareAllQueues()
-	publish.SetPublisher(&rabbitutils.RMQPublisher{})
-	go rabbitutils.ListenToAllQueues()*/
-	//panic("Intentionally crashed")
+	publishers.DeclareAllExchanges(publishChannel)
+
+	consumerChannel, err := res.RabbitMQConn.Channel()
+	if err != nil {
+		res.Logger.Fatal(err.Error())
+	}
+
+	time.Sleep(time.Second * 10)
+	rmqConsumer := consumers.NewRMQConsumerWithChannel(consumers.CreateRMQConsumerOpts{
+		Channel:       consumerChannel,
+		Logger:        res.Logger,
+		RMQConnection: res.RabbitMQConn,
+	})
+	//judge.registered queues
+	go func() {
+		rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.HandleSendWelcomeAndEmailVerificationEmailToJudgeConsumption,
+			exports.JudgesExchange,
+			exports.SendJudgeWelcomeEmailQueueName,
+			exports.SendJudgeWelcomeEmailQueueBindingKeyName)
+	}()
+
+	//participant.registered queues
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.HandleSendWelcomeAndEmailVerificationEmailToJudgeConsumption,
+			exports.ParticipantsExchange,
+			exports.SendParticipantWelcomeEmailQueueName,
+			exports.SendParticipantWelcomeEmailQueueBindingKeyName)
+	}()
+
+	//invite list jobs
+	go func() {
+		rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.HandleSendInviteEmailConsumption,
+			exports.InvitationsExchange,
+			exports.SendParticipantTeammateInvitationEmailQueueName,
+			exports.ParticipantTeammateSendInvitationEmailBindingKeyName)
+	}()
+
+	//uploads jobs
+	go func() {
+		rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.HandleUploadJudgeProfilePicConsumption,
+			exports.UploadJobsExchange,
+			exports.UploadJudgeProfilePicQueueName,
+			exports.UploadJudgeProfilePicBindingKeyName)
+	}()
+	//HandleUploadJudgeProfilePicConsumption
 
 	e.Logger.Fatal(e.Start(getURL(port)))
-}
-
-func Setup(opts SetupOpts) *AppResources {
-	logger := opts.Logger
-	rabbitMQURL := os.Getenv("RABBITMQ_URL")
-	if rabbitMQURL == "" {
-		logger.Fatal("Please specify rabbitMQ URL")
-	}
-	rmqPublisherChannel, err := rabbitmq.GetRMQChannelWithURL(rabbitmq.SetupRMQConfig{
-		Url: rabbitMQURL,
-	})
-	if err != nil {
-		logger.Fatal(err)
-	}
-	rmqConsumerChannel, err := rabbitmq.GetRMQChannelWithURL(rabbitmq.SetupRMQConfig{
-		Url: rabbitMQURL,
-	})
-	if err != nil {
-		logger.Fatal(err)
-	}
-	publisher := publishers.NewRMQPublisherWithChannel(rmqPublisherChannel)
-	consumer := consumers.NewRMQConsumerWithChannel(rmqConsumerChannel)
-	return &AppResources{
-		Publisher: publisher,
-		Consumer:  consumer,
-	}
 }
 
 func getURL(port int) string {
 	return strings.Join([]string{"", strconv.Itoa(port)}, ":")
 }
-
-/*
-func startAllJobs() {
-
-	judgeCreatedByAdminWelcomeEmailTaskConsumer, err := jobs.StartConsumingJudgeCreatedByAdminWelcomeEmailQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	adminCreatedByAdminWelcomeEmailTaskConsumer, err := jobs.StartConsumingAdminCreatedByAdminWelcomeEmailQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	adminWelcomeEmailTaskConsumer, err := jobs.StartAdminWelcomeEmailQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	invitelistTaskConsumer, err := jobs.StartConsumingInviteTaskQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	for {
-		select {
-		case err := <-rmqUtils.ErrCh:
-			fmt.Println(err.Error())
-		case <-adminCreatedByAdminWelcomeEmailTaskConsumer.Ch:
-			fmt.Println("'adminCreatedByAdminWelcomeEmailTaskConsumer' task completed successfully")
-
-		case <-adminWelcomeEmailTaskConsumer.Ch:
-			fmt.Println("'adminWelcomeEmailTaskConsumer' Task completed")
-		case <-judgeCreatedByAdminWelcomeEmailTaskConsumer.Ch:
-			fmt.Println("mail to judge created by admin list task completed successfully")
-		case <-invitelistTaskConsumer.Ch:
-			fmt.Println("Invite list task completed successfully")
-		}
-	}
-}*/

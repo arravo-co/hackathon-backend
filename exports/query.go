@@ -28,7 +28,6 @@ type DatasourceQueryMethods interface {
 	GetManySolutionData(filterInput interface{}) ([]SolutionDocument, error)
 	GetParticipantRecord(participantId string) (*ParticipantDocument, error)
 	GetParticipantsRecords() ([]ParticipantDocument, error)
-	GetParticipantsRecordsAggregate() ([]ParticipantAccountWithCoParticipantsDocument, error)
 	GetSolutionDataById(id string) (*SolutionDocument, error)
 	RemoveMemberFromParticipatingTeam(dataToSave *RemoveMemberFromParticipatingTeamData) (interface{}, error)
 	RemoveTeamMemberAccount(dataToSave *RemoveTeamMemberAccountData) (*AccountDocument, error)
@@ -37,10 +36,12 @@ type DatasourceQueryMethods interface {
 	UpdateParticipantInfoByEmail(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
 	UpdatePasswordByEmail(filter *UpdateAccountFilter, newPasswordHash string) (*AccountDocument, error)
 	UpdateSolutionData(id string, dataInput *UpdateSolutionData) (*SolutionDocument, error)
+	UpsertToken(dataInput *UpsertTokenData) (*TokenData, error)
+	VerifyToken(dataInput *VerifyTokenData) error
 }
 
 type JudgeDatasourceQueryMethods interface {
-	CreateAccount(dataToSave *CreateAccountData) (interface{}, error)
+	CreateAccount(dataToSave *CreateAccountData) (*AccountDocument, error)
 	CreateJudgeAccount(dataToSave *CreateJudgeAccountData) (*AccountDocument, error)
 	DeleteAccount(identifier string) (*AccountDocument, error)
 	FindAccountIdentifier(identifier string) (*AccountDocument, error)
@@ -49,4 +50,9 @@ type JudgeDatasourceQueryMethods interface {
 	GetAccountsOfJudges() ([]AccountDocument, error)
 	UpdateAccountInfoByEmail(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
 	UpdatePasswordByEmail(filter *UpdateAccountFilter, newPasswordHash string) (*AccountDocument, error)
+}
+
+type TokenDatasourceQueryMethods interface {
+	UpsertToken(dataInput *UpsertTokenData) (*TokenData, error)
+	VerifyToken(dataInput *VerifyTokenData) error
 }

@@ -1,19 +1,45 @@
 package consumers
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/aidarkhanov/nanoid"
+	consumerhandlers "github.com/arravoco/hackathon_backend/consumer_handlers"
+	"go.uber.org/zap"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+type CreateRMQConsumerOpts struct {
+	Channel       *amqp.Channel
+	Logger        *zap.Logger
+	RMQConnection *amqp.Connection
+}
 type RMQConsumer struct {
-	Channel *amqp.Channel
+	Channel       *amqp.Channel
+	Logger        *zap.Logger
+	RMQConnection *amqp.Connection
 }
 
-func NewRMQConsumerWithChannel(ch *amqp.Channel) *RMQConsumer {
+func NewRMQConsumerWithChannel(opts CreateRMQConsumerOpts) *RMQConsumer {
 	return &RMQConsumer{
-		Channel: ch,
+		Channel:       opts.Channel,
+		Logger:        opts.Logger,
+		RMQConnection: opts.RMQConnection,
 	}
+}
+
+func (c *RMQConsumer) SetupChannel() error {
+	if c.Channel != nil && !c.Channel.IsClosed() {
+
+	}
+	ch, err := c.RMQConnection.Channel()
+	if err != nil {
+		return err
+	}
+	c.Channel = ch
+	return nil
 }
 
 func (c *RMQConsumer) DeclareExchange(name string, kind string) error {
@@ -38,33 +64,90 @@ func (c *RMQConsumer) ConsumeQueue(q_name string, consumer_name string) (<-chan 
 	return resChan, err
 }
 
-/*
-func DeclareAllQueues() {
-	q, err := DeclareQueue("upload.profile_picture.cloudinary")
+/**/
+func (c *RMQConsumer) DeclareAllQueues() {
+	q, err := c.DeclareQueue("judge.send.welcome_email") //upload.profile_picture.cloudinary
 	if err != nil {
-		log.Fatalln(err.Error())
+		c.Logger.Fatal(err.Error())
 	}
-	log.Println(q)
+	c.Logger.Sugar().Info(q)
+	fmt.Printf("Queue name: %s\n", q.Name)
+	fmt.Println("BindToJudgeCreateExchanged called")
+	for {
+		err := c.BindQueue(q.Name,
+			"judge.send.welcome_email", "judge.registered")
+		if err != nil {
+			fmt.Println(err.Error())
+			if c.Channel.IsClosed() {
+				err = c.SetupChannel()
+				if err != nil {
+					break
+				}
+				continue
+			}
+			time.Sleep(time.Second * 10)
+			continue
+		} else {
+			fmt.Println("JudgeCreated bound")
+		}
 
-	sendJudgeCreatedAdminWelcomeEmailQueue, err := DeclareQueue("send.judge.created.admin.welcome_email")
-	if err != nil {
-		log.Fatalln("Error: ", err.Error())
+		chWelcomeEmailToJudgeDelivery, err := c.ConsumeQueue("judge.send.welcome_email", GetConsumerTag())
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println(chWelcomeEmailToJudgeDelivery)
+		}
+		for v := range chWelcomeEmailToJudgeDelivery {
+			fmt.Println("responsekkkkkkkkkkkkkkkkkkkkkkkkkkkffffffffffffffkkkkkkkkkkkkk")
+			consumerhandlers.HandleSendWelcomeAndEmailVerificationEmailToJudgeConsumption(v.Body)
+			v.Ack(false)
+		}
 	}
-	log.Println(sendJudgeCreatedAdminWelcomeEmailQueue)
+}
 
-	sendParticipantCreatedWelcomeEmailQueue, err := DeclareQueue("send.participant.created.welcome_email_verification_email")
+func (c *RMQConsumer) DeclareAllQueuesParameterized(handler func([]byte) error, exchange, queue_name, key string) error {
+	q, err := c.DeclareQueue(queue_name) //upload.profile_picture.cloudinary
 	if err != nil {
-		log.Fatalln("Error: ", err.Error())
+		c.Logger.Fatal(err.Error())
+		return err
 	}
-	log.Println(sendParticipantCreatedWelcomeEmailQueue)
 
-	uploadSolutionPicQueue, err := DeclareQueue("upload.solution_picture.cloudinary")
-	if err != nil {
-		log.Fatalln("Error: ", err.Error())
+	c.Logger.Sugar().Infof("\nAttempting to bind queue %s to exchange %s with key %s\n", queue_name, exchange, key)
+	for {
+		err := c.BindQueue(q.Name, key, exchange)
+		if err != nil {
+			fmt.Printf("Failed to bind: %s\n", err.Error())
+			if c.Channel.IsClosed() {
+				time.Sleep(time.Second * 10)
+				err = c.SetupChannel()
+				if err != nil {
+					break
+				}
+				continue
+			}
+			time.Sleep(time.Second * 10)
+			continue
+		} else {
+			fmt.Println("Exchange created bound")
+		}
+
+		delivery, err := c.ConsumeQueue(queue_name, GetConsumerTag())
+		if err != nil {
+			fmt.Println("\nFailed to consume: ", err.Error())
+			time.Sleep(time.Second * 10)
+			continue
+		}
+		for v := range delivery {
+			err := handler(v.Body)
+			if err != nil {
+				v.Nack(false, false)
+				continue
+			}
+			v.Ack(false)
+		}
 	}
-	log.Println(uploadSolutionPicQueue)
-	//
-}*/
+	return nil
+}
 
 func GetConsumerTag() string {
 	id := nanoid.Must(nanoid.Generate("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456456789", 10))

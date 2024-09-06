@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/publishers"
 	"github.com/arravoco/hackathon_backend/seeders"
 	testsetup "github.com/arravoco/hackathon_backend/testdbsetup"
 	testrepos "github.com/arravoco/hackathon_backend/testdbsetup/test_repos"
@@ -61,7 +60,7 @@ func TestInviteToTeam(t *testing.T) {
 	t.Run("should be able to invite new team members to a reviewed participating team as the team lead of the team", func(t *testing.T) {
 
 		account_status := "REVIEWED"
-		teamLeadPartAccWithReviewedTeam, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+		teamLeadPartAccWithReviewedTeam, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 			Status: &account_status,
 		})
 		if err != nil {
@@ -119,7 +118,7 @@ func TestInviteToTeam(t *testing.T) {
 	t.Run("should not be able to invite new team members to an unreviewed participating team", func(t *testing.T) {
 
 		account_status := "EMAIL_UNVERIFIED"
-		teamLeadPartAccWithUnReviewedTeam, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+		teamLeadPartAccWithUnReviewedTeam, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 			Status: &account_status,
 		})
 		if err != nil {
@@ -164,7 +163,7 @@ func TestCompleteNewTeamMemberRegistration(t *testing.T) {
 		fake := faker.New()
 		status := "REVIEWED"
 		admin_email := fake.Internet().FreeEmailDomain()
-		teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+		teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 			Status: &status,
 			Email:  &admin_email,
 		})
@@ -259,7 +258,7 @@ func TestGetTeamMembersInfo(t *testing.T) {
 	fake := faker.New()
 	status := "REVIEWED"
 	admin_email := fake.Internet().FreeEmailDomain()
-	teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+	teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 		Status: &status,
 		Email:  &admin_email,
 	})
@@ -271,7 +270,7 @@ func TestGetTeamMembersInfo(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		func() {
 			email := emails[i]
-			teamMemAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+			teamMemAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 				Status:        &status,
 				Email:         &email,
 				ParticipantId: &teamLeadPartAcc.ParticipantId,
@@ -333,7 +332,7 @@ func TestGetParticipantInfo(t *testing.T) {
 	fake := faker.New()
 	status := "REVIEWED"
 	admin_email := fake.Internet().FreeEmailDomain()
-	teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+	teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 		Status: &status,
 		Email:  &admin_email,
 	})
@@ -345,7 +344,7 @@ func TestGetParticipantInfo(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		func() {
 			email := emails[i]
-			teamMemAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+			teamMemAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 				Status:        &status,
 				Email:         &email,
 				ParticipantId: &teamLeadPartAcc.ParticipantId,
@@ -374,7 +373,7 @@ func TestGetParticipantInfo(t *testing.T) {
 		panic(err)
 	}
 
-	partEnt, err := service.GetParticipantInfo(teamLeadPartAcc.ParticipantId)
+	partEnt, err := service.GetSingleParticipantWithAccountsInfo(teamLeadPartAcc.ParticipantId)
 	if err != nil {
 		panic(err)
 	}
@@ -382,6 +381,11 @@ func TestGetParticipantInfo(t *testing.T) {
 	if partEnt.ParticipantId != teamLeadPartAcc.ParticipantId {
 		t.Fatalf("Participant id mismatch: expected %s, got %s", teamLeadPartAcc.ParticipantId, partEnt.ParticipantId)
 	}
+}
+
+func TestGetMultipleParticipantsWithAccounts(t *testing.T) {
+	//dbInstance, service := Setup()
+
 }
 
 func TestSelectTeamSolution(t *testing.T) {
@@ -394,7 +398,7 @@ func TestSelectTeamSolution(t *testing.T) {
 	fake := faker.New()
 	status := "REVIEWED"
 	admin_email := fake.Internet().FreeEmailDomain()
-	teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticpantAccountOpts{
+	teamLeadPartAcc, _, err := seeders.CreateFakeParticipantAccount(dbInstance, &seeders.CreateParticipantAccountOpts{
 		Status: &status,
 		Email:  &admin_email,
 	})
@@ -452,21 +456,22 @@ func Setup() (*mongo.Database, *Service) {
 	partRepo := testrepos.GetParticipantRepositoryWithQueryInstance(q)
 	judgeAccountRepository := testrepos.GetJudgeAccountRepositoryWithQueryInstance(q)
 	/**/
+	/**
 	rmq_url := os.Getenv("RABBITMQ_URL")
 	fmt.Println(rmq_url)
-	ch, err := publishers.GetRMQChannelWithURL(publishers.SetupRMQConfig{
+	ch, err := rabbitmq.GetRMQChannelWithURL(rabbitmq.SetupRMQConfig{
 		Url: rmq_url,
 	})
 	if err != nil {
 		panic(err)
 	}
 	publisher := publishers.NewRMQPublisherWithChannel(ch)
-
+	*/
 	service := NewService(&ServiceConfig{
 		JudgeAccountRepository:       judgeAccountRepository,
 		ParticipantAccountRepository: partAccRepo,
-		Publisher:                    publisher,
-		ParticipantRepository:        partRepo,
+		//Publisher:                    publisher,
+		ParticipantRepository: partRepo,
 	})
 	return dbInstance, service
 }

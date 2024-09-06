@@ -1,14 +1,18 @@
 package services
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/go-playground/validator/v10"
+	"github.com/rabbitmq/amqp091-go"
 )
 
-func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeDTO) (*entity.Judge, error) {
+func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeByAdminDTO) (*entity.Judge, error) {
 	err := validate.Struct(dataInput)
 	if err != nil {
 		return nil, err
@@ -26,6 +30,47 @@ func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeDTO) (*entity.Judg
 	if err != nil {
 		return nil, err
 	}
+	/*
+		PublishJudgeCreated(s.TokenRepository, s.AppResources.RabbitMQConn, &JudgeRegisteredPublishPayload{
+			Email:       dataInput.Email,
+			Name:        dataInput.FirstName,
+			Password:    dataInput.Password,
+			InviterName: dataInput.InviterName,
+		})*/
+
+	pubData := &JudgeRegisteredPublishPayload{
+		Email:       dataInput.Email,
+		Name:        dataInput.FirstName,
+		Password:    dataInput.Password,
+		InviterName: dataInput.InviterName,
+	}
+	by, err := json.Marshal(pubData)
+	if err != nil {
+		fmt.Printf("Failed to marshal: %v\n", err)
+	} else {
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.ParticipantsExchange,
+			KeyName:      exports.ParticipantRegisteredRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.ParticipantsExchange,
+			KeyName:      exports.ParticipantSendWelcomeEmailRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
+	}
 
 	judge := entity.Judge{
 		Id:                created.Id,
@@ -37,10 +82,12 @@ func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeDTO) (*entity.Judg
 		PhoneNumber:       created.PhoneNumber,
 		ProfilePictureUrl: created.ProfilePictureUrl,
 		Role:              created.Role,
+		Bio:               created.Bio,
 		Status:            created.Status,
 		CreatedAt:         created.CreatedAt,
 		UpdatedAt:         created.UpdatedAt,
 	}
+
 	return &judge, nil
 }
 
@@ -138,4 +185,36 @@ func (s *Service) GetJudges() ([]*entity.Judge, error) {
 		})
 	}
 	return ents, nil
+}
+
+// JudgeCreatedByAdminWelcomeEmailQueuePayload
+func PublishJudgeCreated(tokenRepo exports.TokenRepositoryInterface, rmqConn *amqp091.Connection, data *JudgeRegisteredPublishPayload) error {
+	by, err := json.Marshal(data)
+	if err != nil {
+		fmt.Print(err.Error())
+		return err
+	}
+	ch, err := rmqConn.Channel()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	exchange_name := "judge.registered"
+	key_name := "judge.send.welcome_email"
+	err = ch.ExchangeDeclare(exchange_name, amqp091.ExchangeDirect, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = ch.PublishWithContext(context.Background(),
+		exchange_name, key_name, false, false, amqp091.Publishing{
+			Body:        by,
+			ContentType: "application/json",
+		})
+	if err != nil {
+		fmt.Print(err.Error())
+		return err
+	}
+	fmt.Printf("Published details: exchange: %s key: %s\n", exchange_name, key_name)
+	return nil
 }

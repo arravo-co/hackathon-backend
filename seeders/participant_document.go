@@ -17,6 +17,7 @@ type OptsToCreateParticipantRecord struct {
 	CoParticipants []CoParticipantInfoToCreateTeamParticipant
 	InviteList     []InvitelistQueuePayload
 	SolutionId     string
+	ReviewRanking  *int
 }
 type InvitelistQueuePayload struct {
 	InviterId string
@@ -66,6 +67,7 @@ func CreateAccountLinkedTeamParticipantDocument(dbInstance *mongo.Database,
 	status := "UNREVIEWED"
 	var co_parts_docs []exports.ParticipantDocumentTeamCoParticipantInfo
 	var invite_list []exports.ParticipantDocumentTeamInviteInfo
+	var review_ranking int
 
 	if opts.Status != "" {
 		status = opts.Status
@@ -95,6 +97,10 @@ func CreateAccountLinkedTeamParticipantDocument(dbInstance *mongo.Database,
 		}
 	}
 
+	if opts.ReviewRanking != nil {
+		review_ranking = *opts.ReviewRanking
+	}
+
 	var sol_id string = opts.SolutionId
 
 	acc := &exports.ParticipantDocument{
@@ -107,6 +113,7 @@ func CreateAccountLinkedTeamParticipantDocument(dbInstance *mongo.Database,
 		CoParticipants: co_parts_docs,
 		SolutionId:     sol_id,
 		InviteList:     invite_list,
+		ReviewRanking:  review_ranking,
 	}
 
 	result, err := partCol.InsertOne(ctx, acc)

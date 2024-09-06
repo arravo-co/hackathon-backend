@@ -7,6 +7,7 @@ require (
 	github.com/aidarkhanov/nanoid v1.0.8
 	github.com/cloudinary/cloudinary-go v1.7.0
 	github.com/dvsekhvalnov/jose2go v1.6.0
+	github.com/go-faker/faker/v4 v4.5.0
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
@@ -87,11 +88,11 @@ require (
 	github.com/yuin/gopher-lua v1.1.0 // indirect
 	go.opentelemetry.io/otel/metric v1.26.0 // indirect
 	go.opentelemetry.io/otel/trace v1.26.0 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sync v0.6.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

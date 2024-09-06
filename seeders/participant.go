@@ -14,14 +14,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type CreateParticpantAccountOpts struct {
+type CreateParticipantAccountOpts struct {
 	Status        *string
 	HackathonId   *string
 	Email         *string
 	ParticipantId *string
 }
 
-func CreateFakeParticipantAccount(dbInstance *mongo.Database, opts *CreateParticpantAccountOpts) (*exports.AccountDocument, string, error) {
+func CreateFakeParticipantAccount(dbInstance *mongo.Database, opts *CreateParticipantAccountOpts) (*exports.AccountDocument, string, error) {
 	accountCol := dbInstance.Collection("accounts")
 	ctx := context.Context(context.Background())
 

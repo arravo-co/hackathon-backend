@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/aidarkhanov/nanoid"
 	"github.com/arravoco/hackathon_backend/di"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
@@ -15,6 +16,7 @@ import (
 	"github.com/arravoco/hackathon_backend/services"
 	taskmgt "github.com/arravoco/hackathon_backend/task_mgt"
 	"github.com/arravoco/hackathon_backend/utils"
+	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -60,6 +62,7 @@ type GetJudgesSuccessResponse struct {
 // @Failure		400	{object}	RegisterJudgeFailResponse
 // @Router			/api/v1/judges              [post]
 func RegisterJudge(c echo.Context) error {
+	tokenData := authutils.GetAuthPayload(c)
 	data := dtos.RegisterNewJudgeDTO{}
 	err := c.Bind(&data)
 	if err != nil {
@@ -68,6 +71,11 @@ func RegisterJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+	password := nanoid.Must(nanoid.Generate("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456456789@#$%^&*()+_", 10))
+	if data.Password == "" {
+		data.Password = password
+		data.ConfirmPassword = password
+	}
 	err = validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
@@ -75,11 +83,7 @@ func RegisterJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	var judge exports.JudgeRepositoryInterface = di.GetDefaultJudgeRepository()
-	var cfg *services.ServiceConfig = &services.ServiceConfig{
-		JudgeAccountRepository: judge,
-	}
-	dataInputToService := &services.RegisterNewJudgeDTO{
+	dataInputToService := &services.RegisterNewJudgeByAdminDTO{
 		FirstName:       data.FirstName,
 		LastName:        data.LastName,
 		Email:           data.Email,
@@ -88,8 +92,10 @@ func RegisterJudge(c echo.Context) error {
 		ConfirmPassword: data.ConfirmPassword,
 		Gender:          data.Gender,
 		State:           data.State,
+		InviterEmail:    tokenData.Email,
+		InviterName:     tokenData.FirstName,
 	}
-	serv := services.NewService(cfg)
+	serv := services.GetServiceWithDefaultRepositories()
 	responseData, err := serv.RegisterNewJudge(dataInputToService)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{

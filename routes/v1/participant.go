@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/services"
@@ -20,6 +19,17 @@ type RegisterParticipantSuccessResponse struct {
 type RegisterParticipantFailResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
+}
+type GetParticipantsWithAccountsAggregateFilterOpts struct {
+	ParticipantId            *string
+	ParticipantStatus        *string `validate:"omitempty,oneof=UNREVIEWED REVIEWED AI_RANKED"`
+	ParticipantType          *string `validate:"omitempty,oneof=TEAM"`
+	ReviewRanking_Eq         *int
+	ReviewRanking_Top        *int
+	Solution_Like            *string
+	Limit                    *int
+	SortByReviewRanking_Asc  *bool
+	SortByReviewRanking_Desc *bool
 }
 
 type GetParticipantsResponseData struct {
@@ -39,14 +49,17 @@ type RegisterTeamParticipantSuccessResponse struct {
 	Message string             `json:"message"`
 	Data    entity.Participant `json:"data"`
 }
+
 type RegisterTeamParticipantFailResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
+
 type InviteTeamMemberFailResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
+
 type InviteTeamMemberSuccessResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -160,30 +173,26 @@ func CompleteNewTeamMemberRegistration(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	q := query.GetDefaultQuery()
-	if q != nil {
-		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
-			Code:    http.StatusBadRequest,
-			Message: "Failed to complete registration. Try again later",
-		})
-	}
 
 	serv := services.GetServiceWithDefaultRepositories()
 	resData, err := serv.CompleteNewTeamMemberRegistration(&services.CompleteNewTeamMemberRegistrationDTO{
-		FirstName:     data.FirstName,
-		Email:         data.Email,
-		LastName:      data.LastName,
-		Gender:        data.Gender,
-		Password:      data.Password,
-		Skillset:      data.Skillset,
-		State:         data.State,
-		HackathonId:   data.HackathonId,
-		TeamLeadEmail: data.TeamLeadEmail,
-		DOB:           data.DOB,
-		PhoneNumber:   data.PhoneNumber,
-		ParticipantId: participantId, Motivation: data.Motivation,
+		FirstName:        data.FirstName,
+		Email:            data.Email,
+		LastName:         data.LastName,
+		Gender:           data.Gender,
+		Password:         data.Password,
+		Skillset:         data.Skillset,
+		State:            data.State,
+		HackathonId:      data.HackathonId,
+		TeamLeadEmail:    data.TeamLeadEmail,
+		DOB:              data.DOB,
+		PhoneNumber:      data.PhoneNumber,
+		ParticipantId:    participantId,
+		Motivation:       data.Motivation,
 		EmploymentStatus: data.EmploymentStatus,
 		ExperienceLevel:  data.ExperienceLevel,
+		TeamRole:         "TEAM_MEMBER",
+		ConfirmPassword:  data.ConfirmPassword,
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterTeamParticipantFailResponse{
@@ -230,14 +239,44 @@ func GetTeamMembersInfo(ctx echo.Context) error {
 // @Failure 400 object RegisterAnotherAdminResponseData "Failed to get participant info"
 // @Router /api/v1/participants [get]
 func GetParticipants(c echo.Context) error {
-	serv := services.GetServiceWithDefaultRepositories()
-	participants, err := serv.GetParticipantsInfo()
+	fmt.Println("GetParticipants called")
+	queryFilterObj := &GetParticipantsWithAccountsAggregateFilterOpts{}
+	err := c.Bind(queryFilterObj)
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,
 			Message: err.Error(),
 		})
 	}
+
+	err = validate.Struct(queryFilterObj)
+	if err != nil {
+		return c.JSON(400, &FailResponse{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+
+	filterObj := &services.GetParticipantsWithAccountsAggregateFilterOpts{
+		ParticipantId:            queryFilterObj.ParticipantId,
+		ParticipantStatus:        queryFilterObj.ParticipantStatus,
+		ParticipantType:          queryFilterObj.ParticipantType,
+		ReviewRanking_Eq:         queryFilterObj.ReviewRanking_Eq,
+		ReviewRanking_Top:        queryFilterObj.ReviewRanking_Top,
+		Solution_Like:            queryFilterObj.Solution_Like,
+		Limit:                    queryFilterObj.Limit,
+		SortByReviewRanking_Asc:  queryFilterObj.SortByReviewRanking_Asc,
+		SortByReviewRanking_Desc: queryFilterObj.SortByReviewRanking_Desc,
+	}
+	serv := services.GetServiceWithDefaultRepositories()
+	participants, err := serv.GetMultipleParticipantsWithAccounts(filterObj)
+	if err != nil {
+		return c.JSON(400, &FailResponse{
+			Code:    400,
+			Message: err.Error(),
+		})
+	}
+	//fmt.Println(participants)
 	return c.JSON(200, &GetParticipantsResponseData{
 		Code:    200,
 		Message: "List of participants",
@@ -255,7 +294,7 @@ func GetParticipants(c echo.Context) error {
 func GetParticipant(c echo.Context) error {
 	participantId := c.Param("participantId")
 	serv := services.GetServiceWithDefaultRepositories()
-	participant, err := serv.GetParticipantInfo(participantId)
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(participantId)
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,

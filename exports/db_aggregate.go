@@ -65,7 +65,9 @@ type ParticipantTeamMembersWithAccountsAggregateDocument struct {
 }
 
 type GetParticipantsWithAccountsAggregateFilterOpts struct {
+	ParticipantId            *string
 	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ParticipantType          *string `validate:"omitempty, oneof TEAM "`
 	ReviewRanking_Eq         *int
 	ReviewRanking_Top        *int
 	Solution_Like            *string

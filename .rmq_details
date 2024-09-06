@@ -1,0 +1,8 @@
+Exchanges:
+
+- Name:
+  - judge.registered
+  Route Keys:
+  - judge.send.welcome_email
+
+

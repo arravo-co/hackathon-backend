@@ -1,18 +1,6 @@
 package rabbitutils
 
-import (
-	"encoding/json"
-	"fmt"
-
-	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/jobs"
-	"github.com/arravoco/hackathon_backend/publish"
-	taskmgt "github.com/arravoco/hackathon_backend/task_mgt"
-	"github.com/arravoco/hackathon_backend/utils"
-	"github.com/arravoco/hackathon_backend/utils/email"
-	amqp "github.com/rabbitmq/amqp091-go"
-)
-
+/*
 func HandleJudgeProfilePicUploadConsumption(response *amqp.Delivery) {
 	fmt.Println("HandlePicUploadConsumption: ", response.Body)
 	dt := &exports.UploadJudgeProfilePicQueuePayload{}
@@ -106,7 +94,7 @@ func HandleSolutionPicUploadConsumption(response *amqp.Delivery) {
 }
 
 func HandleSendEmailToJudgeConsumption(response *amqp.Delivery) {
-	payloadStruct := exports.JudgeCreatedByAdminWelcomeEmailQueuePayload{}
+	payloadStruct := exports.JudgeCreatedPublishPayload{}
 	err := json.Unmarshal([]byte(response.Body), &payloadStruct)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -164,3 +152,4 @@ func HandleCoordinateParticipantWelcomeVerificationConsumption(response *amqp.De
 		}
 	}
 }
+*/

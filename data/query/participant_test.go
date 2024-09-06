@@ -1,7 +1,9 @@
 package query
 
 import (
+	"fmt"
 	"os"
+	"sort"
 	"testing"
 
 	"github.com/arravoco/hackathon_backend/exports"
@@ -38,10 +40,10 @@ func TestGetParticipantsInfo(t *testing.T) {
 		},
 	})
 	assert.NoError(t, err)
-	docs, err := q.GetParticipantsRecordsAggregate()
-	assert.NoError(t, err)
+	//docs, err := q.GetParticipantsRecordsAggregate()
+	//assert.NoError(t, err)
 
-	assert.IsType(t, []exports.ParticipantAccountWithCoParticipantsDocument{}, docs)
+	//assert.IsType(t, []exports.ParticipantAccountWithCoParticipantsDocument{}, docs)
 }
 
 func TestGetParticipantsWithAccountsAggregate(t *testing.T) {
@@ -58,60 +60,79 @@ func TestGetParticipantsWithAccountsAggregate(t *testing.T) {
 	})
 	q := GetQueryInstance(dbInstance)
 	status := "UNREVIEWED"
-	opts := &seeders.CreateParticpantAccountOpts{
+	opts := &seeders.CreateParticipantAccountOpts{
 		Status: &status,
 	}
-	var accsInDB []exports.AccountDocument
+	//var accsInDB []exports.AccountDocument
 	var partsInDB []exports.ParticipantDocument
-
-	solArray := []seeders.OptsToCreateSolutionRecord{
-		{Title: "Solution 1", Objective: "Objective 1", Description: "Description 1"},
-		{Title: "Solution 2", Objective: "Objective 2", Description: "Description 2"},
-		{Title: "Solution 3", Objective: "Objective 3", Description: "Description 3"},
-		{Title: "Solution 4", Objective: "Objective 4", Description: "Description 4"},
-		{Title: "Solution 5", Objective: "Objective 5", Description: "Description 5"},
-		{Title: "Solution 6", Objective: "Objective 6", Description: "Description 6"},
-		{Title: "Solution 7", Objective: "Objective 7", Description: "Description 7"},
-		{Title: "Solution 8", Objective: "Objective 8", Description: "Description 8"},
-		{Title: "Solution 9", Objective: "Objective 9", Description: "Description 9"},
-		{Title: "Solution 10", Objective: "Objective 10", Description: "Description 10"},
-	}
-
-	for i := 0; i < 10; i++ {
-		accInDB, _, err := seeders.CreateFakeParticipantAccount(dbInstance, opts)
-		if err != nil {
-			panic(err)
-		}
-		sol, err := seeders.CreateFakeSolutionDocument(dbInstance, solArray[i])
-		if err != nil {
-			panic(err)
-		}
-		teamLeadInfo := seeders.TeamLeadInfoToCreateTeamParticipant{
-			TeamName:      "Good team",
-			Email:         accInDB.Email,
-			ParticipantId: accInDB.ParticipantId,
-			HackathonId:   accInDB.HackathonId,
-		}
-		partInDB, err := seeders.CreateAccountLinkedTeamParticipantDocument(dbInstance, &seeders.OptsToCreateParticipantRecord{
-			TeamleadInfo: teamLeadInfo,
-			SolutionId:   sol.Id.Hex(),
+	_, partsInDB = seeders.SeedMultipleAccountsAndParticipants(dbInstance, seeders.SeedMultipleAccountsAndParticipantsOpts{
+		CreateParticipantAccountOpts: *opts,
+		NumberOfAccounts:             4,
+	})
+	t.Run("It should get participants by solution title or description", func(t *testing.T) {
+		search_sol_like := "solution"
+		recs, err := q.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{
+			Solution_Like: &search_sol_like,
 		})
 		if err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
-		accsInDB = append(accsInDB, *accInDB)
-		partsInDB = append(partsInDB, *partInDB)
-	}
 
-	search_sol_like := "Solution"
-	recs, err := q.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{
-		Solution_Like: &search_sol_like,
+		if len(recs) == 0 {
+			t.Fatal("failed to get participants with search id")
+		}
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	if len(recs) == 0 {
-		t.Fatal("failed to get participants with search id")
-	}
+	t.Run("should get by participant id", func(t *testing.T) {
+		participant_id := partsInDB[0].ParticipantId
+		recs, err := q.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{
+			ParticipantId: &participant_id,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(recs) != 1 {
+			t.Fatal("failed to get participants with search id")
+		}
+	})
+
+	t.Run("It should get participants by top review ranking", func(t *testing.T) {
+		var top_3 []int
+		var partsInDBCopy []exports.ParticipantDocument = make([]exports.ParticipantDocument, len(partsInDB))
+		num := copy(partsInDBCopy, partsInDB)
+		sort.Slice(partsInDBCopy, func(i, j int) bool {
+			return partsInDBCopy[i].ReviewRanking > partsInDBCopy[j].ReviewRanking
+		})
+		for i := 0; i < 3; i++ {
+			top_3 = append(top_3, partsInDBCopy[i].ReviewRanking)
+		}
+		review_ranking_top := 3
+		recs, err := q.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{
+			ReviewRanking_Top: &review_ranking_top,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(recs) != 3 {
+			t.Fatal("failed to get participants with search id")
+		}
+		var found_3 []bool
+		for i := 0; i < len(recs); i++ {
+			for _, v := range top_3 {
+				if v == recs[i].ReviewRanking {
+					found_3 = append(found_3, true)
+				}
+			}
+		}
+
+		fmt.Println("\n\n", len(partsInDB), "\n\n", num, "\n\n", found_3, "\n\n", top_3)
+		for _, v := range found_3 {
+			if !v {
+				t.Fatal("failed to find top ")
+			}
+		}
+	})
+
 }

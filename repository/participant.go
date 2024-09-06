@@ -17,7 +17,7 @@ import (
 )
 
 // AddMemberToParticipatingTeam
-type ParticipantRepository struct {
+type ParticipantRecordRepository struct {
 	DB                  *query.Query
 	Entity              *entity.Participant
 	FirstName           string                                      `json:"first_name"`
@@ -49,20 +49,6 @@ type ParticipantRepository struct {
 	FieldOfStudy        string                                      `json:"field_of_study"`
 	PreviousProjects    []string                                    `json:"previous_projects"`
 	Solution            *SolutionRepository                         `json:"solution"`
-	CreatedAt           time.Time                                   `json:"created_at"`
-	UpdatedAt           time.Time                                   `json:"updated_at"`
-}
-type ParticipantRecord struct {
-	ParticipantId       string                                      `json:"participant_id"`
-	TeamLeadEmail       string                                      `json:"team_lead_email"`
-	TeamName            string                                      `json:"team_name"`
-	TeamRole            string                                      `json:"team_role"`
-	HackathonId         string                                      `json:"hackathon_id"`
-	ParticipantType     string                                      `json:"type"`
-	CoParticipants      []CoParticipantInfo                         `json:"co_participants"`
-	ParticipantEmail    string                                      `json:"participant_email"`
-	InviteList          []exports.ParticipantDocumentTeamInviteInfo `json:"invite_list"`
-	ParticipationStatus string                                      `json:"participation_status"`
 	CreatedAt           time.Time                                   `json:"created_at"`
 	UpdatedAt           time.Time                                   `json:"updated_at"`
 }
@@ -123,13 +109,13 @@ type RemoveMemberFromTeamData struct {
 	MemberEmail   string `bson:"email"`
 }
 
-func NewParticipantRepository(q *query.Query) *ParticipantRepository {
-	return &ParticipantRepository{
+func NewParticipantRecordRepository(q *query.Query) *ParticipantRecordRepository {
+	return &ParticipantRecordRepository{
 		DB: q,
 	}
 }
 
-func (p *ParticipantRepository) AddMemberInfoToParticipatingTeamRecord(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantRecordRepository, error) {
+func (p *ParticipantRecordRepository) AddMemberInfoToParticipatingTeamRecord(dataToSave *exports.AddMemberToParticipatingTeamData) (*exports.ParticipantRecordRepository, error) {
 	partDoc, err := p.DB.AddMemberToParticipatingTeam(dataToSave)
 	if err != nil {
 		return nil, err
@@ -147,7 +133,7 @@ func (p *ParticipantRepository) AddMemberInfoToParticipatingTeamRecord(dataToSav
 	}, err
 }
 
-func (p ParticipantRepository) CreateParticipantRecord(dataInput *exports.CreateParticipantRecordData) (*exports.ParticipantRecordRepository, error) {
+func (p ParticipantRecordRepository) CreateParticipantRecord(dataInput *exports.CreateParticipantRecordData) (*exports.ParticipantRecordRepository, error) {
 	partDoc, err := p.DB.CreateParticipantRecord(dataInput)
 	if err != nil {
 		return nil, err
@@ -165,7 +151,7 @@ func (p ParticipantRepository) CreateParticipantRecord(dataInput *exports.Create
 	}, nil
 }
 
-func (p ParticipantRepository) AddToTeamInviteList(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
+func (p ParticipantRecordRepository) AddToTeamInviteList(dataInput *exports.AddToTeamInviteListData) (interface{}, error) {
 	res, err := p.DB.AddToTeamInviteList(dataInput)
 	if err != nil {
 		return nil, err
@@ -289,7 +275,7 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 	return p, nil
 }*/
 
-func (p *ParticipantRepository) UpdateParticipantRecord(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
+func (p *ParticipantRecordRepository) UpdateParticipantRecord(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
 	_, err := p.DB.UpdateParticipantInfoByEmail(&exports.UpdateAccountFilter{Email: p.Email}, &exports.UpdateAccountDocument{
 		FirstName:       dataInput.FirstName,
 		LastName:        dataInput.LastName,
@@ -318,7 +304,7 @@ func GenerateParticipantID(emails []string) (string, error) {
 	return sub, nil
 }
 
-func (s *ParticipantRepository) GetParticipantRecord(participantId string) (*exports.ParticipantRecordRepository, error) {
+func (s *ParticipantRecordRepository) GetParticipantRecord(participantId string) (*exports.ParticipantRecordRepository, error) {
 	participant, err := s.DB.GetParticipantRecord(participantId)
 	if err != nil {
 		return nil, err
@@ -346,7 +332,7 @@ func (s *ParticipantRepository) GetParticipantRecord(participantId string) (*exp
 	return pE, err
 }
 
-func (s *ParticipantRepository) GetParticipantsRecords() ([]exports.ParticipantRecordRepository, error) {
+func (s *ParticipantRecordRepository) GetParticipantsRecords() ([]exports.ParticipantRecordRepository, error) {
 	partDocs, err := s.DB.GetParticipantsRecords()
 
 	var participants []exports.ParticipantRecordRepository
@@ -372,7 +358,7 @@ func (s *ParticipantRepository) GetParticipantsRecords() ([]exports.ParticipantR
 	return participants, err
 }
 
-func (s *ParticipantRepository) RemoveCoparticipantFromParticipantRecord(dataInput *exports.RemoveMemberFromTeamData) (*exports.ParticipantRecordRepository, error) {
+func (s *ParticipantRecordRepository) RemoveCoparticipantFromParticipantRecord(dataInput *exports.RemoveMemberFromTeamData) (*exports.ParticipantRecordRepository, error) {
 	_, err := s.DB.RemoveMemberFromParticipatingTeam(&exports.RemoveMemberFromParticipatingTeamData{
 		HackathonId:   dataInput.HackathonId,
 		MemberEmail:   dataInput.MemberEmail,
@@ -388,7 +374,7 @@ func (s *ParticipantRepository) RemoveCoparticipantFromParticipantRecord(dataInp
 
 //
 
-func (s *ParticipantRepository) AddSolutionIdToParticipantRecord(dataInput *exports.SelectTeamSolutionData) (*exports.ParticipantRecordRepository, error) {
+func (s *ParticipantRecordRepository) AddSolutionIdToParticipantRecord(dataInput *exports.SelectTeamSolutionData) (*exports.ParticipantRecordRepository, error) {
 
 	partDoc, err := s.DB.SelectSolutionForTeam(&exports.SelectTeamSolutionData{
 		HackathonId:   dataInput.HackathonId,
@@ -437,8 +423,12 @@ func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberWith
 	return info
 }
 
-func (s *ParticipantRepository) GetSingleParticipantRecordAndMemberAccountsInfo(participant_id string) (*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
-	arggs, err := s.DB.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{})
+func (s *ParticipantRecordRepository) GetSingleParticipantRecordAndMemberAccountsInfo(participant_id string) (*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
+	fmt.Println(participant_id)
+	arggs, err := s.GetMultipleParticipantRecordAndMemberAccountsInfo(exports.GetParticipantsWithAccountsAggregateFilterOpts{
+		ParticipantId: &participant_id,
+	})
+	//panic(fmt.Errorf("%d", len(arggs)))
 	if err != nil {
 		return nil, err
 	}
@@ -446,67 +436,11 @@ func (s *ParticipantRepository) GetSingleParticipantRecordAndMemberAccountsInfo(
 		return nil, nil
 	}
 	arg := arggs[0]
-
-	team_lead_info := exports.TeamLeadInfoParticipantRecordRepositoryAggregate{
-		Email:     arg.TeamLeadInfo.Email,
-		AccountId: arg.TeamLeadInfo.AccountId,
-		FirstName: arg.TeamLeadInfo.FirstName,
-		LastName:  arg.TeamLeadInfo.LastName,
-		Gender:    arg.TeamLeadInfo.Gender,
-		//PasswordHash:  arg.TeamLeadInfo.PasswordHash,
-		TeamRole: arg.TeamLeadInfo.TeamRole,
-
-		State:         arg.TeamLeadInfo.State,
-		CreatedAt:     arg.TeamLeadInfo.CreatedAt,
-		UpdateAt:      arg.TeamLeadInfo.UpdateAt,
-		Skillset:      arg.TeamLeadInfo.Skillset,
-		AccountStatus: arg.TeamLeadInfo.AccountStatus,
-		AccountRole:   arg.TeamLeadInfo.AccountRole,
-		PhoneNumber:   arg.TeamLeadInfo.PhoneNumber,
-	}
-	var co_participants []exports.CoParticipantAggregateData
-	for _, co := range arg.CoParticipants {
-		co_participants = append(co_participants, exports.CoParticipantAggregateData{
-			AccountId:   co.AccountId,
-			HackathonId: co.HackathonId,
-			Email:       co.Email,
-			LastName:    co.LastName,
-			FirstName:   co.FirstName,
-			Gender:      co.Gender,
-			State:       co.State, Skillset: co.Skillset,
-			AccountStatus: co.AccountStatus,
-			AccountRole:   co.AccountRole,
-			TeamRole:      co.TeamRole,
-			//PasswordHash:  co.PasswordHash,
-			PhoneNumber: co.PhoneNumber,
-			CreatedAt:   co.CreatedAt,
-			UpdateAt:    co.UpdateAt,
-		})
-	}
-	arr := &exports.ParticipantTeamMembersWithAccountsAggregate{
-		Id:                arggs[0].Id.String(),
-		ParticipantId:     arggs[0].ParticipantId,
-		ParticipantEmail:  arggs[0].ParticipantEmail,
-		TeamLeadEmail:     arggs[0].TeamLeadEmail,
-		TeamName:          arggs[0].TeamName,
-		TeamLeadFirstName: arggs[0].TeamLeadFirstName,
-		TeamLeadLastName:  arggs[0].TeamLeadLastName,
-		TeamLeadGender:    arggs[0].TeamLeadGender,
-		TeamLeadAccountId: arggs[0].TeamLeadAccountId,
-		TeamLeadInfo:      team_lead_info,
-		CoParticipants:    co_participants,
-		ReviewRanking:     arggs[0].ReviewRanking,
-		Status:            arggs[0].Status,
-	}
-	return arr, nil
+	fmt.Println(arg)
+	return arg, nil
 }
-func (s *ParticipantRepository) GetMultipleParticipantRecordAndMemberAccountsInfo(dataInput FilterGetParticipants) ([]*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
-	arggs, err := s.DB.GetParticipantsWithAccountsAggregate(exports.GetParticipantsWithAccountsAggregateFilterOpts{
-		ParticipantStatus: dataInput.Status,
-		ReviewRanking_Eq:  dataInput.ReviewRanking_Eq,
-		ReviewRanking_Top: dataInput.ReviewRanking_Top,
-		Solution_Like:     dataInput.Solution_Like,
-	})
+func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccountsInfo(dataInput exports.GetParticipantsWithAccountsAggregateFilterOpts) ([]*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
+	arggs, err := s.DB.GetParticipantsWithAccountsAggregate(dataInput)
 	if err != nil {
 		return nil, err
 	}
@@ -544,6 +478,15 @@ func (s *ParticipantRepository) GetMultipleParticipantRecordAndMemberAccountsInf
 				UpdateAt:    co.UpdateAt,
 			})
 		}
+		sol := exports.ParticipantDocumentParticipantSelectedSolution{
+			Title:            arg.Solution.Title,
+			Description:      arg.Solution.Description,
+			Objective:        arg.Solution.Objective,
+			SolutionImageUrl: arg.Solution.SolutionImageUrl,
+			HackathonId:      arg.Solution.HackathonId,
+			CreatedAt:        arg.CreatedAt,
+			UpdatedAt:        arg.UpdatedAt,
+		}
 		arr = append(arr, &exports.ParticipantTeamMembersWithAccountsAggregate{
 			Id:                arg.Id.String(),
 			ParticipantId:     arg.ParticipantId,
@@ -558,6 +501,8 @@ func (s *ParticipantRepository) GetMultipleParticipantRecordAndMemberAccountsInf
 			CoParticipants:    co_participants,
 			Status:            arg.Status,
 			ReviewRanking:     arg.ReviewRanking,
+			Type:              arg.Type,
+			Solution:          sol,
 		})
 	}
 	return arr, nil

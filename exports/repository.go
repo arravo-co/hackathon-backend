@@ -4,6 +4,55 @@ import (
 	"time"
 )
 
+type AccountRepository struct {
+	DB                *AccountRepositoryInterface
+	Id                string
+	FirstName         string
+	LastName          string
+	Email             string
+	PasswordHash      string
+	Gender            string
+	Role              string
+	HackathonId       string
+	Status            string
+	State             string
+	PhoneNumber       string
+	Bio               string
+	IsEmailVerified   bool
+	ProfilePictureUrl string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+
+	LinkedInAddress     string
+	Skillset            []string
+	ParticipantId       string
+	DOB                 time.Time `bson:"dob,omitempty"`
+	EmploymentStatus    string
+	ExperienceLevel     string
+	Motivation          string
+	HackathonExperience string
+	YearsOfExperience   int
+	FieldOfStudy        string
+	PreviousProjects    []string
+	IsEmailVerifiedAt   time.Time
+}
+
+type AccountRepositoryInterface interface {
+	GetAccountByEmail(email string) (*AccountRepository, error)
+	GetAccountsByEmail(emails []string) ([]*AccountRepository, error)
+	CreateAccount(input *CreateAccountData) (*AccountRepository, error)
+	//CreateCoParticipantAccount(input *RegisterNewParticipantAccountDTO) (*ParticipantAccountRepository, error)
+	UpdateAccount(email string, input *UpdateAccountDTO) error
+	GetAccounts() ([]*AccountRepository, error)
+	DeleteAccount(identifier string) (*AccountRepository, error)
+	MarkAccountAsDeleted(identifier string) (*AccountRepository, error)
+	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
+	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
+	FindAccountIdentifier(identifier string) (*AccountRepository, error)
+	UpdateParticipantPassword(filter *UpdateAccountFilter, newPasswordHash string) (*AccountRepository, error)
+	ChangePassword(dataInput *PasswordChangeData) (*AccountRepository, error)
+}
+
 type JudgeAccountRepository struct {
 	DB                *JudgeRepositoryInterface
 	Id                string
@@ -146,21 +195,33 @@ type ParticipantTeamMembersWithAccountsAggregate struct {
 }
 
 type TeamLeadInfoParticipantRecordRepositoryAggregate struct {
-	HackathonId   string
-	AccountId     string
-	Email         string
-	FirstName     string
-	LastName      string
-	Gender        string
-	PhoneNumber   string
-	Skillset      []string
-	AccountStatus string
-	AccountRole   string
-	TeamRole      string
-	passwordHash  string
-	State         string
-	CreatedAt     time.Time
-	UpdateAt      time.Time
+	HackathonId         string
+	AccountId           string
+	Email               string
+	FirstName           string
+	LastName            string
+	Gender              string
+	PhoneNumber         string
+	Skillset            []string
+	AccountStatus       string
+	AccountRole         string
+	TeamRole            string
+	passwordHash        string
+	State               string
+	LinkedInAddress     string
+	ParticipantId       string
+	DOB                 time.Time `bson:"dob,omitempty"`
+	EmploymentStatus    string
+	ExperienceLevel     string
+	Motivation          string
+	HackathonExperience string
+	YearsOfExperience   int
+	FieldOfStudy        string
+	PreviousProjects    []string
+	IsEmailVerified     bool
+	IsEmailVerifiedAt   time.Time
+	CreatedAt           time.Time
+	UpdateAt            time.Time
 }
 
 // CreateTeamMemberAccount
@@ -193,6 +254,7 @@ type CoParticipantAggregateData struct {
 	CreatedAt           time.Time
 	UpdateAt            time.Time
 }
+
 type ParticipantAccountRepositoryInterface interface {
 	GetParticipantAccountByEmail(email string) (*ParticipantAccountRepository, error)
 	GetParticipantAccountsByEmail(emails []string) ([]*ParticipantAccountRepository, error)
@@ -204,6 +266,7 @@ type ParticipantAccountRepositoryInterface interface {
 	MarkParticipantAccountAsDeleted(identifier string) (*ParticipantAccountRepository, error)
 	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
+	FindAccountIdentifier(identifier string) (*ParticipantAccountRepository, error)
 	UpdateParticipantPassword(filter *UpdateAccountFilter, newPasswordHash string) (*ParticipantAccountRepository, error)
 }
 
@@ -218,4 +281,25 @@ type ParticipantRepositoryInterface interface {
 	//RegisterTeamLead(input RegisterNewParticipantAccountDTO) (*ParticipantRecordRepository, error)
 	RemoveCoparticipantFromParticipantRecord(dataInput *RemoveMemberFromTeamData) (*ParticipantRecordRepository, error)
 	GetSingleParticipantRecordAndMemberAccountsInfo(participant_id string) (*ParticipantTeamMembersWithAccountsAggregate, error)
+	GetMultipleParticipantRecordAndMemberAccountsInfo(dataInput GetParticipantsWithAccountsAggregateFilterOpts) ([]*ParticipantTeamMembersWithAccountsAggregate, error)
+}
+
+type TokenDataRepository struct {
+	Id             string
+	Token          string
+	TokenType      string
+	TokenTypeValue string
+	Scope          string
+	TTL            time.Time
+	Status         string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+type TokenRepositoryInterface interface {
+	UpsertToken(dataInput *UpsertTokenData) (*TokenDataRepository, error)
+	VerifyToken(dataInput *VerifyTokenData) error
+}
+
+type AuthRepositoryInterface interface {
 }

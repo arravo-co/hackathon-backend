@@ -1,10 +1,16 @@
 package services
 
 import (
-	"github.com/arravoco/hackathon_backend/di"
+	"context"
+	"fmt"
+
+	"github.com/arravoco/hackathon_backend/data"
+	"github.com/arravoco/hackathon_backend/data/query"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/publish"
+	"github.com/arravoco/hackathon_backend/repository"
+	"github.com/arravoco/hackathon_backend/resources"
 	"github.com/go-playground/validator/v10"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 /*
@@ -23,7 +29,8 @@ type Service struct {
 	JudgeAccountRepository       exports.JudgeRepositoryInterface
 	ParticipantAccountRepository exports.ParticipantAccountRepositoryInterface
 	SolutionRepository           SolutionRepository
-	Publisher                    publish.PublisherInterface
+	TokenRepository              exports.TokenRepositoryInterface
+	AppResources                 *resources.AppResources
 }
 
 type ServiceConfig struct {
@@ -31,10 +38,11 @@ type ServiceConfig struct {
 	ParticipantAccountRepository exports.ParticipantAccountRepositoryInterface
 	JudgeAccountRepository       exports.JudgeRepositoryInterface
 	SolutionRepository           SolutionRepository
-	Publisher                    publish.PublisherInterface
+	TokenRepository              exports.TokenRepositoryInterface
+	AppResources                 *resources.AppResources
 }
 
-var service *Service
+var defaultService *Service
 
 func NewService(cfg *ServiceConfig) *Service {
 	validate = validator.New()
@@ -43,20 +51,74 @@ func NewService(cfg *ServiceConfig) *Service {
 		JudgeAccountRepository:       cfg.JudgeAccountRepository,
 		SolutionRepository:           cfg.SolutionRepository,
 		ParticipantAccountRepository: cfg.ParticipantAccountRepository,
-		Publisher:                    cfg.Publisher,
+		AppResources:                 cfg.AppResources,
+		TokenRepository:              cfg.TokenRepository,
 	}
 }
 
 func GetServiceWithDefaultRepositories() *Service {
-	if service != nil {
-		return service
+	if defaultService != nil {
+		return defaultService
 	}
-	var judge exports.JudgeRepositoryInterface = di.GetDefaultJudgeRepository()
+	res := resources.GetDefaultResources()
+	var dataSourceInstance exports.DBInterface = data.GetDatasourceWithMongoDBInstance(res.Mongo)
+	q := query.GetQueryWithConfiguredDatasource(dataSourceInstance)
+
+	var judgeRepoInstance *repository.JudgeAccountRepository = repository.NewJudgeAccountRepository(q)
+	var partAccRepoInstance *repository.ParticipantAccountRepository = repository.NewParticipantAccountRepository(q)
+	var partRecordRepoInstance *repository.ParticipantRecordRepository = repository.NewParticipantRecordRepository(q)
+
+	var solRepoInstance *repository.SolutionRepository = repository.NewSolutionRepository(q)
+
+	var tokenRepoInstance *repository.TokenDataRepository = repository.NewTokenDataRepository(q)
+
 	var cfg *ServiceConfig = &ServiceConfig{
-		JudgeAccountRepository: judge,
+		JudgeAccountRepository:       judgeRepoInstance,
+		AppResources:                 res,
+		TokenRepository:              tokenRepoInstance,
+		ParticipantRepository:        partRecordRepoInstance,
+		ParticipantAccountRepository: partAccRepoInstance,
+		SolutionRepository:           solRepoInstance,
 	}
-	service = NewService(cfg)
-	return service
+	defaultService = NewService(cfg)
+	return defaultService
+}
+
+type PublishOpts struct {
+	RMQConn      *amqp091.Connection
+	Data         []byte
+	ExchangeName string
+	KeyName      string
+	ExchangeKind string
+}
+
+func Publish(opts *PublishOpts) error {
+	rmqConn := opts.RMQConn
+	by := opts.Data
+	ch, err := rmqConn.Channel()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	exchange_name := opts.ExchangeName
+	key_name := opts.KeyName
+	err = ch.ExchangeDeclare(exchange_name, opts.ExchangeKind, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = ch.PublishWithContext(context.Background(),
+		exchange_name, key_name, false, false, amqp091.Publishing{
+			Body:        by,
+			ContentType: "application/json",
+		})
+	if err != nil {
+		fmt.Print(err.Error())
+		return err
+	}
+	fmt.Printf("Published details: %s\n", exchange_name)
+
+	return nil
 }
 
 var validate *validator.Validate

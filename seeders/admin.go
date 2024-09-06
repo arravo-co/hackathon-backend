@@ -3,7 +3,6 @@ package seeders
 import (
 	"context"
 	"fmt"
-	"math/rand"
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/jaswdr/faker"
@@ -11,35 +10,29 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type CreateFakeJudgeAccountOpts struct {
+type CreateFakeAdminAccountOpts struct {
 	HackathonId string
 	Email       string
 }
 
-func CreateFakeJudgeAccount(dbInstance *mongo.Database, opts ...CreateFakeJudgeAccountOpts) (*exports.AccountDocument, string, error) {
-
-	fake := faker.New()
-	var hackathon_id string = "HACKATHON_ID_001"
-	email := fake.Internet().Email()
-	for _, v := range opts {
-		if v.HackathonId != "" {
-			hackathon_id = v.HackathonId
-		}
-		if v.Email != "" {
-			email = v.Email
-		}
-	}
+func CreateFakeAdminAccount(dbInstance *mongo.Database, opts *CreateFakeAdminAccountOpts) (*exports.AccountDocument, string, error) {
 	accountCol := dbInstance.Collection("accounts")
 	ctx := context.Context(context.Background())
+
+	fake := faker.New()
+	email := fake.Internet().Email()
+	if opts.Email != "" {
+		email = opts.Email
+	}
 	person := fake.Person()
-	var gender string
-	rand.Shuffle(2, func(i, j int) {
-		genderList := []string{"MALE", "FEMALE"}
-		gender = genderList[i]
-	})
+	var gender string = fake.RandomStringElement([]string{"MALE", "FEMALE"})
 	phone_number := fake.Phone().E164Number()
 	password := fake.Internet().Password()
 	password_hash, _ := exports.GenerateHashPassword(password)
+	var hackathon_id string = "HACKATHON_ID_001"
+	if opts.HackathonId != "" {
+		hackathon_id = opts.HackathonId
+	}
 	acc := &exports.AccountDocument{
 		Email:           email,
 		PasswordHash:    password_hash,
@@ -47,7 +40,7 @@ func CreateFakeJudgeAccount(dbInstance *mongo.Database, opts ...CreateFakeJudgeA
 		LastName:        person.LastName(),
 		Gender:          gender,
 		HackathonId:     hackathon_id,
-		Role:            "JUDGE",
+		Role:            "ADMIN",
 		PhoneNumber:     phone_number,
 		IsEmailVerified: false,
 		Status:          "EMAIL_UNVERIFIED",

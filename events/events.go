@@ -16,7 +16,7 @@ var AdminAccountCreatedByAdminEvent eventemitter.EventType = "AdminAccountCreate
 
 func init() {
 	RegisterParticipantCreatedEvent(listeners.HandleParticipantCreatedEvent)
-	RegisterJudgeCreatedByAdminEvent(listeners.HandleJudgeCreatedByAdminEvent)
+	//RegisterJudgeCreatedByAdminEvent(listeners.HandleJudgeCreatedByAdminEvent)
 	RegisterAdminCreatedEvent(listeners.HandleAdminCreatedEvent)
 	RegisterAdminCreatedByAdminEvent(listeners.HandleAdminCreatedByAdminEvent)
 	EventEmitter = eventemitter.NewEmitter(true)

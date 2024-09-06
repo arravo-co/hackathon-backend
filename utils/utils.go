@@ -135,6 +135,7 @@ func ProcessTeamInviteLink(str string) (*exports.TeamInviteLinkPayload, error) {
 		return nil, err
 	}
 	fmt.Println(payload)
+	fmt.Println("here is the payload for the message")
 	return payload, nil
 }
 
