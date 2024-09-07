@@ -513,6 +513,7 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 			})
 		}
 		sol := exports.ParticipantDocumentParticipantSelectedSolution{
+			Id:               arg.Solution.Id,
 			Title:            arg.Solution.Title,
 			Description:      arg.Solution.Description,
 			Objective:        arg.Solution.Objective,
