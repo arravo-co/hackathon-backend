@@ -276,7 +276,7 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 }*/
 
 func (p *ParticipantRecordRepository) UpdateParticipantRecord(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
-	_, err := p.DB.UpdateParticipantInfoByEmail(&exports.UpdateAccountFilter{Email: p.Email}, &exports.UpdateAccountDocument{
+	_, err := p.DB.UpdateParticipantInfoByEmail(&exports.UpdateAccountDocumentFilter{Email: p.Email}, &exports.UpdateAccountDocument{
 		FirstName:       dataInput.FirstName,
 		LastName:        dataInput.LastName,
 		Gender:          dataInput.Gender,

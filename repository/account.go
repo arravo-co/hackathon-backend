@@ -119,7 +119,7 @@ func (p *AccountRepository) GetAccountByEmail(email string) (*exports.AccountRep
 func (p *AccountRepository) GetAccountsByEmail(emails []string) ([]*exports.AccountRepository, error) {
 	return nil, nil
 }
-func (p *AccountRepository) UpdateAccount(filter *exports.UpdateAccountFilter, input *exports.UpdateAccountDTO) error {
+func (p *AccountRepository) UpdateAccount(filter *exports.UpdateAccountDocumentFilter, input *exports.UpdateAccountDTO) error {
 	p.DB.UpdateAccountInfoByEmail(filter, &exports.UpdateAccountDocument{
 		IsEmailVerified:   input.IsEmailVerified,
 		IsEmailVerifiedAt: input.IsEmailVerifiedAt,
@@ -132,7 +132,7 @@ func (p *AccountRepository) UpdateAccount(filter *exports.UpdateAccountFilter, i
 	return nil
 }
 
-func (p *AccountRepository) UpdatePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.AccountRepository, error) {
+func (p *AccountRepository) UpdatePasswordByEmail(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.AccountRepository, error) {
 	accDoc, err := p.DB.UpdatePasswordByEmail(filter, newPasswordHash)
 	if err != nil {
 		return nil, err

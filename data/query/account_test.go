@@ -36,7 +36,7 @@ func TestUpdateAccountInfoByEmail(t *testing.T) {
 	}
 	t.Run("It should update first_name", func(t *testing.T) {
 		first_name_updated := "David"
-		accDoc, err := q.UpdateAccountInfoByEmail(&exports.UpdateAccountFilter{
+		accDoc, err := q.UpdateAccountInfoByEmail(&exports.UpdateAccountDocumentFilter{
 			Email: accInDB.Email,
 		}, &exports.UpdateAccountDocument{
 			FirstName: first_name_updated,
@@ -57,7 +57,7 @@ func TestUpdateAccountInfoByEmail(t *testing.T) {
 
 	t.Run("It should update last_name", func(t *testing.T) {
 		last_name_updated := "Jones"
-		accDoc, err := q.UpdateAccountInfoByEmail(&exports.UpdateAccountFilter{
+		accDoc, err := q.UpdateAccountInfoByEmail(&exports.UpdateAccountDocumentFilter{
 			Email: accInDB.Email,
 		}, &exports.UpdateAccountDocument{
 			LastName: last_name_updated,
@@ -78,7 +78,7 @@ func TestUpdateAccountInfoByEmail(t *testing.T) {
 
 	t.Run("It should update bio", func(t *testing.T) {
 		bio_updated := "Bio updated"
-		accDoc, err := q.UpdateAccountInfoByEmail(&exports.UpdateAccountFilter{
+		accDoc, err := q.UpdateAccountInfoByEmail(&exports.UpdateAccountDocumentFilter{
 			Email: accInDB.Email,
 		}, &exports.UpdateAccountDocument{
 			Bio: bio_updated,

@@ -42,7 +42,7 @@ func TestRegisterJudge(t *testing.T) {
 		JudgeAccountRepository: judgeAccountRepository,
 		//Publisher:              publisher,
 	})
-	dataInput := &RegisterNewJudgeByAdminDTO{
+	dataInput := &RegisterNewJudgeDTO{
 		FirstName:       "john",
 		LastName:        "doe",
 		Password:        "password",

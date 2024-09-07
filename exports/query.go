@@ -1,14 +1,5 @@
 package exports
 
-/*type QueryWithDatasource struct {
-	Datasource   DBInterface
-	QueryMethods DatasourceQueryMethods
-}
-
-type Query struct {
-	Methods DatasourceQueryMethods
-}*/
-
 type DatasourceQueryMethods interface {
 	AddMemberToParticipatingTeam(dataToSave *AddMemberToParticipatingTeamData) (*ParticipantDocument, error)
 	AddToTeamInviteList(dataToSave *AddToTeamInviteListData) (interface{}, error)
@@ -23,6 +14,7 @@ type DatasourceQueryMethods interface {
 	FindAccountIdentifier(identifier string) (*AccountDocument, error)
 	GetAccountByEmail(email string) (*AccountDocument, error)
 	GetAccountsByEmails(emails []string) ([]AccountDocument, error)
+	GetAccounts(FilterGetManyAccountDocuments) ([]AccountDocument, error)
 	GetAccountsByParticipantIds(participantIds []string) ([]AccountDocument, error)
 	GetAccountsOfJudges() ([]AccountDocument, error)
 	GetManySolutionData(filterInput interface{}) ([]SolutionDocument, error)
@@ -32,9 +24,9 @@ type DatasourceQueryMethods interface {
 	RemoveMemberFromParticipatingTeam(dataToSave *RemoveMemberFromParticipatingTeamData) (interface{}, error)
 	RemoveTeamMemberAccount(dataToSave *RemoveTeamMemberAccountData) (*AccountDocument, error)
 	SelectSolutionForTeam(dataToSave *SelectTeamSolutionData) (*ParticipantDocument, error)
-	UpdateAccountInfoByEmail(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
-	UpdateParticipantInfoByEmail(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
-	UpdatePasswordByEmail(filter *UpdateAccountFilter, newPasswordHash string) (*AccountDocument, error)
+	UpdateAccountInfoByEmail(filter *UpdateAccountDocumentFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
+	UpdateParticipantInfoByEmail(filter *UpdateAccountDocumentFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
+	UpdatePasswordByEmail(filter *UpdateAccountDocumentFilter, newPasswordHash string) (*AccountDocument, error)
 	UpdateSolutionData(id string, dataInput *UpdateSolutionData) (*SolutionDocument, error)
 	UpsertToken(dataInput *UpsertTokenData) (*TokenData, error)
 	VerifyToken(dataInput *VerifyTokenData) error
@@ -48,8 +40,20 @@ type JudgeDatasourceQueryMethods interface {
 	GetAccountByEmail(email string) (*AccountDocument, error)
 	GetAccountsByEmails(emails []string) ([]AccountDocument, error)
 	GetAccountsOfJudges() ([]AccountDocument, error)
-	UpdateAccountInfoByEmail(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
-	UpdatePasswordByEmail(filter *UpdateAccountFilter, newPasswordHash string) (*AccountDocument, error)
+	UpdateAccountInfoByEmail(filter *UpdateAccountDocumentFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
+	UpdatePasswordByEmail(filter *UpdateAccountDocumentFilter, newPasswordHash string) (*AccountDocument, error)
+}
+
+type AdminDatasourceQueryMethods interface {
+	CreateAdminAccount(dataToSave *CreateAdminAccountData) (*AccountDocument, error)
+	DeleteAccount(identifier string) (*AccountDocument, error)
+	FindAccountIdentifier(identifier string) (*AccountDocument, error)
+	GetAccounts(FilterGetManyAccountDocuments) ([]AccountDocument, error)
+	GetAccountByEmail(email string) (*AccountDocument, error)
+	GetAccountsByEmails(emails []string) ([]AccountDocument, error)
+	GetAccountsOfJudges() ([]AccountDocument, error)
+	UpdateAccountInfoByEmail(filter *UpdateAccountDocumentFilter, dataInput *UpdateAccountDocument) (*AccountDocument, error)
+	UpdatePasswordByEmail(filter *UpdateAccountDocumentFilter, newPasswordHash string) (*AccountDocument, error)
 }
 
 type TokenDatasourceQueryMethods interface {

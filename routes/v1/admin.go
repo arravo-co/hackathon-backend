@@ -1,17 +1,12 @@
 package routes_v1
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 
+	"github.com/aidarkhanov/nanoid"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/publish"
-	"github.com/arravoco/hackathon_backend/repository"
-	taskmgt "github.com/arravoco/hackathon_backend/task_mgt"
-	"github.com/arravoco/hackathon_backend/utils"
+	"github.com/arravoco/hackathon_backend/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -35,8 +30,8 @@ func RegisterAdmin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	authAdmin := repository.Admin{}
-	err = authAdmin.RegisterNewAdmin(&dtos.CreateNewAdminDTO{
+	serv := services.GetServiceWithDefaultRepositories()
+	_, err = serv.RegisterAdmin(&services.CreateNewAdminDTO{
 		Email:       dataInput.Email,
 		LastName:    dataInput.LastName,
 		FirstName:   dataInput.FirstName,
@@ -55,7 +50,7 @@ func RegisterAdmin(c echo.Context) error {
 	})
 }
 
-// @Title Register A New Admin
+// @Title Register A New Admin By Another Admin
 // @Security AuthorizationHeader read write
 // @SecurityScheme AuthorizationHeader http bearer Input your token
 // @Summary Register new admin
@@ -68,20 +63,21 @@ func RegisterAnotherAdmin(c echo.Context) error {
 	authPayload := exports.GetPayload(c)
 	dataInput := dtos.CreateNewAdminByAuthAdminDTO{}
 	c.Bind(&dataInput)
-	validate.Struct(dataInput)
-	authAdmin := repository.Admin{}
-	err := authAdmin.FillAdminEntity(authPayload.Email)
+	err := validate.Struct(dataInput)
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{
 			Code:    400,
-			Message: "Failed at fully authenticating admin"})
+			Message: err.Error()})
 	}
-	err = authAdmin.AdminCreateNewAdminProfile(&dtos.CreateNewAdminByAuthAdminDTO{
-		Email:       dataInput.Email,
-		LastName:    dataInput.LastName,
-		FirstName:   dataInput.FirstName,
-		Gender:      dataInput.Gender,
-		PhoneNumber: dataInput.PhoneNumber,
+	serv := services.GetServiceWithDefaultRepositories()
+	_, err = serv.AdminCreateNewAdminProfile(&services.CreateNewAdminByAuthAdminDTO{
+		Email:        dataInput.Email,
+		LastName:     dataInput.LastName,
+		FirstName:    dataInput.FirstName,
+		Gender:       dataInput.Gender,
+		PhoneNumber:  dataInput.PhoneNumber,
+		InviterEmail: authPayload.Email,
+		InviterName:  authPayload.FirstName,
 	})
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{
@@ -123,7 +119,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 	*/
 	err := validate.Struct(dataInput)
 	if err != nil {
-		fmt.Println("Failed to fully authenticate admin")
+		fmt.Println(err)
 		return c.JSON(400, &RegisterJudgeByAdminResponseData{
 			Code:    400,
 			Message: err.Error()})
@@ -136,20 +132,19 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 			Code:    400,
 			Message: err.Error()})
 	}
-	authAdmin := repository.Admin{}
-	err = authAdmin.FillAdminEntity(authPayload.Email)
-	if err != nil {
-		return c.JSON(400, &RegisterJudgeByAdminResponseData{
-			Code:    400,
-			Message: "Failed to fully authenticate admin"})
-	}
-	err = authAdmin.AdminCreateNewJudgeProfile(&dtos.CreateNewJudgeByAdminDTO{
-		Email:       dataInput.Email,
-		LastName:    dataInput.LastName,
-		FirstName:   dataInput.FirstName,
-		Gender:      dataInput.Gender,
-		PhoneNumber: dataInput.PhoneNumber,
-		Bio:         dataInput.Bio,
+	password := nanoid.Must(nanoid.Generate("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456456789@#$%^&*()+_", 10))
+	serv := services.GetServiceWithDefaultRepositories()
+	_, err = serv.RegisterNewJudge(&services.RegisterNewJudgeDTO{
+		Email:           dataInput.Email,
+		LastName:        dataInput.LastName,
+		FirstName:       dataInput.FirstName,
+		Gender:          dataInput.Gender,
+		PhoneNumber:     dataInput.PhoneNumber,
+		Password:        password,
+		ConfirmPassword: password,
+		Bio:             dataInput.Bio,
+		InviterEmail:    authPayload.Email,
+		InviterName:     authPayload.FirstName,
 	})
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{
@@ -169,17 +164,22 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	ch := make(chan interface{})
+	//ch := make(chan interface{})
 	if profPic != nil {
-		go func() {
+		serv.UploadJudgeProfile(services.UploadJudgeProfilePictureOpt{
+			Email:       dataInput.Email,
+			PictureFile: profPic,
+		})
+		/*go func() {
 			dir, err := os.Getwd()
 			if err != nil {
 				fmt.Println(err.Error())
 			}
 			opt := utils.UploadOpts{
 				Folder: filepath.Join(dir, "uploads"),
+				FileNamePrefix: strings.Join([]string{email},""),
 			}
-			filePath, err := utils.GetUploadedPic(profPic, []utils.UploadOpts{opt}...)
+			filePath, err := utils.SaveFile(profPic, []utils.UploadOpts{opt}...)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -218,7 +218,7 @@ func RegisterJudgeByAdmin(c echo.Context) error {
 			ch <- struct{}{}
 			//judge :=result.SecureURL
 		}()
-		<-ch
+		<-ch*/
 	}
 	return nil
 }

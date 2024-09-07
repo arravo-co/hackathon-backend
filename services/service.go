@@ -31,6 +31,7 @@ type Service struct {
 	SolutionRepository           SolutionRepository
 	TokenRepository              exports.TokenRepositoryInterface
 	AppResources                 *resources.AppResources
+	AdminAccountRepository       exports.AdminRepositoryInterface
 }
 
 type ServiceConfig struct {
@@ -40,6 +41,7 @@ type ServiceConfig struct {
 	SolutionRepository           SolutionRepository
 	TokenRepository              exports.TokenRepositoryInterface
 	AppResources                 *resources.AppResources
+	AdminAccountRepository       exports.AdminRepositoryInterface
 }
 
 var defaultService *Service
@@ -53,6 +55,7 @@ func NewService(cfg *ServiceConfig) *Service {
 		ParticipantAccountRepository: cfg.ParticipantAccountRepository,
 		AppResources:                 cfg.AppResources,
 		TokenRepository:              cfg.TokenRepository,
+		AdminAccountRepository:       cfg.AdminAccountRepository,
 	}
 }
 

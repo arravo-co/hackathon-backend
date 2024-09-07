@@ -23,6 +23,12 @@ type UploadJudgeProfilePicQueuePayload struct {
 	FilePath string `json:"file_path"`
 }
 
+type UploadFileQueuePayload struct {
+	//QueuePayload
+	OwnerId  string `json:"owner_id"`
+	FilePath string `json:"file_path"`
+}
+
 type UploadSolutionPicQueuePayload struct {
 	QueuePayload
 	SolutionId string `json:"solution_id"`

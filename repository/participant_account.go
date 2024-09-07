@@ -123,6 +123,6 @@ func (p *ParticipantAccountRepository) MarkParticipantAccountAsDeleted(identifie
 
 // GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 // UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
-func (p *ParticipantAccountRepository) UpdateParticipantPassword(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.ParticipantAccountRepository, error) {
+func (p *ParticipantAccountRepository) UpdateParticipantPassword(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.ParticipantAccountRepository, error) {
 	return nil, nil
 }

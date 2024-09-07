@@ -49,7 +49,7 @@ type AccountRepositoryInterface interface {
 	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
 	FindAccountIdentifier(identifier string) (*AccountRepository, error)
-	UpdateParticipantPassword(filter *UpdateAccountFilter, newPasswordHash string) (*AccountRepository, error)
+	UpdateParticipantPassword(filter *UpdateAccountDocumentFilter, newPasswordHash string) (*AccountRepository, error)
 	ChangePassword(dataInput *PasswordChangeData) (*AccountRepository, error)
 }
 
@@ -81,7 +81,7 @@ type JudgeRepositoryInterface interface {
 	DeleteJudgeAccount(identifier string) (*JudgeAccountRepository, error)
 	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
-	UpdateJudgePassword(filter *UpdateAccountFilter, newPasswordHash string) (*JudgeAccountRepository, error)
+	UpdateJudgePassword(filter *UpdateAccountDocumentFilter, newPasswordHash string) (*JudgeAccountRepository, error)
 }
 
 type ParticipantAccountRepository struct {
@@ -267,7 +267,7 @@ type ParticipantAccountRepositoryInterface interface {
 	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
 	FindAccountIdentifier(identifier string) (*ParticipantAccountRepository, error)
-	UpdateParticipantPassword(filter *UpdateAccountFilter, newPasswordHash string) (*ParticipantAccountRepository, error)
+	UpdateParticipantPassword(filter *UpdateAccountDocumentFilter, newPasswordHash string) (*ParticipantAccountRepository, error)
 }
 
 type ParticipantRepositoryInterface interface {
@@ -301,5 +301,27 @@ type TokenRepositoryInterface interface {
 	VerifyToken(dataInput *VerifyTokenData) error
 }
 
-type AuthRepositoryInterface interface {
+type AdminRepositoryInterface interface {
+	CreateAdminAccount(dataToSave *CreateAdminAccountRepositoryDTO) (*AdminAccountRepository, error)
+	DeleteAdminAccount(identifier string) (*AdminAccountRepository, error)
+	GetAdminAccountByEmail(email string) (*AdminAccountRepository, error)
+	GetAdminAccounts(FilterGetManyAccountRepositories) ([]AdminAccountRepository, error)
+	UpdateAdminAccount(filter *UpdateAccountRepositoryFilter, dataInput *UpdateAdminAccountRepository) (*AdminAccountRepository, error)
+}
+
+type AdminAccountRepository struct {
+	Id              string
+	FirstName       string
+	LastName        string
+	Email           string
+	PasswordHash    string
+	Gender          string
+	Role            string
+	HackathonId     string
+	Status          string
+	PhoneNumber     string
+	IsEmailVerified bool      `json:"is_email_verified"`
+	EmailVerifiedAt time.Time `json:"email_verified_at"`
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }

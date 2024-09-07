@@ -359,7 +359,7 @@ func (auth *AuthUtils) CompleteEmailVerification(dataInput *exports.AuthUtilsCom
 		return err
 	}
 	is_email_verified := true
-	err = auth.AccountRepository.UpdateAccount(&exports.UpdateAccountFilter{
+	err = auth.AccountRepository.UpdateAccount(&exports.UpdateAccountDocumentFilter{
 		Email: dataInput.Email,
 	}, &exports.UpdateAccountDTO{
 		IsEmailVerified:   is_email_verified,
@@ -386,7 +386,7 @@ func (auth *AuthUtils) ChangePassword(dataInput *exports.AuthUtilsChangePassword
 	if err != nil {
 		return err
 	}
-	accountDoc, err = auth.AccountRepository.UpdatePasswordByEmail(&exports.UpdateAccountFilter{Email: dataInput.Email}, hash)
+	accountDoc, err = auth.AccountRepository.UpdatePasswordByEmail(&exports.UpdateAccountDocumentFilter{Email: dataInput.Email}, hash)
 
 	// emit an emit here
 	return nil
@@ -426,7 +426,7 @@ func (auth *AuthUtils) CompletePasswordRecovery(dataInput *exports.AuthUtilsComp
 		exports.MySugarLogger.Error(err)
 		return nil, err
 	}
-	_, err = data.UpdatePasswordByEmail(&exports.UpdateAccountFilter{Email: dataInput.Email}, newPasswordHash)
+	_, err = data.UpdatePasswordByEmail(&exports.UpdateAccountDocumentFilter{Email: dataInput.Email}, newPasswordHash)
 
 	if err != nil {
 		exports.MySugarLogger.Error(err)

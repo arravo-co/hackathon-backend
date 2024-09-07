@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type UpdateAccountFilter struct {
+type UpdateAccountDocumentFilter struct {
 	Email       string `bson:"email"`
 	PhoneNumber string `bson:"phone_number"`
 }
@@ -223,4 +223,19 @@ type GetParticipantsFilterOpts struct {
 	Limit                    *int
 	SortByReviewRanking_Asc  *bool
 	SortByReviewRanking_Desc *bool
+}
+
+type UpdateAdminAccountDocument struct {
+	FirstName         string    `bson:"first_name,omitempty"`
+	LastName          string    `bson:"last_name,omitempty"`
+	Gender            string    `bson:"gender,omitempty"`
+	State             string    `bson:"state,omitempty"`
+	Bio               string    `bson:"bio,omitempty"`
+	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
+	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
+	ProfilePictureUrl string    `bson:"profile_picture_url"`
+}
+
+type FilterGetManyAccountDocuments struct {
+	Email_eq string
 }

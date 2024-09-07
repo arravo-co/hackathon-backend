@@ -2,17 +2,29 @@ package services
 
 import "time"
 
-type RegisterNewJudgeByAdminDTO struct {
+type RegisterNewJudgeDTO struct {
 	FirstName       string `validate:"min=2,required" json:"first_name"`
 	LastName        string `validate:"min=2,required" json:"last_name"`
 	Email           string `validate:"email,required" json:"email"`
 	Password        string `validate:"min=7" json:"password"`
+	PhoneNumber     string `validate:"omitempty,e164" json:"phone_number"`
 	ConfirmPassword string `validate:"eqfield=Password" json:"confirm_password"`
 	Gender          string `validate:"oneof=MALE FEMALE" json:"gender"`
 	State           string
 	Bio             string
 	InviterEmail    string `validate:"required"`
 	InviterName     string `validate:"required"`
+}
+
+type RegisterNewJudgeByAdminDTO struct {
+	FirstName    string `validate:"min=2,required" json:"first_name"`
+	LastName     string `validate:"min=2,required" json:"last_name"`
+	Email        string `validate:"email,required" json:"email"`
+	Gender       string `validate:"oneof=MALE FEMALE" json:"gender"`
+	State        string
+	Bio          string
+	InviterEmail string `validate:"required"`
+	InviterName  string `validate:"required"`
 }
 
 type UpdateJudgeDTO struct {
@@ -102,12 +114,31 @@ type GetParticipantsWithAccountsAggregateFilterOpts struct {
 }
 
 type JudgeRegisteredPublishPayload struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+type JudgeRegisteredByAdminPublishPayload struct {
 	Email       string `json:"email"`
 	Name        string `json:"name"`
 	Password    string `json:"password"`
 	InviterName string `json:"inviter_name"`
 }
 
+type AdminRegisteredPublishPayload struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+type AdminRegisteredByAdminPublishPayload struct {
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	Password     string `json:"password"`
+	InviterName  string `json:"inviter_name"`
+	InviterEmail string `json:"inviter_email"`
+}
 type ParticipantRegisteredPayload struct {
 	Email            string
 	Password         string
@@ -130,4 +161,24 @@ type AddedToInviteListPayload struct {
 	InviteeEmail       string    `json:"invitee_email"`
 	InviterName        string    `json:"inviter_name"`
 	TimeSent           time.Time `json:"time_sent"`
+}
+
+type CreateNewAdminByAuthAdminDTO struct {
+	Email        string `validate:"email"`
+	HackathonId  string `validate:"required"`
+	FirstName    string `validate:"required"`
+	LastName     string `validate:"required"`
+	PhoneNumber  string `validate:"e164"`
+	Gender       string `validate:"required"`
+	InviterEmail string `validate:"required"`
+	InviterName  string `validate:"required"`
+}
+
+type CreateNewAdminDTO struct {
+	Email       string
+	LastName    string
+	FirstName   string
+	PhoneNumber string
+	Password    string
+	HackathonId string
 }

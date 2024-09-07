@@ -83,7 +83,7 @@ func RegisterJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	dataInputToService := &services.RegisterNewJudgeByAdminDTO{
+	dataInputToService := &services.RegisterNewJudgeDTO{
 		FirstName:       data.FirstName,
 		LastName:        data.LastName,
 		Email:           data.Email,

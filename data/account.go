@@ -297,7 +297,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 	return dataToSave, err
 }
 
-func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+func UpdateAccountInfoByEmail(filter *exports.UpdateAccountDocumentFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
@@ -316,7 +316,7 @@ func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *ex
 	return &accountDoc, err
 }
 
-func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountDocumentFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
@@ -331,7 +331,7 @@ func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput
 	return &accountDoc, err
 }
 
-func UpdatePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.AccountDocument, error) {
+func UpdatePasswordByEmail(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.AccountDocument, error) {
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}

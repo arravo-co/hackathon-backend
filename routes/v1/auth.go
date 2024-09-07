@@ -410,8 +410,8 @@ func GetAuthUserInfo(c echo.Context) error {
 	}
 
 	if tokenData.Role == "ADMIN" {
-		participant := repository.Admin{}
-		err = participant.FillAdminEntity(tokenData.Email)
+		serv := services.GetServiceWithDefaultRepositories()
+		admin, err := serv.GetAdminInfo(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
 				ResponseData{
@@ -420,7 +420,7 @@ func GetAuthUserInfo(c echo.Context) error {
 				},
 			})
 		}
-		user = &participant
+		user = &admin
 	}
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{

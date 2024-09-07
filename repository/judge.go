@@ -116,7 +116,7 @@ func (dt *JudgeAccountRepository) UpdateJudgeAccount(email string, input *export
 	if input.ProfilePictureUrl != "" {
 		dataInput.ProfilePictureUrl = input.ProfilePictureUrl
 	}
-	_, err := dt.DB.UpdateAccountInfoByEmail(&exports.UpdateAccountFilter{
+	_, err := dt.DB.UpdateAccountInfoByEmail(&exports.UpdateAccountDocumentFilter{
 		Email: email,
 	}, dataInput)
 	// emit created event
@@ -192,6 +192,6 @@ func (dt *JudgeAccountRepository) GetJudgeAccountByEmail(email string) (*exports
 	return j, nil
 }
 
-func (dt *JudgeAccountRepository) UpdateJudgePassword(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.JudgeAccountRepository, error) {
+func (dt *JudgeAccountRepository) UpdateJudgePassword(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.JudgeAccountRepository, error) {
 	return nil, nil
 }

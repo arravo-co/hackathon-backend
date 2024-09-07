@@ -2,11 +2,45 @@ package exports
 
 // Routing Keys
 
-// the exchange should be topic
+/**
+  - name: admin.registered
+*/
+var AdminRegisteredRoutingKeyName = "admin.registered"
+
+/**
+  - name: admin.send.welcome_email
+*/
+var AdminSendWelcomeEmailRoutingKeyName = "admin.send.welcome_email"
+
+/**
+  - name: admin_registered_by_admin.registered
+*/
+var AdminRegisteredByAdminRoutingKeyName = "admin_registered_by_admin.registered"
+
+/**
+  - name: admin_registered_by_admin.send.welcome_email
+*/
+var AdminRegisteredByAdminSendWelcomeEmailRoutingKeyName = "admin_registered_by_admin.send.welcome_email"
+
+/**
+  - name: judge.registered
+*/
 var JudgeRegisteredRoutingKeyName = "judge.registered"
 
-// the exchange should be direct or topic
+/**
+  - name: judge.send.welcome_email
+*/
 var JudgeSendWelcomeEmailRoutingKeyName = "judge.send.welcome_email"
+
+/**
+  - name: judge.registered
+*/
+var JudgeRegisteredByAdminRoutingKeyName = "judge.registered"
+
+/**
+  - name: judge_registered_by_admin.send.welcome_email
+*/
+var JudgeRegisteredByAdminSendWelcomeEmailRoutingKeyName = "judge_registered_by_admin.send.welcome_email"
 
 /**
   - the exchange should be topic
@@ -18,7 +52,13 @@ var ParticipantRegisteredRoutingKeyName = "participant.registered"
   - the exchange should be topic
   - name: participant.send.welcome_email
 */
-var ParticipantSendWelcomeEmailRoutingKeyName = "participant.send.welcome_email"
+var ParticipantTeamLeadSendWelcomeEmailRoutingKeyName = "participant.team_lead.send.welcome_email"
+
+/**
+  - the exchange should be topic
+  - name: participant.team_member.send.welcome_email
+*/
+var ParticipantTeamMemberSendWelcomeEmailRoutingKeyName = "participant.team_member.send.welcome_email"
 
 /** ParticipantSendInvitationEmailRoutingKeyName
   - name: participant.invited
@@ -30,7 +70,7 @@ var ParticipantInvitedRoutingKeyName = "participant.invited"
 */
 var ParticipantSendInvitationEmailRoutingKeyName = "participant.send.invitation_email"
 
-/*UploadJudgeProfilePicBindingKeyName
+/*UploadJudgeProfilePicRoutingKeyName
   - judge.upload.profile_pic
 */
 var UploadJudgeProfilePicRoutingKeyName = "judge.upload.profile_pic"

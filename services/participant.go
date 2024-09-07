@@ -114,7 +114,7 @@ func (s *Service) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMember
 			Data:         by,
 			RMQConn:      s.AppResources.RabbitMQConn,
 			ExchangeName: exports.ParticipantsExchange,
-			KeyName:      exports.ParticipantSendWelcomeEmailRoutingKeyName,
+			KeyName:      exports.ParticipantTeamLeadSendWelcomeEmailRoutingKeyName,
 			ExchangeKind: amqp091.ExchangeTopic,
 		})
 		if err != nil {
@@ -286,7 +286,7 @@ func (s *Service) RegisterTeamLead(input *RegisterNewParticipantDTO) (*entity.Pa
 			Data:         by,
 			RMQConn:      s.AppResources.RabbitMQConn,
 			ExchangeName: exports.ParticipantsExchange,
-			KeyName:      exports.ParticipantSendWelcomeEmailRoutingKeyName,
+			KeyName:      exports.ParticipantTeamLeadSendWelcomeEmailRoutingKeyName,
 			ExchangeKind: amqp091.ExchangeTopic,
 		})
 		if err != nil {

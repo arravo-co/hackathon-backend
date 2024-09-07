@@ -5,14 +5,65 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"mime/multipart"
+	"os"
+	"path/filepath"
 
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/rabbitmq/amqp091-go"
 )
 
-func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeByAdminDTO) (*entity.Judge, error) {
+type UploadJudgeProfilePictureOpt struct {
+	PictureFile *multipart.FileHeader
+	Email       string
+}
+
+func (s *Service) UploadJudgeProfile(opts UploadJudgeProfilePictureOpt) error {
+	profPic := opts.PictureFile
+	email := opts.Email
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	opt := utils.UploadOpts{
+		Folder:         filepath.Join(dir, "uploads"),
+		FileNamePrefix: fmt.Sprintf("%s_", email),
+	}
+	filePath, err := utils.SaveFile(profPic, []utils.UploadOpts{opt}...)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	payload := exports.UploadJudgeProfilePicQueuePayload{
+		Email:    email,
+		FilePath: filePath,
+	}
+	byt, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	} else {
+		err = Publish(&PublishOpts{
+			ExchangeName: exports.UploadJobsExchange,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			KeyName:      exports.UploadJudgeProfilePicRoutingKeyName,
+			Data:         byt,
+			ExchangeKind: amqp091.ExchangeDirect,
+		})
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+	fmt.Println("Queue payload published")
+	return nil
+}
+
+func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeDTO) (*entity.Judge, error) {
 	err := validate.Struct(dataInput)
 	if err != nil {
 		return nil, err
@@ -30,15 +81,80 @@ func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeByAdminDTO) (*enti
 	if err != nil {
 		return nil, err
 	}
-	/*
-		PublishJudgeCreated(s.TokenRepository, s.AppResources.RabbitMQConn, &JudgeRegisteredPublishPayload{
-			Email:       dataInput.Email,
-			Name:        dataInput.FirstName,
-			Password:    dataInput.Password,
-			InviterName: dataInput.InviterName,
-		})*/
 
 	pubData := &JudgeRegisteredPublishPayload{
+		Email:     dataInput.Email,
+		FirstName: dataInput.FirstName,
+		LastName:  dataInput.LastName,
+	}
+	by, err := json.Marshal(pubData)
+	if err != nil {
+		fmt.Printf("Failed to marshal: %v\n", err)
+	} else {
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.JudgesExchange,
+			KeyName:      exports.JudgeRegisteredRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = Publish(&PublishOpts{
+			Data:         by,
+			RMQConn:      s.AppResources.RabbitMQConn,
+			ExchangeName: exports.JudgesExchange,
+			KeyName:      exports.JudgeSendWelcomeEmailRoutingKeyName,
+			ExchangeKind: amqp091.ExchangeTopic,
+		})
+		if err != nil {
+			fmt.Println(err)
+
+		}
+
+	}
+
+	judge := entity.Judge{
+		Id:                created.Id,
+		HackathonId:       created.HackathonId,
+		LastName:          created.LastName,
+		FirstName:         created.FirstName,
+		Email:             created.Email,
+		Gender:            created.Gender,
+		PhoneNumber:       created.PhoneNumber,
+		ProfilePictureUrl: created.ProfilePictureUrl,
+		Role:              created.Role,
+		Bio:               created.Bio,
+		Status:            created.Status,
+		CreatedAt:         created.CreatedAt,
+		UpdatedAt:         created.UpdatedAt,
+	}
+
+	return &judge, nil
+}
+
+func (s *Service) RegisterNewJudgeByAdmin(dataInput *RegisterNewJudgeDTO) (*entity.Judge, error) {
+	err := validate.Struct(dataInput)
+	if err != nil {
+		return nil, err
+	}
+	dataToSave := &exports.RegisterNewJudgeDTO{
+		FirstName: dataInput.FirstName,
+		LastName:  dataInput.LastName,
+		Email:     dataInput.Email,
+		Gender:    dataInput.Gender,
+		Password:  dataInput.Password,
+		Bio:       dataInput.Bio,
+		State:     dataInput.State,
+	}
+	created, err := s.JudgeAccountRepository.CreateJudgeAccount(dataToSave)
+	if err != nil {
+		return nil, err
+	}
+
+	pubData := &JudgeRegisteredByAdminPublishPayload{
 		Email:       dataInput.Email,
 		Name:        dataInput.FirstName,
 		Password:    dataInput.Password,
@@ -51,8 +167,8 @@ func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeByAdminDTO) (*enti
 		err = Publish(&PublishOpts{
 			Data:         by,
 			RMQConn:      s.AppResources.RabbitMQConn,
-			ExchangeName: exports.ParticipantsExchange,
-			KeyName:      exports.ParticipantRegisteredRoutingKeyName,
+			ExchangeName: exports.JudgesExchange,
+			KeyName:      exports.JudgeRegisteredByAdminRoutingKeyName,
 			ExchangeKind: amqp091.ExchangeTopic,
 		})
 		if err != nil {
@@ -63,7 +179,7 @@ func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeByAdminDTO) (*enti
 			Data:         by,
 			RMQConn:      s.AppResources.RabbitMQConn,
 			ExchangeName: exports.ParticipantsExchange,
-			KeyName:      exports.ParticipantSendWelcomeEmailRoutingKeyName,
+			KeyName:      exports.JudgeRegisteredByAdminSendWelcomeEmailRoutingKeyName,
 			ExchangeKind: amqp091.ExchangeTopic,
 		})
 		if err != nil {
@@ -188,7 +304,7 @@ func (s *Service) GetJudges() ([]*entity.Judge, error) {
 }
 
 // JudgeCreatedByAdminWelcomeEmailQueuePayload
-func PublishJudgeCreated(tokenRepo exports.TokenRepositoryInterface, rmqConn *amqp091.Connection, data *JudgeRegisteredPublishPayload) error {
+func PublishJudgeCreated(tokenRepo exports.TokenRepositoryInterface, rmqConn *amqp091.Connection, data *JudgeRegisteredByAdminPublishPayload) error {
 	by, err := json.Marshal(data)
 	if err != nil {
 		fmt.Print(err.Error())

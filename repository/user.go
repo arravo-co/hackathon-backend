@@ -19,6 +19,6 @@ func (accRepo *AccountRepository) ChangePassword(dataInput *exports.PasswordChan
 	if err != nil {
 		return nil, err
 	}
-	acc, err = accRepo.UpdatePasswordByEmail(&exports.UpdateAccountFilter{Email: dataInput.Email}, passwordHash)
+	acc, err = accRepo.UpdatePasswordByEmail(&exports.UpdateAccountDocumentFilter{Email: dataInput.Email}, passwordHash)
 	return acc, err
 }

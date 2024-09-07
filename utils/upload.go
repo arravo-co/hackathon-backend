@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cloudinary/cloudinary-go"
 	"github.com/cloudinary/cloudinary-go/api/uploader"
@@ -19,7 +20,51 @@ func init() {
 }
 
 type UploadOpts struct {
-	Folder string
+	Folder         string
+	FileNamePrefix string
+}
+
+func SaveFile(file *multipart.FileHeader, opts ...UploadOpts) (string, error) {
+	op := UploadOpts{
+		Folder:         "../uploads",
+		FileNamePrefix: "",
+	}
+	for _, opt := range opts {
+		if opt.Folder != "" {
+			op.Folder = opt.Folder
+		}
+		if opt.FileNamePrefix != "" {
+			op.FileNamePrefix = opt.FileNamePrefix
+		}
+	}
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+	fileName := strings.Join([]string{op.FileNamePrefix, file.Filename}, "")
+	var byt []byte
+	_, err = src.Read(byt)
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("\n picture file  %d     %s\n", file.Size, string(byt))
+	/*is_img := filetype.IsImage(byt)
+	if !is_img {
+		//return "", fmt.Errorf("error: not an image type ")
+	}*/
+	path := filepath.Join(op.Folder, fileName)
+	osFile, err := os.Create(path)
+	if err != nil {
+		return "", err
+	}
+	defer osFile.Close()
+	wB, err := io.Copy(osFile, src)
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("\n%d bytes written..\n", wB)
+	return path, nil
 }
 
 func GetUploadedPic(file *multipart.FileHeader, opts ...UploadOpts) (string, error) {
