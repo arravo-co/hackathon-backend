@@ -37,7 +37,7 @@ type ParticipantRecordRepository struct {
 	ParticipantEmail    string                                      `json:"participant_email"`
 	InviteList          []exports.ParticipantDocumentTeamInviteInfo `json:"invite_list"`
 	AccountStatus       string                                      `json:"account_status"`
-	ParticipationStatus string                                      `json:"participation_status"`
+	ParticipationStatus string                                      `json:"participant_status"`
 	Skillset            []string                                    `json:"skillset"`
 	PhoneNumber         string                                      `json:"phone_number"`
 	EmploymentStatus    string                                      `json:"employment_status"`
@@ -512,15 +512,19 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 				Motivation:          co.Motivation,
 			})
 		}
-		sol := exports.ParticipantDocumentParticipantSelectedSolution{
-			Id:               arg.Solution.Id,
-			Title:            arg.Solution.Title,
-			Description:      arg.Solution.Description,
-			Objective:        arg.Solution.Objective,
-			SolutionImageUrl: arg.Solution.SolutionImageUrl,
-			HackathonId:      arg.Solution.HackathonId,
-			CreatedAt:        arg.CreatedAt,
-			UpdatedAt:        arg.UpdatedAt,
+		var sol exports.ParticipantDocumentParticipantSelectedSolution
+		if arg.SolutionId != "" {
+
+			sol = exports.ParticipantDocumentParticipantSelectedSolution{
+				Id:               arg.Solution.Id,
+				Title:            arg.Solution.Title,
+				Description:      arg.Solution.Description,
+				Objective:        arg.Solution.Objective,
+				SolutionImageUrl: arg.Solution.SolutionImageUrl,
+				HackathonId:      arg.Solution.HackathonId,
+				CreatedAt:        arg.CreatedAt,
+				UpdatedAt:        arg.UpdatedAt,
+			}
 		}
 		arr = append(arr, &exports.ParticipantTeamMembersWithAccountsAggregate{
 			Id:               arg.Id.String(),

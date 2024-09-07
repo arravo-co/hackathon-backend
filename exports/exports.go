@@ -34,7 +34,7 @@ type AuthUtilsBasicLoginSuccessData struct {
 	Gender              string    `json:"gender"`
 	State               string    `json:"state"`
 	passwordHash        string
-	AccountRole         string                                  `json:"role"`
+	AccountRole         string                                  `json:"account_role"`
 	HackathonId         string                                  `json:"hackathon_id"`
 	AccountStatus       string                                  `json:"account_status"`
 	ParticipantStatus   string                                  `json:"participant_status"`
@@ -50,6 +50,7 @@ type AuthUtilsBasicLoginSuccessData struct {
 	ParticipantEmail    string                                  `json:"participant_email"`
 	InviteList          []ParticipantDocumentTeamInviteInfo     `json:"invite_list"`
 	Skillset            []string                                `json:"skillset"`
+	SolutionId          string                                  `json:"solution_id"`
 	Solution            *AuthUtilsParticipantSolutionInfo       `json:"solution"`
 	Bio                 string                                  `json:"bio,omitempty"`
 	EmploymentStatus    string                                  `json:"employment_status,omitempty"`
