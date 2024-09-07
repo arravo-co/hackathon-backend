@@ -118,15 +118,15 @@ type ParticipantAccountRepository struct {
 }
 
 type ParticipantDocumentParticipantSelectedSolution struct {
-	Id               string    `json:"id"`
-	HackathonId      string    `json:"hackathon_id"`
-	Title            string    `json:"name"`
-	Description      string    `json:"description"`
-	Objective        string    `json:"objective"`
-	CreatorId        string    `json:"creator_id"`
-	SolutionImageUrl string    `json:"solution_image_url"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+	Id               string    `bson:"_id"`
+	HackathonId      string    `bson:"hackathon_id"`
+	Title            string    `bson:"title"`
+	Description      string    `bson:"description"`
+	Objective        string    `bson:"objective"`
+	CreatorId        string    `bson:"creator_id"`
+	SolutionImageUrl string    `bson:"solution_image_url"`
+	CreatedAt        time.Time `bson:"created_at"`
+	UpdatedAt        time.Time `bson:"updated_at"`
 }
 
 type ParticipantDocumentTeamCoParticipantInfo struct {

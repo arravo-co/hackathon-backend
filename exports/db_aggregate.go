@@ -13,7 +13,7 @@ type ParticipantTeamMembersWithAccountsAggregateDocument struct {
 	Type             string                                         `bson:"type,omitempty"`
 	TeamLeadEmail    string                                         `bson:"team_lead_email,omitempty"`
 	SolutionId       string                                         `bson:"solution_id,omitempty"`
-	Solution         ParticipantDocumentParticipantSelectedSolution `bson:"solution"`
+	Solution         ParticipantDocumentParticipantSelectedSolution `bson:"solution_document"`
 	TeamName         string                                         `bson:"team_name,omitempty"`
 	ParticipantEmail string                                         `bson:"participant_email,omitempty"`
 	GithubAddress    string                                         `bson:"github_address,omitempty"`

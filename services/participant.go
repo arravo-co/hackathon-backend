@@ -523,7 +523,9 @@ func (s *Service) GetMultipleParticipantsWithAccounts(opts *GetParticipantsWithA
 				ParticipantId:       v.TeamLeadInfo.ParticipantId,
 				UpdateAt:            v.TeamLeadInfo.UpdateAt,
 				Motivation:          v.TeamLeadInfo.Motivation,
-			}, Solution: &entity.ParticipantEntitySelectedSolution{
+			},
+			Solution: &entity.ParticipantEntitySelectedSolution{
+				Id:               v.Solution.Id,
 				HackathonId:      v.Solution.HackathonId,
 				Title:            v.Solution.Title,
 				Description:      v.Solution.Description,

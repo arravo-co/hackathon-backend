@@ -96,7 +96,7 @@ type ParticipantEntityTeamLeadInfo struct {
 type ParticipantEntitySelectedSolution struct {
 	Id               string    `json:"id"`
 	HackathonId      string    `json:"hackathon_id"`
-	Title            string    `json:"name"`
+	Title            string    `json:"title"`
 	Description      string    `json:"description"`
 	Objective        string    `json:"objective"`
 	CreatorId        string    `json:"creator_id"`
