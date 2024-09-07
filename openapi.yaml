@@ -653,7 +653,7 @@ components:
           type: string
         participant_id:
           type: string
-        participation_status:
+        participant_status:
           type: string
         phone_number:
           type: string
@@ -977,7 +977,7 @@ components:
           type: string
         participant_id:
           type: string
-        participation_status:
+        participant_status:
           type: string
         phone_number:
           type: string

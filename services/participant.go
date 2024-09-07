@@ -408,7 +408,7 @@ func (s *Service) GetSingleParticipantWithAccountsInfo(participantId string) (*e
 		ParticipantId:       part.ParticipantId,
 		ParticipantEmail:    part.ParticipantEmail,
 		ParticipantType:     part.Type,
-		ParticipationStatus: part.Status,
+		ParticipatantStatus: part.Status,
 		CoParticipants:      co_parts,
 		TeamLeadEmail:       part.TeamLeadEmail,
 		TeamName:            part.TeamName,
@@ -495,6 +495,17 @@ func (s *Service) GetMultipleParticipantsWithAccounts(opts *GetParticipantsWithA
 				Time:      v.Time,
 			})
 		}
+		var sol *entity.ParticipantEntitySelectedSolution
+		if v.SolutionId != "" {
+			sol = &entity.ParticipantEntitySelectedSolution{
+				Id:               v.Solution.Id,
+				HackathonId:      v.Solution.HackathonId,
+				Title:            v.Solution.Title,
+				Description:      v.Solution.Description,
+				SolutionImageUrl: v.Solution.SolutionImageUrl,
+				Objective:        v.Solution.Objective,
+			}
+		}
 		partEnts = append(partEnts, entity.Participant{
 			ParticipantId: v.ParticipantId,
 			TeamLeadEmail: v.TeamLeadEmail,
@@ -524,18 +535,11 @@ func (s *Service) GetMultipleParticipantsWithAccounts(opts *GetParticipantsWithA
 				UpdateAt:            v.TeamLeadInfo.UpdateAt,
 				Motivation:          v.TeamLeadInfo.Motivation,
 			},
-			Solution: &entity.ParticipantEntitySelectedSolution{
-				Id:               v.Solution.Id,
-				HackathonId:      v.Solution.HackathonId,
-				Title:            v.Solution.Title,
-				Description:      v.Solution.Description,
-				SolutionImageUrl: v.Solution.SolutionImageUrl,
-				Objective:        v.Solution.Objective,
-			},
+			Solution:            sol,
 			CoParticipants:      co_parts,
 			ParticipantType:     v.Type,
 			ParticipantEmail:    v.ParticipantEmail,
-			ParticipationStatus: v.Status,
+			ParticipatantStatus: v.Status,
 			CreatedAt:           v.CreatedAt,
 			UpdatedAt:           v.UpdatedAt,
 		})

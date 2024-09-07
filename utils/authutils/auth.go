@@ -124,11 +124,15 @@ func (auth *AuthUtils) BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*
 				UpdatedAt:           v.UpdateAt,
 			})
 		}
-		sol := exports.AuthUtilsParticipantSolutionInfo{
-			Title:            participantAndAccDoc.Solution.Title,
-			Description:      participantAndAccDoc.Solution.Description,
-			SolutionImageUrl: participantAndAccDoc.Solution.SolutionImageUrl,
-			Objective:        participantAndAccDoc.Solution.Objective,
+		var sol exports.AuthUtilsParticipantSolutionInfo
+		if participantAndAccDoc.SolutionId != "" {
+
+			sol = exports.AuthUtilsParticipantSolutionInfo{
+				Title:            participantAndAccDoc.Solution.Title,
+				Description:      participantAndAccDoc.Solution.Description,
+				SolutionImageUrl: participantAndAccDoc.Solution.SolutionImageUrl,
+				Objective:        participantAndAccDoc.Solution.Objective,
+			}
 		}
 		var invite_list []exports.ParticipantDocumentTeamInviteInfo
 		for _, v := range participantAndAccDoc.InviteList {
@@ -147,6 +151,7 @@ func (auth *AuthUtils) BasicLogin(dataInput *exports.AuthUtilsBasicLoginData) (*
 			Gender:              accountDoc.Gender,
 			TeamRole:            team_role,
 			State:               accountDoc.State,
+			SolutionId:          participantAndAccDoc.SolutionId,
 			AccountStatus:       accountDoc.Status,
 			ParticipantStatus:   participantAndAccDoc.Status,
 			HackathonId:         accountDoc.HackathonId,

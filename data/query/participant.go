@@ -731,6 +731,9 @@ func (q *Query) UpdateSingleParticipantRecord(filterOpts *exports.UpdateSinglePa
 	if dataToSave.Status != "" {
 		up["status"] = dataToSave.Status
 	}
+	if dataToSave.ReviewRanking > 0 {
+		up["review_ranking"] = dataToSave.ReviewRanking
+	}
 	len_of_map := 0
 	for range up {
 		len_of_map += 0
