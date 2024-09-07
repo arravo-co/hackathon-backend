@@ -55,7 +55,8 @@ func (c *AdminCreatedByAdminWelcomeEmailTaskConsumer) Consume(d rmq.Delivery) {
 		return
 	}
 	ttl := time.Now().AddDate(0, 0, 7)
-	dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	dataToken, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		Email: payloadStruct.Email,
 		TTL:   ttl,
 	})

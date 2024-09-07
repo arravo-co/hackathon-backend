@@ -1,36 +1,28 @@
 package repository
 
 import (
-	"time"
-
-	"github.com/arravoco/hackathon_backend/data"
-	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/go-playground/validator/v10"
 )
 
-type Judge struct {
-	FirstName         string `json:"first_name"`
-	LastName          string `json:"last_name"`
-	Email             string `json:"email"`
-	passwordHash      string
-	Gender            string    `json:"gender"`
-	Role              string    `json:"role"`
-	HackathonId       string    `json:"hackathon_id"`
-	Status            string    `json:"status"`
-	State             string    `json:"state"`
-	PhoneNumber       string    `json:"phone_number"`
-	Bio               string    `json:"bio"`
-	ProfilePictureUrl string    `json:"profile_picture_url"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+var validate *validator.Validate = validator.New()
+
+type JudgeAccountRepository struct {
+	DB exports.JudgeDatasourceQueryMethods
 }
 
-func GetJudgeEntity(email string) (*Judge, error) {
-	acc, err := data.GetAccountByEmail(email)
+func NewJudgeAccountRepository(datasource exports.JudgeDatasourceQueryMethods) *JudgeAccountRepository {
+	return &JudgeAccountRepository{
+		DB: datasource,
+	}
+}
+
+func (ac *JudgeAccountRepository) GetJudgeByEmail(email string) (*exports.JudgeAccountRepository, error) {
+	acc, err := ac.DB.GetAccountByEmail(email)
 	if err != nil {
 		return nil, err
 	}
-	judge := Judge{}
+	judge := &exports.JudgeAccountRepository{}
 	judge.Email = acc.Email
 	judge.Role = acc.Role
 	judge.FirstName = acc.FirstName
@@ -44,33 +36,15 @@ func GetJudgeEntity(email string) (*Judge, error) {
 	judge.ProfilePictureUrl = acc.ProfilePictureUrl
 	judge.CreatedAt = acc.CreatedAt
 	judge.UpdatedAt = acc.UpdatedAt
-	return &judge, nil
+	return judge, nil
 }
 
-func (judge *Judge) FillJudgeEntity(email string) error {
-	acc, err := data.GetAccountByEmail(email)
+func (dt *JudgeAccountRepository) CreateJudgeAccount(input *exports.RegisterNewJudgeDTO) (*exports.JudgeAccountRepository, error) {
+
+	err := validate.Struct(input)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	judge.Email = acc.Email
-	judge.Role = acc.Role
-	judge.FirstName = acc.FirstName
-	judge.LastName = acc.LastName
-	judge.Gender = acc.Gender
-	judge.HackathonId = acc.HackathonId
-	judge.PhoneNumber = acc.PhoneNumber
-	judge.Status = acc.Status
-	judge.State = acc.State
-	judge.Bio = acc.Bio
-	judge.ProfilePictureUrl = acc.ProfilePictureUrl
-	judge.CreatedAt = acc.CreatedAt
-	judge.UpdatedAt = acc.UpdatedAt
-	return nil
-}
-
-func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAccountData, error) {
-
 	passwordHash, err := exports.GenerateHashPassword(input.Password)
 	if err != nil {
 		return nil, err
@@ -83,13 +57,33 @@ func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAc
 			LastName:     input.LastName,
 			Gender:       input.Gender,
 			State:        input.State,
-			Role:         "JUDGE", Status: "EMAIL_UNVERIFIED"},
+			Role:         "JUDGE",
+			Status:       "EMAIL_UNVERIFIED",
+		},
 		Bio: input.Bio,
 	}
-	dataResponse, err := data.CreateJudgeAccount(dataInput)
+	dataResponse, err := dt.DB.CreateJudgeAccount(dataInput)
 	// emit created event
 	if err != nil {
 		return nil, err
+	}
+	id := dataResponse.Id.Hex()
+	judge := &exports.JudgeAccountRepository{
+		Id:                id,
+		FirstName:         dataResponse.FirstName,
+		LastName:          dataResponse.LastName,
+		Email:             dataResponse.Email,
+		State:             dataInput.State,
+		Gender:            dataInput.Gender,
+		HackathonId:       dataInput.HackathonId,
+		PhoneNumber:       dataInput.PhoneNumber,
+		ProfilePictureUrl: dataInput.ProfilePictureUrl,
+		PasswordHash:      dataInput.PasswordHash,
+		IsEmailVerified:   dataResponse.IsEmailVerified,
+		Role:              dataResponse.Role,
+		Status:            dataResponse.Status,
+		Bio:               dataResponse.Bio,
+		CreatedAt:         dataResponse.CreatedAt,
 	}
 	/*events.EmitJudgeAccountCreated(&exports.JudgeAccountCreatedByAdminEventData{
 		JudgeEmail: dataResponse.Email,
@@ -98,10 +92,10 @@ func (p *Judge) Register(input dtos.RegisterNewJudgeDTO) (*exports.CreateJudgeAc
 		EventData:  exports.EventData{EventName: "JudgeAccountCreated"},
 	})
 	*/
-	return dataResponse, err
+	return judge, err
 }
 
-func (p *Judge) UpdateJudgeProfile(input dtos.UpdateJudgeDTO) error {
+func (dt *JudgeAccountRepository) UpdateJudgeAccount(email string, input *exports.UpdateJudgeDTO) error {
 
 	dataInput := &exports.UpdateAccountDocument{}
 	if input.LastName != "" {
@@ -122,34 +116,19 @@ func (p *Judge) UpdateJudgeProfile(input dtos.UpdateJudgeDTO) error {
 	if input.ProfilePictureUrl != "" {
 		dataInput.ProfilePictureUrl = input.ProfilePictureUrl
 	}
-	dataResponse, err := data.UpdateAccountInfoByEmail(&exports.UpdateAccountFilter{
-		Email: p.Email,
+	_, err := dt.DB.UpdateAccountInfoByEmail(&exports.UpdateAccountDocumentFilter{
+		Email: email,
 	}, dataInput)
 	// emit created event
 	if err != nil {
 		return err
 	}
-	p.FirstName = dataResponse.FirstName
-	p.LastName = dataResponse.LastName
-	p.Gender = dataResponse.Gender
-	p.Bio = dataResponse.Bio
-
-	p.ProfilePictureUrl = dataResponse.ProfilePictureUrl
-	p.Role = dataResponse.Role
-	p.State = dataResponse.State
-	/*events.EmitJudgeAccountCreated(&exports.JudgeAccountCreatedByAdminEventData{
-		JudgeEmail: dataResponse.Email,
-		LastName:   dataResponse.LastName,
-		FirstName:  dataResponse.FirstName,
-		EventData:  exports.EventData{EventName: "JudgeAccountCreated"},
-	})
-	*/
 	return nil
 }
 
-func GetJudges() ([]*Judge, error) {
+func (dt *JudgeAccountRepository) GetJudges() ([]*exports.JudgeAccountRepository, error) {
 
-	dataResponse, err := data.GetAccountsOfJudges()
+	dataResponse, err := dt.DB.GetAccountsOfJudges()
 	// emit created event
 	if err != nil {
 		return nil, err
@@ -161,9 +140,9 @@ func GetJudges() ([]*Judge, error) {
 		EventData:  exports.EventData{EventName: "JudgeAccountCreated"},
 	})
 	*/
-	var ent []*Judge
+	var ent []*exports.JudgeAccountRepository
 	for _, acc := range dataResponse {
-		ent = append(ent, &Judge{
+		ent = append(ent, &exports.JudgeAccountRepository{
 			FirstName:         acc.FirstName,
 			LastName:          acc.LastName,
 			Email:             acc.Email,
@@ -174,10 +153,45 @@ func GetJudges() ([]*Judge, error) {
 			State:             acc.State,
 			PhoneNumber:       acc.PhoneNumber,
 			ProfilePictureUrl: acc.ProfilePictureUrl,
+			PasswordHash:      acc.PasswordHash,
 			Bio:               acc.Bio,
 			CreatedAt:         acc.CreatedAt,
 			UpdatedAt:         acc.UpdatedAt,
 		})
 	}
 	return ent, err
+}
+
+func (dt *JudgeAccountRepository) DeleteJudgeAccount(identifier string) (*exports.JudgeAccountRepository, error) {
+	return nil, nil
+}
+func (dt *JudgeAccountRepository) GetJudgeAccountByEmail(email string) (*exports.JudgeAccountRepository, error) {
+	acc, err := dt.DB.GetAccountByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	id := acc.Id.Hex()
+	j := &exports.JudgeAccountRepository{
+		Id:                id,
+		Email:             acc.Email,
+		LastName:          acc.LastName,
+		FirstName:         acc.FirstName,
+		Bio:               acc.Bio,
+		PhoneNumber:       acc.PhoneNumber,
+		Status:            acc.Status,
+		Role:              acc.Role,
+		PasswordHash:      acc.PasswordHash,
+		State:             acc.State,
+		HackathonId:       acc.HackathonId,
+		IsEmailVerified:   acc.IsEmailVerified,
+		ProfilePictureUrl: acc.ProfilePictureUrl,
+		Gender:            acc.Gender,
+		CreatedAt:         acc.CreatedAt,
+		UpdatedAt:         acc.UpdatedAt,
+	}
+	return j, nil
+}
+
+func (dt *JudgeAccountRepository) UpdateJudgePassword(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.JudgeAccountRepository, error) {
+	return nil, nil
 }

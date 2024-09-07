@@ -47,6 +47,7 @@ func StartAllRoutes(e *echo.Echo) {
 
 func setupAdminsRoutes(api *echo.Group) {
 	adminsRoutes := api.Group("/admin")
+	adminsRoutes.POST("/updates/participants", UpdateAuthParticipantInfo, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
 	adminsRoutes.POST("/register_admin", RegisterAnotherAdmin, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
 	adminsRoutes.POST("/register_judge", RegisterJudgeByAdmin, othermiddleware.AuthRole([]string{"ADMIN", "SUPER_ADMIN"}))
 	adminsRoutes.POST("", RegisterAdmin, middleware.CORSWithConfig(middleware.CORSConfig{
@@ -68,7 +69,7 @@ func setupJudgesRoutes(api *echo.Group) {
 	judgesRoutes = api.Group("/judges")
 	judgesRoutes.GET("/:email", GetJudgeByEmailAddress)
 	judgesRoutes.GET("", GetJudges)
-	judgesRoutes.POST("", RegisterJudge)
+	judgesRoutes.POST("", RegisterJudge, othermiddleware.AuthRole([]string{"ADMIN", "JUDGE"}))
 }
 
 func setupAuthRoutes(api *echo.Group) {
@@ -79,8 +80,9 @@ func setupAuthRoutes(api *echo.Group) {
 	authRoutes.POST("/verification/email/completion", CompleteEmailVerification)
 	authRoutes.GET("/password/recovery/initiation", InitiatePasswordRecovery)
 	authRoutes.POST("/password/recovery/completion", CompletePasswordRecovery)
+	authRoutes.POST("/password/change", ChangePassword, othermiddleware.Auth())
 	authRoutes.GET("/me", GetAuthUserInfo, othermiddleware.Auth())
-	authRoutes.PUT("/me", UpdateAuthUserInfo, othermiddleware.Auth())
+	authRoutes.PUT("/me", UpdateAuthParticipantInfo, othermiddleware.Auth())
 	authRoutes.POST("/me/team/invite", InviteMemberToTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 	authRoutes.POST("/me/team/solution", ChooseSolutionForMyTeam, othermiddleware.AuthRole([]string{"PARTICIPANT"}))
 	authRoutes.GET("/team/invite", ValidateTeamInviteLink)

@@ -44,7 +44,8 @@ func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreat
 			RabbitMQKey:      "send.participant.created.welcome_email_verification_email",
 		}, payloadByt)
 
-		dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+		auth := authutils.GetAuthUtilsWithDefaultRepositories()
+		dataToken, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 			Email: eventDTOData.ParticipantEmail,
 			TTL:   ttl,
 		})
@@ -76,7 +77,8 @@ func HandleParticipantCreatedEvent(eventDTOData *exports.ParticipantAccountCreat
 
 	case "INDIVIDUAL":
 		ttl := time.Now().Add(time.Minute * 15)
-		dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+		auth := authutils.GetAuthUtilsWithDefaultRepositories()
+		dataToken, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 			Email: eventDTOData.ParticipantEmail,
 			TTL:   ttl,
 		})

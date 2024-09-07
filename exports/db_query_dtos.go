@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type UpdateAccountFilter struct {
+type UpdateAccountDocumentFilter struct {
 	Email       string `bson:"email"`
 	PhoneNumber string `bson:"phone_number"`
 }
@@ -23,29 +23,35 @@ type UpdateAccountDocument struct {
 }
 
 type CreateAdminAccountData struct {
-	Email        string `bson:"email"`
-	PasswordHash string `bson:"password_hash"`
-	FirstName    string `bson:"first_name"`
-	LastName     string `bson:"last_name"`
-	Gender       string `bson:"gender"`
-	HackathonId  string `bson:"hackathon_id"`
-	Role         string `bson:"role"`
-	PhoneNumber  string `bson:"phone_number"`
-	Status       string `bson:"status"`
+	Email        string    `bson:"email"`
+	PasswordHash string    `bson:"password_hash"`
+	FirstName    string    `bson:"first_name"`
+	LastName     string    `bson:"last_name"`
+	Gender       string    `bson:"gender"`
+	HackathonId  string    `bson:"hackathon_id"`
+	Role         string    `bson:"role"`
+	PhoneNumber  string    `bson:"phone_number"`
+	Status       string    `bson:"status"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type CreateAccountData struct {
-	Email             string `bson:"email"`
-	PasswordHash      string `bson:"password_hash"`
-	FirstName         string `bson:"first_name"`
-	LastName          string `bson:"last_name"`
-	Gender            string `bson:"gender"`
-	State             string `bson:"state"`
-	Role              string `bson:"role"`
-	PhoneNumber       string `bson:"phone_number"`
-	HackathonId       string `bson:"hackathon_id"`
-	Status            string `bson:"status"`
-	ProfilePictureUrl string `bson:"profile_picture_url"`
+	Email             string    `bson:"email"`
+	PasswordHash      string    `bson:"password_hash"`
+	FirstName         string    `bson:"first_name"`
+	LastName          string    `bson:"last_name"`
+	Gender            string    `bson:"gender"`
+	State             string    `bson:"state"`
+	Role              string    `bson:"role"`
+	PhoneNumber       string    `bson:"phone_number"`
+	HackathonId       string    `bson:"hackathon_id"`
+	Status            string    `bson:"status"`
+	ProfilePictureUrl string    `bson:"profile_picture_url"`
+	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
+	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
+	CreatedAt         time.Time `bson:"created_at"`
+	UpdatedAt         time.Time `bson:"updated_at"`
 }
 
 type CreateParticipantAccountData struct {
@@ -94,11 +100,12 @@ type RemoveMemberFromParticipatingTeamData struct {
 }
 
 type AddToTeamInviteListData struct {
-	HackathonId   string `bson:"hackathon_id"`
-	ParticipantId string `bson:"participant_id"`
-	InviterEmail  string `bson:"inviter_email"`
-	Email         string `bson:"email"`
-	Role          string `bson:"role"`
+	HackathonId      string `bson:"hackathon_id"`
+	ParticipantId    string `bson:"participant_id"`
+	InviterEmail     string `bson:"inviter_email"`
+	InviterFirstName string `bson:"inviter_first_name"`
+	Email            string `bson:"email"`
+	Role             string `bson:"role"`
 }
 type CreateTeamParticipantAccountData struct {
 	Email               string   `bson:"email"`
@@ -113,14 +120,19 @@ type CreateTeamParticipantAccountData struct {
 }
 
 type CreateParticipantRecordData struct {
-	ParticipantId    string          `bson:"participant_id"`
-	ParticipantEmail string          `bson:"participant_email,omitempty"`
-	TeamLeadEmail    string          `bson:"team_lead_email,omitempty"`
-	TeamName         string          `bson:"team_name,omitempty"`
-	CoParticipants   []CoParticipant `bson:"co_participants,omitempty"`
-	Type             string          `bson:"type"`
-	HackathonId      string          `bson:"hackathon_id"`
-	GithubAddress    string          `bson:"github_address,omitempty"`
+	ParticipantId     string
+	ParticipantEmail  string
+	TeamLeadFirstName string
+	TeamLeadLastName  string
+	TeamLeadGender    string
+	TeamLeadAccountId string
+	TeamLeadEmail     string
+	TeamName          string
+	CoParticipants    []CoParticipant
+	Type              string
+	HackathonId       string
+	GithubAddress     string
+	ReviewRanking     int
 }
 
 type TeamParticipantRecordCreatedData struct {
@@ -179,4 +191,75 @@ type SelectTeamSolutionData struct {
 	HackathonId   string `bson:"hackathon_id"`
 	ParticipantId string `bson:"participant_id"`
 	SolutionId    string `bson:"solution_id"`
+}
+
+type RegisterNewParticipantDTO struct {
+	FirstName           string   `validate:"min=2" json:"first_name"`
+	LastName            string   `validate:"min=2" json:"last_name"`
+	Email               string   `validate:"email" json:"email"`
+	Password            string   `validate:"min=7" json:"password"`
+	PhoneNumber         string   `validate:"e164" json:"phone_number"`
+	ConfirmPassword     string   `validate:"eqfield=Password" json:"confirm_password"`
+	Gender              string   `validate:"oneof=MALE FEMALE" json:"gender"`
+	Skillset            []string `validate:"min=1" json:"skillset"`
+	State               string   `validate:"min=3" json:"state"`
+	Type                string   `validate:"oneof=INDIVIDUAL TEAM" json:"type"`
+	TeamSize            int      `json:"team_size"`
+	DOB                 string   ` json:"dob"`
+	TeamName            string   `validate:"omitempty" json:"team_name"`
+	EmploymentStatus    string   `validate:"oneof=STUDENT EMPLOYED UNEMPLOYED FREELANCER" json:"employment_status"`
+	ExperienceLevel     string   `validate:"oneof=JUNIOR MID SENIOR" json:"experience_level"`
+	Motivation          string   `validate:"min=100" json:"motivation"`
+	HackathonExperience string   `json:"hackathon_experience"`
+	YearsOfExperience   int      `json:"years_of_experience"`
+	FieldOfStudy        string   `json:"field_of_study"`
+	PreviousProjects    []string `json:"previous_projects"`
+}
+
+type GetParticipantsFilterOpts struct {
+	ParticipantId            *string
+	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ReviewRanking_Eq         *int
+	ReviewRanking_Top        *int
+	Solution_Like            *string
+	Limit                    *int
+	SortByReviewRanking_Asc  *bool
+	SortByReviewRanking_Desc *bool
+}
+
+type UpdateAdminAccountDocument struct {
+	FirstName         string    `bson:"first_name,omitempty"`
+	LastName          string    `bson:"last_name,omitempty"`
+	Gender            string    `bson:"gender,omitempty"`
+	State             string    `bson:"state,omitempty"`
+	Bio               string    `bson:"bio,omitempty"`
+	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
+	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
+	ProfilePictureUrl string    `bson:"profile_picture_url"`
+}
+
+type FilterGetManyAccountDocuments struct {
+	Email_eq string
+}
+
+type UpdateSingleParticipantRecordFilter struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+}
+
+type UpdateManyParticipantRecordFilter struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	Status        string `bson:"status"`
+	Role          string `bson:"role"`
+}
+type UpdateParticipantRecordData struct {
+	Status        string `bson:"status"`
+	ReviewRanking int    `bson:"review_ranking"`
+	TeamName      string `bson:"team_name"`
+}
+
+type AdminParticipantInfoUpdateDTO struct {
+	Status        string `json:"status,omitempty"`
+	ReviewRanking int    `json:"review_rank,omitempty"`
 }

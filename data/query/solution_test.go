@@ -6,7 +6,6 @@ import (
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestCreateSolutionData(t *testing.T) {
@@ -30,7 +29,7 @@ func TestUpdateSolutionData(t *testing.T) {
 	doc, err := q.CreateSolutionData(&cre)
 	assert.NoError(t, err)
 
-	objId := doc.Id.(primitive.ObjectID).Hex()
+	objId := doc.Id.Hex()
 	dat := exports.UpdateSolutionData{
 		Title:       "Legal solution",
 		Description: "Legal solution description",
@@ -51,7 +50,7 @@ func TestGetSolutionDataById(t *testing.T) {
 	doc, err := q.CreateSolutionData(&cre)
 	assert.NoError(t, err)
 
-	objId := doc.Id.(primitive.ObjectID).Hex()
+	objId := doc.Id.Hex()
 	docFetched, err := q.GetSolutionDataById(objId)
 	assert.NoError(t, err)
 	assert.IsType(t, &exports.SolutionDocument{}, docFetched)
@@ -68,7 +67,7 @@ func TestGetManySolutionData(t *testing.T) {
 	doc, err := q.CreateSolutionData(&cre)
 	assert.NoError(t, err)
 
-	objId := doc.Id.(primitive.ObjectID).Hex()
+	objId := doc.Id.Hex()
 	docFetched, err := q.GetManySolutionData(objId)
 	assert.NoError(t, err)
 	assert.IsType(t, []exports.SolutionDocument{}, docFetched)

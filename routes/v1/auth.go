@@ -102,9 +102,9 @@ type CompletePasswordRecoverySuccessResponseData struct {
 }
 
 type DeleteTeamMemberSuccessResponse struct {
-	Code    int                       `json:"code"`
-	Message string                    `json:"message"`
-	Data    *entity.TeamMemberAccount `json:"data"`
+	Code    int                                     `json:"code"`
+	Message string                                  `json:"message"`
+	Data    *entity.TeamMemberWithParticipantRecord `json:"data"`
 }
 
 type DeleteTeamMemberFailResponse struct {
@@ -139,8 +139,8 @@ func BasicLogin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-
-	dataResponse, err := authutils.BasicLogin(&exports.AuthUtilsBasicLoginData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	dataResponse, err := auth.BasicLogin(&exports.AuthUtilsBasicLoginData{
 		Identifier: data.Identifier,
 		Password:   data.Password,
 	})
@@ -179,7 +179,8 @@ func InitiateEmailVerification(c echo.Context) error {
 	}
 
 	ttl := time.Now().Add(time.Minute * 15)
-	tokenData, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	tokenData, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		TTL:   ttl,
 		Email: emailToVerify,
 	})
@@ -239,7 +240,8 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 		})
 	}
 
-	err = authutils.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	err = auth.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
 		Token: payload.Token,
 		Email: payload.Email,
 	})
@@ -292,7 +294,8 @@ func CompleteEmailVerification(c echo.Context) error {
 		})
 	}
 
-	err = authutils.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	err = auth.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
 		Token: dataDto.Token,
 		Email: dataDto.Email,
 	})
@@ -351,7 +354,8 @@ func ChangePassword(c echo.Context) error {
 			},
 		})
 	}
-	acc, err := repository.ChangePassword(&repository.PasswordChangeData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	err = auth.ChangePassword(&exports.AuthUtilsChangePasswordData{
 		Email:       tokenData.Email,
 		OldPassword: dataDto.OldPassword,
 		NewPassword: dataDto.NewPassword,
@@ -368,7 +372,7 @@ func ChangePassword(c echo.Context) error {
 		ResponseData{
 			Code:    200,
 			Message: "Password change completed successfully",
-		}, &PasswordChangeSuccessResponseData{FirstName: acc.FirstName},
+		}, &PasswordChangeSuccessResponseData{},
 	})
 }
 
@@ -392,8 +396,8 @@ func GetAuthUserInfo(c echo.Context) error {
 	var user interface{}
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
-		partServ := services.NewParticipantService()
-		participant, err := partServ.FillParticipantInfo(tokenData.Email)
+		serv := services.GetServiceWithDefaultRepositories()
+		participant, err := serv.GetSingleParticipantWithAccountsInfo(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
 				ResponseData{
@@ -406,8 +410,8 @@ func GetAuthUserInfo(c echo.Context) error {
 	}
 
 	if tokenData.Role == "ADMIN" {
-		participant := repository.Admin{}
-		err = participant.FillAdminEntity(tokenData.Email)
+		serv := services.GetServiceWithDefaultRepositories()
+		admin, err := serv.GetAdminInfo(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
 				ResponseData{
@@ -416,7 +420,7 @@ func GetAuthUserInfo(c echo.Context) error {
 				},
 			})
 		}
-		user = &participant
+		user = &admin
 	}
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
@@ -434,7 +438,8 @@ func GetAuthUserInfo(c echo.Context) error {
 	})
 }
 
-// @Title Update Auth User Info
+/*
+// @Title Admin-only Auth User Info
 // @Summary		Update auth user information
 // @Description	Update auth user information
 // @Tags			Auth
@@ -447,23 +452,19 @@ func GetAuthUserInfo(c echo.Context) error {
 // @Failure		404	{object}	AuthUserInfoFetchFailureResponse
 // @Failure		500	{object}	AuthUserInfoFetchFailureResponse
 // @Router			/api/v1/auth/me [put]
-func UpdateAuthUserInfo(c echo.Context) error {
+func UpdateAuthParticipantInfo(c echo.Context) error {
 	tokenData := c.Get("user").(exports.Payload)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
-		updateData := dtos.AuthParticipantInfoUpdateDTO{}
-		participant := repository.ParticipantRepository{
-			Email: tokenData.Email,
-		}
-		err = participant.UpdateParticipantInfo(&dtos.AuthParticipantInfoUpdateDTO{
-			AuthUserInfoUpdateDTO: dtos.AuthUserInfoUpdateDTO{
-				FirstName: updateData.FirstName,
-				LastName:  updateData.LastName,
-				Email:     updateData.Email,
-				Gender:    updateData.Gender,
-			},
-			GithubAddress:   updateData.GithubAddress,
-			LinkedInAddress: updateData.LinkedInAddress,
+		updateData := dtos.AdminParticipantInfoUpdateDTO{}
+		serv := services.GetServiceWithDefaultRepositories()
+		_, err = serv.AdminUpdateParticipantInfo(&services.UpdateSingleParticipantRecordFilter {
+
+		}, &services.AdminParticipantInfoUpdateDTO{
+			ReviewRanking: updateData.ReviewRanking,
+			Status:        updateData.Status,
+			//GithubAddress:   updateData.GithubAddress,
+			//LinkedInAddress: updateData.LinkedInAddress,
 		})
 
 	}
@@ -481,7 +482,7 @@ func UpdateAuthUserInfo(c echo.Context) error {
 			Message: "Password change completed successfully",
 		}, &PasswordChangeSuccessResponseData{},
 	})
-}
+}*/
 
 // @Title Initiate Password Recovery
 // @Summary			Initiate Password Recovery
@@ -506,7 +507,8 @@ func InitiatePasswordRecovery(c echo.Context) error {
 	}
 
 	ttl := time.Now().Add(time.Minute * 15)
-	dataResult, err := authutils.InitiatePasswordRecovery(&exports.AuthUtilsConfigTokenData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	dataResult, err := auth.InitiatePasswordRecovery(&exports.AuthUtilsConfigTokenData{
 		TTL:   ttl,
 		Email: emailToVerify,
 	})
@@ -586,7 +588,8 @@ func CompletePasswordRecovery(c echo.Context) error {
 		})
 	}
 
-	_, err = authutils.CompletePasswordRecovery(&exports.AuthUtilsCompletePasswordRecoveryData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	_, err = auth.CompletePasswordRecovery(&exports.AuthUtilsCompletePasswordRecoveryData{
 		Token:       dataDto.Token,
 		Email:       dataDto.Email,
 		NewPassword: dataDto.NewPassword,
@@ -639,8 +642,14 @@ func InviteMemberToTeam(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	partServ := services.NewParticipantService()
-	participant, err := partServ.FillParticipantInfo(tokenData.Email)
+	serv := services.GetServiceWithDefaultRepositories()
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(tokenData.ParticipantId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
+			Code:    echo.ErrBadRequest.Code,
+			Message: err.Error(),
+		})
+	}
 	if participantId != participant.ParticipantId {
 		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
 			Code:    echo.ErrBadRequest.Code,
@@ -659,12 +668,13 @@ func InviteMemberToTeam(c echo.Context) error {
 			Message: "Only a participating team can invite new members.",
 		})
 	}
-	responseData, err := partServ.InviteToTeam(&exports.AddToTeamInviteListData{
-		HackathonId:   hackathonId,
-		ParticipantId: participant.ParticipantId,
-		Email:         data.Email,
-		Role:          data.Role,
-		InviterEmail:  participant.Email,
+	responseData, err := serv.InviteToTeam(&services.AddToTeamInviteListData{
+		HackathonId:      hackathonId,
+		ParticipantId:    participant.ParticipantId,
+		Email:            data.Email,
+		Role:             data.Role,
+		InviterEmail:     participant.TeamLeadInfo.Email,
+		InviterFirstName: participant.TeamLeadInfo.FirstName,
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{
@@ -748,12 +758,8 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 // @Router			/api/v1/auth/me/team              [get]
 func GetMyTeamMembersInfo(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
-	partServ := services.NewParticipantService()
-	participant, err := partServ.FillParticipantInfo(payload.Email)
-	if err != nil {
-		return err
-	}
-	participants, err := partServ.GetTeamMembersInfo(participant)
+	serv := services.GetServiceWithDefaultRepositories()
+	participants, err := serv.GetTeamMembersInfo(payload.ParticipantId)
 	fmt.Println(participants)
 	if err != nil {
 		return ctx.JSON(400, GetTeamMembersSuccessResponse{
@@ -782,8 +788,8 @@ func RemoveMemberFromMyTeam(ctx echo.Context) error {
 
 	memberId := ctx.Param("team_member_email")
 
-	partServ := services.NewParticipantService()
-	participant, err := partServ.FillParticipantInfo(payload.Email)
+	serv := services.GetServiceWithDefaultRepositories()
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(payload.Email)
 
 	if err != nil {
 		return err
@@ -796,7 +802,7 @@ func RemoveMemberFromMyTeam(ctx echo.Context) error {
 		})
 	}
 
-	member, err := partServ.RemoveMemberFromTeam(&repository.RemoveMemberFromTeamData{
+	member, err := serv.RemoveMemberFromTeam(&repository.RemoveMemberFromTeamData{
 		MemberEmail:   memberId,
 		HackathonId:   payload.HackathonId,
 		ParticipantId: payload.ParticipantId,
@@ -842,8 +848,8 @@ func ChooseSolutionForMyTeam(ctx echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	partServ := services.NewParticipantService()
-	participant, err := partServ.FillParticipantInfo(authPayload.Email)
+	serv := services.GetServiceWithDefaultRepositories()
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(authPayload.Email)
 
 	if err != nil {
 		return ctx.JSON(400, &ResponseData{
@@ -859,7 +865,7 @@ func ChooseSolutionForMyTeam(ctx echo.Context) error {
 		})
 	}
 
-	solEnt, err := partServ.SelectionTeamSolution(&exports.SelectTeamSolutionData{
+	err = serv.SelectTeamSolution(&services.SelectTeamSolutionData{
 		HackathonId:   authPayload.HackathonId,
 		ParticipantId: authPayload.ParticipantId,
 		SolutionId:    solDataBodyPayload.SolutionId,
@@ -870,7 +876,6 @@ func ChooseSolutionForMyTeam(ctx echo.Context) error {
 			Code:    400,
 		})
 	}
-	participant.Solution = solEnt
 	return ctx.JSON(200, AddSolutionSuccessResponse{
 		Message: "",
 		Data:    participant,

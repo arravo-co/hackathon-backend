@@ -16,7 +16,8 @@ import (
 func HandleSendParticipantWelcomeAndVerificationEmailJob(eventDTOData *exports.SendWelcomeAndEmailVerificationTokenJobQueuePayload) error {
 
 	ttl := time.Now().Add(time.Minute * time.Duration(15))
-	dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	dataToken, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		Email: eventDTOData.Email,
 		TTL:   ttl,
 	})
@@ -58,7 +59,8 @@ func HandleSendParticipantWelcomeAndVerificationEmailJob(eventDTOData *exports.S
 func HandleCreateEmailTokenJob(eventDTOData *exports.SendWelcomeAndEmailVerificationTokenJobQueuePayload) error {
 
 	ttl := time.Now().Add(time.Minute * time.Duration(15))
-	dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	dataToken, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		Email: eventDTOData.Email,
 		TTL:   ttl,
 	})
@@ -101,7 +103,8 @@ func HandleSendEmailJob(eventDTOData *exports.ParticipantAccountCreatedEventData
 	switch participantType {
 	case "TEAM":
 		ttl := time.Now().Add(time.Minute * 15)
-		dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+		auth := authutils.GetAuthUtilsWithDefaultRepositories()
+		dataToken, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 			Email: eventDTOData.ParticipantEmail,
 			TTL:   ttl,
 		})
@@ -133,7 +136,8 @@ func HandleSendEmailJob(eventDTOData *exports.ParticipantAccountCreatedEventData
 
 	case "INDIVIDUAL":
 		ttl := time.Now().Add(time.Minute * 15)
-		dataToken, err := authutils.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
+		auth := authutils.GetAuthUtilsWithDefaultRepositories()
+		dataToken, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 			Email: eventDTOData.ParticipantEmail,
 			TTL:   ttl,
 		})

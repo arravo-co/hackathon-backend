@@ -7,14 +7,16 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
-	if err != nil {
-		return nil, err
-	}
+type AccountData struct {
+	AccountCollection *mongo.Collection
+}
+
+func (dt *AccountData) DeleteAccount(identifier string) (*exports.AccountDocument, error) {
+	accountCol := dt.AccountCollection
 	filter := bson.D{{
 		"$or", bson.A{
 			bson.D{{"email", identifier}},
@@ -22,15 +24,12 @@ func DeleteAccount(identifier string) (*exports.AccountDocument, error) {
 		}},
 	}
 	dataFromCol := exports.AccountDocument{}
-	err = accountCol.FindOneAndDelete(context.TODO(), filter).Decode(&dataFromCol)
+	err := accountCol.FindOneAndDelete(context.TODO(), filter).Decode(&dataFromCol)
 	return &dataFromCol, err
 }
 
-func FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) {
-	accountCol, err := DefaultDatasource.GetAccountCollection()
-	if err != nil {
-		return nil, err
-	}
+func (dt *AccountData) FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) {
+	accountCol := dt.AccountCollection
 	filter := bson.D{{
 		"$or", bson.A{
 			bson.D{{"email", identifier}},
@@ -38,7 +37,7 @@ func FindAccountIdentifier(identifier string) (*exports.AccountDocument, error) 
 		}},
 	}
 	dataFromCol := exports.AccountDocument{}
-	err = accountCol.FindOne(context.TODO(), filter).Decode(&dataFromCol)
+	err := accountCol.FindOne(context.TODO(), filter).Decode(&dataFromCol)
 	return &dataFromCol, err
 }
 
@@ -80,7 +79,7 @@ func GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
 	return accounts, err
 }
 
-func GetAccountsOfJudges() ([]exports.AccountDocument, error) {
+func (dt *AccountData) GetAccountsOfJudges() ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
@@ -287,6 +286,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 		IsEmailVerified: false,
 		Status:          dataToSave.Status,
 		Bio:             dataToSave.Bio,
+		CreatedAt:       time.Now(),
 	}
 	result, err := accountCol.InsertOne(ctx, &acc)
 	if err != nil {
@@ -297,7 +297,7 @@ func CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.Cr
 	return dataToSave, err
 }
 
-func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+func UpdateAccountInfoByEmail(filter *exports.UpdateAccountDocumentFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
@@ -316,7 +316,7 @@ func UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *ex
 	return &accountDoc, err
 }
 
-func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountDocumentFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
@@ -331,7 +331,7 @@ func UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput
 	return &accountDoc, err
 }
 
-func UpdatePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.AccountDocument, error) {
+func UpdatePasswordByEmail(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.AccountDocument, error) {
 	accountCol, err := DefaultDatasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}

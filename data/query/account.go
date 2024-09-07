@@ -7,9 +7,26 @@ import (
 
 	"github.com/arravoco/hackathon_backend/exports"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+/*
+	func (q *Query) GetAccountByEmail(email string) (*exports.AccountDocument, error) {
+		accountCol, err := q.Datasource.GetAccountCollection()
+		ctx := context.Context(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		filterStruct := bson.D{
+			{Key: "email", Value: email},
+		}
+		result := accountCol.FindOne(ctx, filterStruct)
+		accountDoc := exports.AccountDocument{}
+		err = result.Decode(&accountDoc)
+		return &accountDoc, err
+	}
+*/
 func (q *Query) DeleteAccount(identifier string) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	if err != nil {
@@ -41,7 +58,6 @@ func (q *Query) FindAccountIdentifier(identifier string) (*exports.AccountDocume
 	err = accountCol.FindOne(context.TODO(), filter).Decode(&dataFromCol)
 	return &dataFromCol, err
 }
-
 func (q *Query) GetAccountByEmail(email string) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
@@ -54,7 +70,30 @@ func (q *Query) GetAccountByEmail(email string) (*exports.AccountDocument, error
 	result := accountCol.FindOne(ctx, filterStruct)
 	accountDoc := exports.AccountDocument{}
 	err = result.Decode(&accountDoc)
+	//panic(fmt.Sprintf("%#v", accountDoc))
 	return &accountDoc, err
+}
+
+func (q *Query) GetAccounts(filters exports.FilterGetManyAccountDocuments) ([]exports.AccountDocument, error) {
+	var accounts []exports.AccountDocument
+	accountCol, err := q.Datasource.GetAccountCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	var filterStructs bson.A = bson.A{
+		bson.D{{"$expr", bson.M{"$regexMatch": bson.D{{"input", "$email"}, {"regex", filters.Email_eq}, {"options", "i"}}}}},
+	}
+	cursor, err := accountCol.Find(ctx, bson.D{{"$or", filterStructs}} /*bson.D{{"$or", filterStructs}}*/)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(context.Background(), &accounts)
+	fmt.Println(accounts)
+	if err != nil {
+		return nil, err
+	}
+	return accounts, err
 }
 
 func (q *Query) GetAccountsByEmails(emails []string) ([]exports.AccountDocument, error) {
@@ -79,7 +118,6 @@ func (q *Query) GetAccountsByEmails(emails []string) ([]exports.AccountDocument,
 	}
 	return accounts, err
 }
-
 func (q *Query) GetAccountsOfJudges() ([]exports.AccountDocument, error) {
 	var accounts []exports.AccountDocument
 	accountCol, err := q.Datasource.GetAccountCollection()
@@ -154,7 +192,7 @@ func (q *Query) CreateTeamMemberAccount(dataToSave *exports.CreateTeamMemberAcco
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	acc.Id = result.InsertedID
+	acc.Id = result.InsertedID.(primitive.ObjectID)
 	return &acc, err
 }
 
@@ -208,19 +246,21 @@ func (q *Query) CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (
 	}
 	fmt.Printf("%#v", result.InsertedID)
 	acc := &exports.AccountDocument{
+		Id:              result.InsertedID.(primitive.ObjectID),
 		Email:           dataToSave.Email,
 		FirstName:       dataToSave.FirstName,
 		LastName:        dataToSave.LastName,
 		PhoneNumber:     dataToSave.PhoneNumber,
 		Gender:          dataToSave.Gender,
 		Role:            dataToSave.Role,
+		Status:          dataToSave.Status,
 		IsEmailVerified: false,
 		HackathonId:     dataToSave.HackathonId,
 	}
 	return acc, nil
 }
 
-func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (interface{}, error) {
+func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
@@ -232,7 +272,14 @@ func (q *Query) CreateAccount(dataToSave *exports.CreateAccountData) (interface{
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	return dataToSave, nil
+	var acc exports.AccountDocument
+	resultFind := accountCol.FindOne(context.Background(), bson.M{"email": dataToSave.Email})
+	err = resultFind.Decode(&acc)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	return &acc, nil
 }
 
 func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAccountData) (*exports.AccountDocument, error) {
@@ -241,7 +288,7 @@ func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAc
 		fmt.Printf("%s\n", err.Error())
 		return nil, err
 	}
-	fmt.Println("Create")
+	fmt.Println("\nCreate")
 	acc := exports.AccountDocument{
 		Email:               dataToSave.Email,
 		PasswordHash:        dataToSave.PasswordHash,
@@ -265,7 +312,7 @@ func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAc
 		HackathonExperience: dataToSave.HackathonExperience,
 		PreviousProjects:    dataToSave.PreviousProjects,
 	}
-	fmt.Println("acciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+	fmt.Println(fmt.Sprintf("acciiiiiiiiii %s", dataToSave.Email))
 	ctx := context.Context(context.Background())
 	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {
@@ -276,13 +323,13 @@ func (q *Query) CreateParticipantAccount(dataToSave *exports.CreateParticipantAc
 	return &acc, err
 }
 
-func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.CreateJudgeAccountData, error) {
+func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	acc := exports.AccountDocument{
+	acc := &exports.AccountDocument{
 		Email:           dataToSave.Email,
 		PasswordHash:    dataToSave.PasswordHash,
 		FirstName:       dataToSave.FirstName,
@@ -295,18 +342,21 @@ func (q *Query) CreateJudgeAccount(dataToSave *exports.CreateJudgeAccountData) (
 		Status:          dataToSave.Status,
 		Bio:             dataToSave.Bio,
 	}
-	result, err := accountCol.InsertOne(ctx, &acc)
+	result, err := accountCol.InsertOne(ctx, acc)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 		return nil, err
 	}
 	fmt.Printf("%#v", result.InsertedID)
-	return dataToSave, err
+	acc.Id = result.InsertedID.(primitive.ObjectID)
+	return acc, err
 }
 
-func (q *Query) UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+func (q *Query) UpdateAccountInfoByEmail(filter *exports.UpdateAccountDocumentFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
-	fmt.Printf("%+v", filter)
+	if err != nil {
+		return nil, err
+	}
 	accountDoc := exports.AccountDocument{}
 	ctx := context.Context(context.Background())
 	defer ctx.Done()
@@ -318,12 +368,14 @@ func (q *Query) UpdateAccountInfoByEmail(filter *exports.UpdateAccountFilter, da
 	opts := []*options.FindOneAndUpdateOptions{{
 		ReturnDocument: &after,
 	}}
+	//panic(fmt.Sprintf("%s      %s", filter.Email, updateDoc))
 	result := accountCol.FindOneAndUpdate(ctx, bson.M{"email": filter.Email}, &updateDoc, opts...)
 	err = result.Decode(&accountDoc)
+	//panic(fmt.Sprintf("%s      %s", accountDoc, err))
 	return &accountDoc, err
 }
 
-func (q *Query) UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
+func (q *Query) UpdateParticipantInfoByEmail(filter *exports.UpdateAccountDocumentFilter, dataInput *exports.UpdateAccountDocument) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}
@@ -338,7 +390,7 @@ func (q *Query) UpdateParticipantInfoByEmail(filter *exports.UpdateAccountFilter
 	return &accountDoc, err
 }
 
-func (q *Query) UpdatePasswordByEmail(filter *exports.UpdateAccountFilter, newPasswordHash string) (*exports.AccountDocument, error) {
+func (q *Query) UpdatePasswordByEmail(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.AccountDocument, error) {
 	accountCol, err := q.Datasource.GetAccountCollection()
 	fmt.Printf("%+v", filter)
 	accountDoc := exports.AccountDocument{}

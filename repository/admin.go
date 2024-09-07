@@ -1,147 +1,131 @@
 package repository
 
 import (
-	"github.com/arravoco/hackathon_backend/config"
-	"github.com/arravoco/hackathon_backend/data"
-	"github.com/arravoco/hackathon_backend/dtos"
-	"github.com/arravoco/hackathon_backend/events"
+	"time"
+
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
-type Admin struct {
-	FirstName    string `json:"first_name"`
-	LastName     string `json:"last_name"`
-	Email        string `json:"email"`
-	passwordHash string
-	Gender       string `json:"gender"`
-	Role         string `json:"role"`
-	HackathonId  string `json:"hackathon_id"`
-	Status       string `json:"status"`
-	PhoneNumber  string `json:"phone_number"`
+type AdminAccountRepository struct {
+	DB exports.AdminDatasourceQueryMethods
 }
 
-func (ad *Admin) FillAdminEntity(email string) error {
-	acc, err := data.GetAccountByEmail(email)
-	if err != nil {
-		return err
+func NewAdminAccountRepository(datasource exports.AdminDatasourceQueryMethods) *AdminAccountRepository {
+	return &AdminAccountRepository{
+		DB: datasource,
 	}
-	ad.Email = acc.Email
-	ad.Role = acc.Role
-	ad.FirstName = acc.FirstName
-	ad.LastName = acc.LastName
-	ad.Gender = acc.Gender
-	ad.HackathonId = acc.HackathonId
-	ad.PhoneNumber = acc.PhoneNumber
-	ad.Status = acc.Status
-	return nil
 }
 
-func (ad *Admin) RegisterNewAdmin(dataInput *dtos.CreateNewAdminDTO) error {
+//exports.AdminRepositoryInterface
 
-	passwordHash, _ := exports.GenerateHashPassword(dataInput.Password)
-	acc, err := data.CreateAdminAccount(&exports.CreateAdminAccountData{
-		Role:         "ADMIN",
-		Email:        dataInput.Email,
+func (ad *AdminAccountRepository) CreateAdminAccount(dataInput *exports.CreateAdminAccountRepositoryDTO) (*exports.AdminAccountRepository, error) {
+
+	acc, err := ad.DB.CreateAdminAccount(&exports.CreateAdminAccountData{
 		FirstName:    dataInput.FirstName,
 		LastName:     dataInput.LastName,
-		PasswordHash: passwordHash,
+		Email:        dataInput.Email,
+		PasswordHash: dataInput.PasswordHash,
 		PhoneNumber:  dataInput.PhoneNumber,
-		HackathonId:  config.GetHackathonId(),
-		Status:       "EMAIL_UNVERIFIED",
+		Gender:       dataInput.Gender,
+		HackathonId:  dataInput.HackathonId,
+		Status:       dataInput.Status,
+		Role:         "ADMIN",
+		CreatedAt:    time.Now(),
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// raise event
+	/* raise event
 	events.EmitAdminAccountCreated(&exports.AdminAccountCreatedEventData{
 		Email:     acc.Email,
 		LastName:  acc.LastName,
 		FirstName: acc.FirstName,
 		EventData: exports.EventData{EventName: string(events.AdminAccountCreatedEvent)},
-	})
+	})*/
 
-	ad.passwordHash = acc.PasswordHash
-	ad.Email = acc.Email
-	ad.FirstName = acc.FirstName
-	ad.LastName = acc.LastName
-	ad.HackathonId = acc.HackathonId
-	ad.Gender = acc.Gender
-	ad.Role = acc.Role
-
-	return nil
+	return &exports.AdminAccountRepository{
+		Id:           acc.Id.Hex(),
+		FirstName:    acc.FirstName,
+		LastName:     acc.LastName,
+		Email:        acc.Email,
+		Role:         acc.Role,
+		Gender:       acc.Gender,
+		HackathonId:  acc.HackathonId,
+		Status:       acc.Status,
+		PhoneNumber:  acc.PhoneNumber,
+		PasswordHash: acc.PasswordHash,
+	}, nil
 }
 
-func (ad *Admin) AdminCreateNewAdminProfile(dataInput *dtos.CreateNewAdminByAuthAdminDTO) error {
-	password := exports.GeneratePassword()
-	passwordHash, err := exports.GenerateHashPassword(password)
+func (ad *AdminAccountRepository) GetAdminAccountByEmail(email string) (*exports.AdminAccountRepository, error) {
+	acc, err := ad.DB.GetAccountByEmail(email)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	acc, err := data.CreateAdminAccount(&exports.CreateAdminAccountData{
-		Role:         "ADMIN",
-		Email:        dataInput.Email,
-		FirstName:    dataInput.FirstName,
-		LastName:     dataInput.LastName,
-		Gender:       dataInput.Gender,
-		PhoneNumber:  dataInput.PhoneNumber,
-		HackathonId:  config.GetHackathonId(),
-		PasswordHash: passwordHash,
-		Status:       "INVITED",
-	})
-	if err != nil {
-		return err
-	}
-	// raise event
-	events.EmitAdminAccountCreatedByAdmin(&exports.AdminAccountCreatedByAdminEventData{
-		Email:       acc.Email,
-		AdminName:   acc.FirstName,
-		EventData:   exports.EventData{EventName: string(events.AdminAccountCreatedByAdminEvent)},
-		Password:    password,
-		InviterName: acc.FirstName,
-	})
 
-	ad.passwordHash = acc.PasswordHash
-	ad.Email = acc.Email
-	ad.FirstName = acc.FirstName
-	ad.LastName = acc.LastName
-	ad.HackathonId = acc.HackathonId
-	ad.Gender = acc.Gender
-	ad.Role = acc.Role
-
-	return nil
+	return &exports.AdminAccountRepository{
+		Id:           acc.Id.Hex(),
+		FirstName:    acc.FirstName,
+		LastName:     acc.LastName,
+		Email:        acc.Email,
+		Role:         acc.Role,
+		Gender:       acc.Gender,
+		HackathonId:  acc.HackathonId,
+		Status:       acc.Status,
+		PhoneNumber:  acc.PhoneNumber,
+		PasswordHash: acc.PasswordHash,
+	}, nil
 }
 
-func (ad *Admin) AdminCreateNewJudgeProfile(dataInput *dtos.CreateNewJudgeByAdminDTO) error {
-	password := exports.GeneratePassword()
-	passwordHash, err := exports.GenerateHashPassword(password)
+func (ad *AdminAccountRepository) GetAdminAccounts(opts exports.FilterGetManyAccountRepositories) ([]exports.AdminAccountRepository, error) {
+	accs, err := ad.DB.GetAccounts(exports.FilterGetManyAccountDocuments{})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	acc, err := data.CreateJudgeAccount(&exports.CreateJudgeAccountData{
-		CreateAccountData: exports.CreateAccountData{
-			Role:         "JUDGE",
-			Email:        dataInput.Email,
-			FirstName:    dataInput.FirstName,
-			LastName:     dataInput.LastName,
-			Gender:       dataInput.Gender,
-			PhoneNumber:  dataInput.PhoneNumber,
-			HackathonId:  config.GetHackathonId(),
-			PasswordHash: passwordHash,
-			Status:       "INVITED",
-		}, Bio: dataInput.Bio,
-	})
-	if err != nil {
-		return err
+	var accRepos []exports.AdminAccountRepository
+	for _, acc := range accs {
+		accRepos = append(accRepos, exports.AdminAccountRepository{
+			Id:           acc.Id.Hex(),
+			FirstName:    acc.FirstName,
+			LastName:     acc.LastName,
+			Email:        acc.Email,
+			Role:         acc.Role,
+			Gender:       acc.Gender,
+			HackathonId:  acc.HackathonId,
+			Status:       acc.Status,
+			PhoneNumber:  acc.PhoneNumber,
+			PasswordHash: acc.PasswordHash,
+		})
 	}
-	// raise event
-	events.EmitJudgeAccountCreatedByAdmin(&exports.JudgeAccountCreatedByAdminEventData{
-		InviteeEmail: acc.Email,
-		JudgeName:    acc.FirstName,
-		JudgeEmail:   acc.Email,
-		InviterName:  acc.FirstName,
-		EventData:    exports.EventData{EventName: string(events.JudgeAccountCreatedByAdminEvent)},
-		Password:     password,
-	})
+	return accRepos, nil
+}
 
-	return nil
+func (ad *AdminAccountRepository) UpdateAdminAccount(filter *exports.UpdateAccountRepositoryFilter, dataInput *exports.UpdateAdminAccountRepository) (*exports.AdminAccountRepository, error) {
+	acc, err := ad.DB.UpdateAccountInfoByEmail(&exports.UpdateAccountDocumentFilter{
+		Email:       filter.Email,
+		PhoneNumber: filter.PhoneNumber,
+	}, &exports.UpdateAccountDocument{
+		FirstName:         dataInput.FirstName,
+		LastName:          dataInput.LastName,
+		Gender:            dataInput.Gender,
+		State:             dataInput.State,
+		IsEmailVerified:   dataInput.IsEmailVerified,
+		IsEmailVerifiedAt: dataInput.IsEmailVerifiedAt,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &exports.AdminAccountRepository{
+		Id:           acc.Id.Hex(),
+		FirstName:    acc.FirstName,
+		LastName:     acc.LastName,
+		Email:        acc.Email,
+		Role:         acc.Role,
+		Gender:       acc.Gender,
+		HackathonId:  acc.HackathonId,
+		Status:       acc.Status,
+		PhoneNumber:  acc.PhoneNumber,
+		PasswordHash: acc.PasswordHash,
+	}, nil
 }

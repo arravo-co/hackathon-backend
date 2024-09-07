@@ -34,36 +34,70 @@ type AuthUtilsBasicLoginSuccessData struct {
 	Gender              string    `json:"gender"`
 	State               string    `json:"state"`
 	passwordHash        string
-	Role                string       `json:"role"`
-	HackathonId         string       `json:"hackathon_id"`
-	Status              string       `json:"status"`
-	PhoneNumber         string       `json:"phone_number"`
-	Age                 int          `json:"age"`
-	DOB                 time.Time    `json:"dob"`
-	ParticipantId       string       `json:"participant_id"`
-	TeamLeadEmail       string       `json:"team_lead_email"`
-	TeamName            string       `json:"team_name"`
-	TeamRole            string       `json:"team_role"`
-	Type                string       `json:"type"`
-	CoParticipantEmails []string     `json:"co_participant_emails"`
-	ParticipantEmail    string       `json:"participant_email"`
-	InviteList          []InviteInfo `json:"invite_list"`
-	Skillset            []string     `json:"skillset"`
-	Solution            *struct {
-		Id               string `json:"id"`
-		Title            string `json:"title"`
-		Description      string `json:"description"`
-		SolutionImageUrl string `json:"solution_image_url"`
-		CreatorId        string `json:"creator_id"`
-	} `json:"solution"`
-	Bio                 string   `bson:"bio,omitempty"`
-	EmploymentStatus    string   `bson:"employment_status,omitempty"`
-	ExperienceLevel     string   `bson:"experience_level,omitempty"`
-	Motivation          string   `bson:"motivation,omitempty"`
-	HackathonExperience string   `bson:"hackathon_experience,omitempty"`
-	YearsOfExperience   int      `bson:"years_of_experience,omitempty"`
-	FieldOfStudy        string   `bson:"field_of_study,omitempty"`
-	PreviousProjects    []string `bson:"previous_projects,omitempty"`
+	AccountRole         string                                  `json:"role"`
+	HackathonId         string                                  `json:"hackathon_id"`
+	AccountStatus       string                                  `json:"account_status"`
+	ParticipantStatus   string                                  `json:"participant_status"`
+	PhoneNumber         string                                  `json:"phone_number"`
+	Age                 int                                     `json:"age"`
+	DOB                 time.Time                               `json:"dob"`
+	ParticipantId       string                                  `json:"participant_id"`
+	TeamLeadEmail       string                                  `json:"team_lead_email"`
+	TeamName            string                                  `json:"team_name"`
+	TeamRole            string                                  `json:"team_role"`
+	Type                string                                  `json:"type"`
+	CoParticipants      []AuthUtilsParticipantCoParticipantInfo `json:"co_participants"`
+	ParticipantEmail    string                                  `json:"participant_email"`
+	InviteList          []ParticipantDocumentTeamInviteInfo     `json:"invite_list"`
+	Skillset            []string                                `json:"skillset"`
+	Solution            *AuthUtilsParticipantSolutionInfo       `json:"solution"`
+	Bio                 string                                  `json:"bio,omitempty"`
+	EmploymentStatus    string                                  `json:"employment_status,omitempty"`
+	ExperienceLevel     string                                  `json:"experience_level,omitempty"`
+	Motivation          string                                  `json:"motivation,omitempty"`
+	HackathonExperience string                                  `json:"hackathon_experience,omitempty"`
+	YearsOfExperience   int                                     `json:"years_of_experience,omitempty"`
+	FieldOfStudy        string                                  `json:"field_of_study,omitempty"`
+	PreviousProjects    []string                                `json:"previous_projects,omitempty"`
+	ProfilePictureUrl   string                                  `json:"profile_picture_url,omitempty"`
+	CreatedAt           time.Time                               `json:"created_at,omitempty"`
+	UpdatedAt           time.Time                               `json:"updated_at,omitempty"`
+}
+
+type AuthUtilsParticipantCoParticipantInfo struct {
+	AccountId           string    `json:"account_id"`
+	FirstName           string    `json:"first_name"`
+	LastName            string    `json:"last_name"`
+	Email               string    `json:"email"`
+	Gender              string    `json:"gender"`
+	State               string    `json:"state"`
+	Age                 int       `json:"age"`
+	DOB                 time.Time `json:"dob"`
+	AccountStatus       string    `json:"account_status"`
+	AccountRole         string    `json:"account_role"`
+	TeamRole            string    `json:"team_role"`
+	ParticipantId       string    `json:"participant_id"`
+	HackathonId         string    `json:"hackathon_id"`
+	Skillset            []string  `json:"skillset"`
+	PhoneNumber         string    `json:"phone_number"`
+	EmploymentStatus    string    `json:"employment_status"`
+	ExperienceLevel     string    `json:"experience_level"`
+	Motivation          string    `json:"motivation"`
+	HackathonExperience string    `json:"hackathon_experience"`
+	YearsOfExperience   int       `json:"years_of_experience"`
+	FieldOfStudy        string    `json:"field_of_study"`
+	PreviousProjects    []string  `json:"previous_projects"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at"`
+}
+
+type AuthUtilsParticipantSolutionInfo struct {
+	Id               string `json:"id"`
+	Title            string `json:"title"`
+	Description      string `json:"description"`
+	Objective        string `json:"objective"`
+	SolutionImageUrl string `json:"solution_image_url"`
+	CreatorId        string `json:"creator_id"`
 }
 
 type jwtCustomClaims struct {

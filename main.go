@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/arravoco/hackathon_backend/config"
-	"github.com/arravoco/hackathon_backend/data"
-	"github.com/arravoco/hackathon_backend/db"
+	consumerhandlers "github.com/arravoco/hackathon_backend/consumer_handlers"
+	"github.com/arravoco/hackathon_backend/consumers"
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
-	"github.com/arravoco/hackathon_backend/jobs"
-	"github.com/arravoco/hackathon_backend/publish"
-	rabbitutils "github.com/arravoco/hackathon_backend/rabbitUtils"
-	"github.com/arravoco/hackathon_backend/rmqUtils"
+	"github.com/arravoco/hackathon_backend/publishers"
+	"github.com/arravoco/hackathon_backend/resources"
 
 	//"github.com/arravoco/hackathon_backend/jobs"
 
@@ -39,21 +38,15 @@ import (
 // @Server http://localhost:5000 Localhost
 // @Server https://hackathon-backend-2cvk.onrender.com Development
 func main() {
-	//consumer.Cleanup()
-	/*
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-		defer stop()
-		shutdown, err := opentel.Setup(ctx)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer func() {
-			err = errors.Join(err, shutdown(ctx))
-		}()
-	*/
 	prometheus.MustRegister(exports.MyFirstCounter)
 	security.GenerateKeys()
 
+	/*rmqUtils.SetupDefaultQueue()
+	data.SetupDefaultDataSource()
+	rabbitutils.SetupDefaultRMQ()
+	rabbitutils.DeclareAllQueues()
+	publish.SetPublisher(&rabbitutils.RMQPublisher{})*/
+	//panic("Intentionally crashed")
 	e := echo.New()
 	port := config.GetPort()
 	routes_v1.StartAllRoutes(e)
@@ -64,77 +57,107 @@ func main() {
 	})
 	fmt.Println("Starting metrics")
 	e.Logger.Info(port)
-	/*
-	 */
-	/*
-		q, err := queue.GetQueue("play_list")
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		byt, err := json.Marshal(exports.PlayQueuePayload{Time: time.Now()})
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		err = q.PublishBytes(byt)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	*/
+	res := resources.GetDefaultResources()
+	publishChannel, err := res.RabbitMQConn.Channel()
+	if err != nil {
+		res.Logger.Fatal(err.Error())
+	}
+	/*rmqPushlisher := publishers.NewRMQPublisherWithChannel(publishChannel)
+	rmqPushlisher.DeclareAllExchanges()
+	res.Logger.Sugar().Infoln(rmqPushlisher)*/
 
-	//go jobs.StartConsumingPlayQueue()
-	//go startAllJobs()
-	db.SetupRedis()
-	rmqUtils.SetupDefaultQueue()
-	data.SetupDefaultDataSource()
-	rabbitutils.SetupRMQ()
-	rabbitutils.DeclareAllQueues()
-	publish.SetPublisher(&rabbitutils.Publisher{})
-	go rabbitutils.ListenToAllQueues()
-	//panic("Intentionally crashed")
+	publishers.DeclareAllExchanges(publishChannel)
+
+	consumerChannel, err := res.RabbitMQConn.Channel()
+	if err != nil {
+		res.Logger.Fatal(err.Error())
+	}
+
+	time.Sleep(time.Second * 10)
+	rmqConsumer := consumers.NewRMQConsumerWithChannel(consumers.CreateRMQConsumerOpts{
+		Channel:       consumerChannel,
+		Logger:        res.Logger,
+		RMQConnection: res.RabbitMQConn,
+	})
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToAdmin,
+			exports.AdminsExchange,
+			exports.SendAdminWelcomeEmailQueueName,
+			exports.AdminSendWelcomeEmailBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToAdminRegisteredByAdmin,
+			exports.AdminsExchange,
+			exports.SendAdminRegisteredByAdminWelcomeEmailQueueName,
+			exports.AdminRegisteredByAdminSendWelcomeEmailBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudgeRegisteredByAdmin,
+			exports.JudgesExchange,
+			exports.SendJudgeWelcomeEmailQueueName,
+			exports.SendJudgeWelcomeEmailQueueBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudge,
+			exports.JudgesExchange,
+			exports.SendJudgeRegisteredByAdminWelcomeEmailQueueName,
+			exports.JudgeRegisteredByAdminSendWelcomeEmailBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendTeamLeadWelcomeAndVerificationEmail,
+			exports.ParticipantsExchange,
+			exports.SendTeamLeadWelcomeEmailQueueName,
+			exports.SendTeamLeadWelcomeEmailQueueBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	//ParticipantTeamMemberSendWelcomeEmailRoutingKeyName
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendTeamMemberWelcomeAndVerificationEmail,
+			exports.ParticipantsExchange,
+			exports.SendTeamMemberWelcomeEmailQueueName,
+			exports.ParticipantTeamMemberSendWelcomeEmailRoutingKeyName)
+		fmt.Println(err)
+	}()
+
+	//invite list jobs
+	go func() {
+		rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendInviteEmailQueueHandler,
+			exports.InvitationsExchange,
+			exports.SendParticipantTeammateInvitationEmailQueueName,
+			exports.ParticipantTeammateSendInvitationEmailBindingKeyName)
+	}()
+
+	//uploads jobs
+	go func() {
+		rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.HandleUploadJudgeProfilePicConsumption,
+			exports.UploadJobsExchange,
+			exports.UploadJudgeProfilePicQueueName,
+			exports.UploadJudgeProfilePicBindingKeyName)
+	}()
+	//HandleUploadJudgeProfilePicConsumption
+
 	e.Logger.Fatal(e.Start(getURL(port)))
 }
 
 func getURL(port int) string {
 	return strings.Join([]string{"", strconv.Itoa(port)}, ":")
-}
-
-func startAllJobs() {
-
-	judgeCreatedByAdminWelcomeEmailTaskConsumer, err := jobs.StartConsumingJudgeCreatedByAdminWelcomeEmailQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	adminCreatedByAdminWelcomeEmailTaskConsumer, err := jobs.StartConsumingAdminCreatedByAdminWelcomeEmailQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	adminWelcomeEmailTaskConsumer, err := jobs.StartAdminWelcomeEmailQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	invitelistTaskConsumer, err := jobs.StartConsumingInviteTaskQueue()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	for {
-		select {
-		case err := <-rmqUtils.ErrCh:
-			fmt.Println(err.Error())
-		case <-adminCreatedByAdminWelcomeEmailTaskConsumer.Ch:
-			fmt.Println("'adminCreatedByAdminWelcomeEmailTaskConsumer' task completed successfully")
-
-		case <-adminWelcomeEmailTaskConsumer.Ch:
-			fmt.Println("'adminWelcomeEmailTaskConsumer' Task completed")
-		case <-judgeCreatedByAdminWelcomeEmailTaskConsumer.Ch:
-			fmt.Println("mail to judge created by admin list task completed successfully")
-		case <-invitelistTaskConsumer.Ch:
-			fmt.Println("Invite list task completed successfully")
-		}
-	}
 }

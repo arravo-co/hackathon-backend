@@ -25,7 +25,7 @@ func (q *Query) CreateSolutionData(dataInput *exports.CreateSolutionData) (*expo
 		CreatedAt:   time.Now(),
 	}
 	result, err := solutionCol.InsertOne(context.Background(), dataFromCol)
-	dataFromCol.Id = result.InsertedID
+	dataFromCol.Id = result.InsertedID.(primitive.ObjectID)
 	return &dataFromCol, err
 }
 

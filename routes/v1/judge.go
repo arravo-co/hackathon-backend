@@ -7,19 +7,23 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/aidarkhanov/nanoid"
+	"github.com/arravoco/hackathon_backend/di"
 	"github.com/arravoco/hackathon_backend/dtos"
+	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/publish"
-	"github.com/arravoco/hackathon_backend/repository"
+	"github.com/arravoco/hackathon_backend/services"
 	taskmgt "github.com/arravoco/hackathon_backend/task_mgt"
 	"github.com/arravoco/hackathon_backend/utils"
+	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/labstack/echo/v4"
 )
 
 type RegisterJudgeSuccessResponse struct {
-	Code    int                            `json:"code"`
-	Message string                         `json:"message"`
-	Data    exports.CreateJudgeAccountData `data:"data"`
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Data    *entity.Judge `data:"data"`
 }
 type RegisterJudgeFailResponse struct {
 	Code    int    `json:"code"`
@@ -27,9 +31,9 @@ type RegisterJudgeFailResponse struct {
 }
 
 type UpdateJudgeSuccessResponse struct {
-	Code    int               `json:"code"`
-	Message string            `json:"message"`
-	Data    *repository.Judge `data:"data"`
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Data    *entity.Judge `data:"data"`
 }
 type UpdateJudgeFailResponse struct {
 	Code    int    `json:"code"`
@@ -37,15 +41,15 @@ type UpdateJudgeFailResponse struct {
 }
 
 type GetJudgeSuccessResponse struct {
-	Code    int               `json:"code"`
-	Message string            `json:"message"`
-	Data    *repository.Judge `data:"data"`
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Data    *entity.Judge `data:"data"`
 }
 
 type GetJudgesSuccessResponse struct {
-	Code    int                 `json:"code"`
-	Message string              `json:"message"`
-	Data    []*repository.Judge `data:"data"`
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Data    []*entity.Judge `data:"data"`
 }
 
 // @Title Register New Judge
@@ -58,6 +62,7 @@ type GetJudgesSuccessResponse struct {
 // @Failure		400	{object}	RegisterJudgeFailResponse
 // @Router			/api/v1/judges              [post]
 func RegisterJudge(c echo.Context) error {
+	tokenData := authutils.GetAuthPayload(c)
 	data := dtos.RegisterNewJudgeDTO{}
 	err := c.Bind(&data)
 	if err != nil {
@@ -66,7 +71,11 @@ func RegisterJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	newJudge := repository.Judge{}
+	password := nanoid.Must(nanoid.Generate("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456456789@#$%^&*()+_", 10))
+	if data.Password == "" {
+		data.Password = password
+		data.ConfirmPassword = password
+	}
 	err = validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
@@ -74,7 +83,20 @@ func RegisterJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	responseData, err := newJudge.Register(data)
+	dataInputToService := &services.RegisterNewJudgeDTO{
+		FirstName:       data.FirstName,
+		LastName:        data.LastName,
+		Email:           data.Email,
+		Bio:             data.Bio,
+		Password:        data.Password,
+		ConfirmPassword: data.ConfirmPassword,
+		Gender:          data.Gender,
+		State:           data.State,
+		InviterEmail:    tokenData.Email,
+		InviterName:     tokenData.FirstName,
+	}
+	serv := services.GetServiceWithDefaultRepositories()
+	responseData, err := serv.RegisterNewJudge(dataInputToService)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
 			Code:    echo.ErrBadRequest.Code,
@@ -83,11 +105,11 @@ func RegisterJudge(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, &RegisterJudgeSuccessResponse{
 		Code: http.StatusCreated,
-		Data: *responseData,
+		Data: responseData,
 	})
 }
 
-// @Title Register New Judge
+// @Title Update Judge info
 // @Description	Register new judge
 // @Summary		Register New Judge
 // @Tags			Judges
@@ -105,9 +127,6 @@ func UpdateJudge(c echo.Context) error {
 		State:     c.FormValue("state"),
 		Bio:       c.FormValue("bio"),
 	}
-	newJudge := &repository.Judge{
-		Email: email,
-	}
 	err := validate.Struct(data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
@@ -115,8 +134,12 @@ func UpdateJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-
-	err = newJudge.UpdateJudgeProfile(dtos.UpdateJudgeDTO{
+	var judge exports.JudgeRepositoryInterface = di.GetDefaultJudgeRepository()
+	var cfg *services.ServiceConfig = &services.ServiceConfig{
+		JudgeAccountRepository: judge,
+	}
+	serv := services.NewService(cfg)
+	judgeEnt, err := serv.UpdateJudgeInfo(email, &services.UpdateJudgeDTO{
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 		Gender:    data.Gender,
@@ -128,7 +151,6 @@ func UpdateJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-
 	profPic, err := c.FormFile("profile_picture")
 	ch := make(chan interface{})
 	if profPic != nil {
@@ -157,7 +179,6 @@ func UpdateJudge(c echo.Context) error {
 				Email:    email,
 				FilePath: filePath,
 				QueuePayload: exports.QueuePayload{
-
 					TaskId: tsk.Id,
 				},
 			}
@@ -183,12 +204,11 @@ func UpdateJudge(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, &UpdateJudgeSuccessResponse{
 		Code: http.StatusCreated,
-		Data: newJudge,
+		Data: judgeEnt,
 	})
-
 }
 
-// @Title Register New Judge
+// @Title Get Judges
 // @Description	Register new judge
 // @Summary		Register New Judge
 // @Tags			Judges
@@ -197,7 +217,8 @@ func UpdateJudge(c echo.Context) error {
 // @Failure		400	{object}	RegisterJudgeFailResponse
 // @Router			/api/v1/judges             [get]
 func GetJudges(c echo.Context) error {
-	judges, err := repository.GetJudges()
+	serv := services.GetServiceWithDefaultRepositories()
+	ents, err := serv.GetJudges()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
 			Code:    echo.ErrBadRequest.Code,
@@ -206,16 +227,16 @@ func GetJudges(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, &GetJudgesSuccessResponse{
 		Code: http.StatusCreated,
-		Data: judges,
+		Data: ents,
 	})
 }
 
-// @Title Register New Judge
-// @Description	Register new judge
-// @Summary		Register New Judge
+// @Title Get Judge by Email Address
+// @Description	Get Judge by Email Address
+// @Summary		Get Judge by Email Address
 // @Tags			Judges
 // @Produce		json
-// @Param email path string true "Create Judge profile"
+// @Param email path string true "Get Judge by Email Address"
 // @Success		200	{object}	GetJudgeSuccessResponse
 // @Failure		400	{object}	RegisterJudgeFailResponse
 // @Router			/api/v1/judges/{email}               [get]
@@ -227,8 +248,8 @@ func GetJudgeByEmailAddress(c echo.Context) error {
 			Message: "Email address cannot be empty",
 		})
 	}
-	newJudge := &repository.Judge{}
-	err := newJudge.FillJudgeEntity(email)
+	serv := services.GetServiceWithDefaultRepositories()
+	judgeEnt, err := serv.GetJudgeByEmail(email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &RegisterJudgeFailResponse{
 			Code:    echo.ErrBadRequest.Code,
@@ -237,6 +258,6 @@ func GetJudgeByEmailAddress(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, &GetJudgeSuccessResponse{
 		Code: http.StatusCreated,
-		Data: newJudge,
+		Data: judgeEnt,
 	})
 }

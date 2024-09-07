@@ -2,7 +2,7 @@ package entity
 
 import "time"
 
-type TeamMemberAccount struct {
+type TeamMemberWithParticipantRecord struct {
 	Email           string   `json:"email"`
 	AccountId       string   `json:"account_id,omitempty"`
 	FirstName       string   `json:"first_name"`

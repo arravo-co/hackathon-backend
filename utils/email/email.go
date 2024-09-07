@@ -25,6 +25,114 @@ type SendEmailHtmlData struct {
 	Message string
 }
 
+type SendWelcomeEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+	TTL       int
+	Token     string
+	Link      string
+}
+
+type SendTeamLeadWelcomeEmailData struct {
+	SendWelcomeEmailData
+	TeamName string
+}
+
+type SendTeamMemberWelcomeEmailData struct {
+	SendWelcomeEmailData
+	TeamName     string
+	TeamLeadName string
+}
+type SendIndividualWelcomeEmailData struct {
+	SendWelcomeEmailData
+}
+
+type SendJudgeWelcomeEmailData struct {
+	JudgeName string
+	Email     string
+	Subject   string
+	TTL       int
+	Token     string
+	Link      string
+}
+
+type SendJudgeCreatedByAdminWelcomeEmailData struct {
+	Name        string
+	Email       string
+	Subject     string
+	TTL         int
+	Token       string
+	Link        string
+	InviterName string
+	Password    string
+}
+type SendTeamInviteEmailData struct {
+	InviterName  string
+	InviteeName  string
+	InviterEmail string
+	InviteeEmail string
+	Subject      string
+	TTL          int
+	Link         string
+}
+
+type SendAdminWelcomeEmailData struct {
+	FirstName string
+	LastName  string
+	Email     string
+	Subject   string
+	TTL       int
+	Token     string
+	Link      string
+}
+
+type SendAdminCreatedByAdminWelcomeEmailData struct {
+	AdminName   string
+	InviterName string
+	Email       string
+	Subject     string
+	TTL         int
+	Token       string
+	Password    string
+	Link        string
+}
+
+type SendEmailVerificationEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+	Token     string
+	TokenTTL  time.Time
+	Link      string
+}
+
+type SendEmailVerificationCompleteEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+}
+
+type SendPasswordRecoveryEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+	Token     string
+	Link      string
+	TTL       uint32
+}
+
+type SendPasswordRecoveryCompleteEmailData struct {
+	LastName  string
+	FirstName string
+	Email     string
+	Subject   string
+}
+
 func SendEmailHtml(data *SendEmailHtmlData) error {
 	apiKey := config.GetResendAPIKey()
 
@@ -72,80 +180,13 @@ func SendEmail(data *SendEmailData) error {
 	return nil
 }
 
-type SendWelcomeEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-	TTL       int
-	Token     string
-	Link      string
-}
-
-type SendTeamLeadWelcomeEmailData struct {
-	SendWelcomeEmailData
-}
-type SendIndividualWelcomeEmailData struct {
-	SendWelcomeEmailData
-}
-
-type SendJudgeWelcomeEmailData struct {
-	JudgeName   string
-	Email       string
-	Subject     string
-	TTL         int
-	Token       string
-	Link        string
-	InviterName string
-}
-
-type SendJudgeCreatedByAdminWelcomeEmailData struct {
-	Name        string
-	Email       string
-	Subject     string
-	TTL         int
-	Token       string
-	Link        string
-	InviterName string
-	Password    string
-}
-type SendTeamInviteEmailData struct {
-	InviterName  string
-	InviteeName  string
-	InviterEmail string
-	InviteeEmail string
-	Subject      string
-	TTL          int
-	Link         string
-}
-
-type SendAdminWelcomeEmailData struct {
-	FirstName string
-	LastName  string
-	Email     string
-	Subject   string
-	TTL       int
-	Token     string
-	Link      string
-}
-
-type SendAdminCreatedByAdminWelcomeEmailData struct {
-	AdminName   string
-	InviterName string
-	Email       string
-	Subject     string
-	TTL         int
-	Token       string
-	Password    string
-	Link        string
-}
-
-func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) {
-	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
+func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/team_lead_welcome_and_verify_email.go.tmpl"))
 	var buf bytes.Buffer
 	err := tmpl.Execute(&buf, data)
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
 	body := buf.String()
 	err = SendEmailHtml(&SendEmailHtmlData{
@@ -155,7 +196,30 @@ func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) {
 	})
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
+	return nil
+}
+
+func SendTeamMemberWelcomeEmail(data *SendTeamMemberWelcomeEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/team_member_welcome_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
 }
 
 func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData) {
@@ -176,12 +240,13 @@ func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData)
 	}
 }
 
-func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) {
+func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) error {
 	tmpl := template.Must(template.ParseFiles("templates/judge_welcome_and_verify_email.go.tmpl"))
 	var buf bytes.Buffer
 	err := tmpl.Execute(&buf, data)
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
 	body := buf.String()
 	err = SendEmailHtml(&SendEmailHtmlData{
@@ -191,7 +256,9 @@ func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) {
 	})
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
+	return nil
 }
 
 func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {
@@ -203,16 +270,6 @@ func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {
 		Message: body,
 		Subject: data.Subject,
 	})
-}
-
-type SendEmailVerificationEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-	Token     string
-	TokenTTL  time.Time
-	Link      string
 }
 
 func SendEmailVerificationEmail(dataInput *SendEmailVerificationEmailData) {
@@ -250,13 +307,6 @@ func SendEmailVerificationEmail(dataInput *SendEmailVerificationEmailData) {
 	})
 }
 
-type SendEmailVerificationCompleteEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-}
-
 func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationCompleteEmailData) {
 	body := hermes.Body{
 		Name: strings.Join([]string{}, " "),
@@ -265,7 +315,7 @@ func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationComplete
 			"Your email has been successfully verified.",
 		},
 		Outros: []string{
-			"If you have any questions, feel free to contact us at support@arravo.co",
+			"If you have any questions, feel free to contact us at appdev@arravo.co",
 			"Thank you for joining Arravo Hackathon!",
 		},
 	}
@@ -275,16 +325,6 @@ func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationComplete
 		Message: &body,
 		Subject: dataInput.Subject,
 	})
-}
-
-type SendPasswordRecoveryEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-	Token     string
-	Link      string
-	TTL       uint32
 }
 
 func SendPasswordRecoveryEmail(data *SendPasswordRecoveryEmailData) error {
@@ -304,13 +344,6 @@ func SendPasswordRecoveryEmail(data *SendPasswordRecoveryEmailData) error {
 		Subject: data.Subject,
 	})
 	return err
-}
-
-type SendPasswordRecoveryCompleteEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
 }
 
 func SendPasswordRecoveryCompleteEmail(dataInput *SendPasswordRecoveryCompleteEmailData) {

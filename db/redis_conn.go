@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/arravoco/hackathon_backend/config"
@@ -21,21 +20,16 @@ func GetDefaultRedisClient() *redis.Client {
 	if DefaultRedisClient != nil {
 		return DefaultRedisClient
 	}
-	DefaultRedisClient = NewRedisClient()
+	DefaultRedisClient = NewRedisDefaultClient()
 	return DefaultRedisClient
 }
 
-func NewRedisClient() *redis.Client {
+func NewRedisDefaultClient() *redis.Client {
 	url := config.GetRedisURL()
 	opts, err := redis.ParseURL(url)
 	if err != nil {
 		fmt.Printf("\n%v\n", err)
 	}
 	DefaultRedisClient = redis.NewClient(opts)
-	pong, err := DefaultRedisClient.Ping(context.Background()).Result()
-	if err != nil {
-		fmt.Printf("\n%v\n", err)
-	}
-	fmt.Println(pong)
 	return DefaultRedisClient
 }

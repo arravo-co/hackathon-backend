@@ -20,7 +20,7 @@
   </p>
 
   <p style="text-align:center;">
-    <strong>{{.Token}}</strong>
+    {{.Link}} <!-- Display the actual link instead of the token. -->
   </p>
 
   <p>
@@ -31,16 +31,15 @@
     Next, you can login with the following credentials.
   </p>
 
-<p style="text-align:center">
-  <span>Email: <strong>{{.Email}}</strong></span>
-</p>
+  <p style="text-align:center">
+    <span>Email: <strong>{{.Email}}</strong></span>
+  </p>
 
+  <p style="text-align:center">
+    <span>Password: <strong>{{.Password}}</strong></span>
+  </p>
 
-<p style="text-align:center">
-  <span>Password: <strong>{{.Password}}</strong></span>
-</p>
-
-<p>You are urged to change your password as soon as you login</p>
+  <p>You are urged to change your password as soon as you login</p>
 
   <p>
     If you require any assistance or have inquiries, please don't hesitate to reply to this email. We are here to support you!

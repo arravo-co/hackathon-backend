@@ -52,3 +52,24 @@ type ChangePasswordData struct {
 	OldPassword string
 	NewPassword string
 }
+
+type GenerateTokenArgs struct {
+	Token          string
+	TokenType      string
+	TokenTypeValue string
+	Scope          string
+	TTL            time.Time
+	Status         string
+}
+
+type TokenData struct {
+	Id             string
+	Token          string
+	TokenType      string
+	TokenTypeValue string
+	Scope          string
+	TTL            time.Time
+	Status         string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}

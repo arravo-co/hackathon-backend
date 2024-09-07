@@ -23,11 +23,16 @@ type AuthUserInfoUpdateDTO struct {
 	State     string `json:"state,omitempty"`
 }
 
-type AuthParticipantInfoUpdateDTO struct {
-	AuthUserInfoUpdateDTO
-	GithubAddress   string `validate:"url,omitempty" json:"github_address"`
-	LinkedInAddress string `validate:"url,omitempty" json:"linkedIn_address"`
-	SolutionId      string `validate:"url,omitempty" json:"solution_id"`
+type AdminParticipantInfoUpdateDTO struct {
+	/*FirstName string `validate:"min=2,omitempty" json:"first_name"`
+	LastName  string `validate:"min=2,omitempty" json:"last_name"`
+	Email     string `validate:"email,omitempty" json:"email"`
+	Gender    string `validate:"oneof=MALE FEMALE,omitempty" json:"gender"`
+	State     string `json:"state,omitempty"`*/
+
+	Status        string `json:"status,omitempty"`
+	ReviewRanking int    `json:"review_rank,omitempty"`
+	//TeamName      string `json:"team_name,omitempty"`
 }
 
 type CompletePasswordRecoveryDTO struct {

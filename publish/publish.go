@@ -26,6 +26,12 @@ func SetPublisher(pub PublisherInterface) {
 	}
 }
 
+func NewPublisher(pub PublisherInterface) *Publisher {
+	return &Publisher{
+		Publisher: pub,
+	}
+}
+
 func Publish(ops *exports.PublisherConfig, body []byte) error {
 	pub := GetPublisher()
 	if pub == nil {
