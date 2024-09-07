@@ -23,15 +23,17 @@ type UpdateAccountDocument struct {
 }
 
 type CreateAdminAccountData struct {
-	Email        string `bson:"email"`
-	PasswordHash string `bson:"password_hash"`
-	FirstName    string `bson:"first_name"`
-	LastName     string `bson:"last_name"`
-	Gender       string `bson:"gender"`
-	HackathonId  string `bson:"hackathon_id"`
-	Role         string `bson:"role"`
-	PhoneNumber  string `bson:"phone_number"`
-	Status       string `bson:"status"`
+	Email        string    `bson:"email"`
+	PasswordHash string    `bson:"password_hash"`
+	FirstName    string    `bson:"first_name"`
+	LastName     string    `bson:"last_name"`
+	Gender       string    `bson:"gender"`
+	HackathonId  string    `bson:"hackathon_id"`
+	Role         string    `bson:"role"`
+	PhoneNumber  string    `bson:"phone_number"`
+	Status       string    `bson:"status"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type CreateAccountData struct {
@@ -48,8 +50,8 @@ type CreateAccountData struct {
 	ProfilePictureUrl string    `bson:"profile_picture_url"`
 	IsEmailVerified   bool      `bson:"is_email_verified,omitempty"`
 	IsEmailVerifiedAt time.Time `bson:"is_email_verified_at,omitempty"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+	CreatedAt         time.Time `bson:"created_at"`
+	UpdatedAt         time.Time `bson:"updated_at"`
 }
 
 type CreateParticipantAccountData struct {
@@ -238,4 +240,26 @@ type UpdateAdminAccountDocument struct {
 
 type FilterGetManyAccountDocuments struct {
 	Email_eq string
+}
+
+type UpdateSingleParticipantRecordFilter struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+}
+
+type UpdateManyParticipantRecordFilter struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	Status        string `bson:"status"`
+	Role          string `bson:"role"`
+}
+type UpdateParticipantRecordData struct {
+	Status        string `bson:"status"`
+	ReviewRanking int    `bson:"review_ranking"`
+	TeamName      string `bson:"team_name"`
+}
+
+type AdminParticipantInfoUpdateDTO struct {
+	Status        string `json:"status,omitempty"`
+	ReviewRanking int    `json:"review_rank,omitempty"`
 }

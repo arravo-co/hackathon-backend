@@ -75,6 +75,8 @@ func GetServiceWithDefaultRepositories() *Service {
 
 	var tokenRepoInstance *repository.TokenDataRepository = repository.NewTokenDataRepository(q)
 
+	var adminAccRepoInstance *repository.AdminAccountRepository = repository.NewAdminAccountRepository(q)
+
 	var cfg *ServiceConfig = &ServiceConfig{
 		JudgeAccountRepository:       judgeRepoInstance,
 		AppResources:                 res,
@@ -82,6 +84,7 @@ func GetServiceWithDefaultRepositories() *Service {
 		ParticipantRepository:        partRecordRepoInstance,
 		ParticipantAccountRepository: partAccRepoInstance,
 		SolutionRepository:           solRepoInstance,
+		AdminAccountRepository:       adminAccRepoInstance,
 	}
 	defaultService = NewService(cfg)
 	return defaultService

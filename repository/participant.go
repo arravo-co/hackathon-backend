@@ -10,7 +10,6 @@ import (
 	//"gitee.com/golang-module/carbon"
 
 	"github.com/arravoco/hackathon_backend/data/query"
-	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 	//"github.com/golang-module/carbon"
@@ -275,16 +274,30 @@ func (repo *ParticipantRepository) FillParticipantInfo(idOrEmail string) (*entit
 	return p, nil
 }*/
 
-func (p *ParticipantRecordRepository) UpdateParticipantRecord(dataInput *dtos.AuthParticipantInfoUpdateDTO) error {
-	_, err := p.DB.UpdateParticipantInfoByEmail(&exports.UpdateAccountDocumentFilter{Email: p.Email}, &exports.UpdateAccountDocument{
-		FirstName:       dataInput.FirstName,
-		LastName:        dataInput.LastName,
-		Gender:          dataInput.Gender,
-		State:           dataInput.State,
-		GithubAddress:   dataInput.GithubAddress,
-		LinkedInAddress: dataInput.LinkedInAddress,
+func (p *ParticipantRecordRepository) AdminUpdateParticipantRecord(filterOpts *exports.UpdateSingleParticipantRecordFilter, dataInput *exports.AdminParticipantInfoUpdateDTO) (*exports.ParticipantRecordRepository, error) {
+	partDoc, err := p.DB.UpdateSingleParticipantRecord(filterOpts, &exports.UpdateParticipantRecordData{
+		Status:        dataInput.Status,
+		ReviewRanking: dataInput.ReviewRanking,
 	})
-	return err
+	if err != nil {
+		return nil, err
+	}
+	return &exports.ParticipantRecordRepository{
+		TeamLeadEmail:    partDoc.TeamLeadEmail,
+		ParticipantId:    partDoc.ParticipantId,
+		Status:           partDoc.Status,
+		HackathonId:      partDoc.HackathonId,
+		ParticipantType:  partDoc.Type,
+		TeamName:         partDoc.TeamName,
+		Id:               partDoc.Id.Hex(),
+		Type:             partDoc.Type,
+		CoParticipants:   partDoc.CoParticipants,
+		InviteList:       partDoc.InviteList,
+		ParticipantEmail: partDoc.ParticipantEmail,
+		Solution:         &partDoc.Solution,
+		CreatedAt:        partDoc.CreatedAt,
+		UpdatedAt:        partDoc.UpdatedAt,
+	}, err
 }
 
 func GenerateParticipantID(emails []string) (string, error) {
@@ -447,23 +460,23 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 	var arr []*exports.ParticipantTeamMembersWithAccountsAggregate
 	for _, arg := range arggs {
 		team_lead_info := exports.TeamLeadInfoParticipantRecordRepositoryAggregate{
-			Email:            arg.TeamLeadInfo.Email,
-			AccountId:        arg.TeamLeadInfo.AccountId,
-			FirstName:        arg.TeamLeadInfo.FirstName,
-			LastName:         arg.TeamLeadInfo.LastName,
-			Gender:           arg.TeamLeadInfo.Gender,
-			CreatedAt:        arg.TeamLeadInfo.CreatedAt,
-			UpdateAt:         arg.TeamLeadInfo.UpdateAt,
-			Skillset:         arg.TeamLeadInfo.Skillset,
-			AccountStatus:    arg.TeamLeadInfo.AccountStatus,
-			AccountRole:      arg.TeamLeadInfo.AccountRole,
-			PhoneNumber:      arg.TeamLeadInfo.PhoneNumber,
-			HackathonId:      arg.HackathonId,
-			ParticipantId:    arg.ParticipantId,
-			PreviousProjects: arg.TeamLeadInfo.PreviousProjects,
-			EmploymentStatus: arg.TeamLeadInfo.EmploymentStatus,
-			LinkedInAddress:  arg.LinkedInAddress,
-
+			Email:               arg.TeamLeadInfo.Email,
+			AccountId:           arg.TeamLeadInfo.AccountId,
+			FirstName:           arg.TeamLeadInfo.FirstName,
+			LastName:            arg.TeamLeadInfo.LastName,
+			Gender:              arg.TeamLeadInfo.Gender,
+			CreatedAt:           arg.TeamLeadInfo.CreatedAt,
+			UpdateAt:            arg.TeamLeadInfo.UpdateAt,
+			Skillset:            arg.TeamLeadInfo.Skillset,
+			AccountStatus:       arg.TeamLeadInfo.AccountStatus,
+			AccountRole:         arg.TeamLeadInfo.AccountRole,
+			PhoneNumber:         arg.TeamLeadInfo.PhoneNumber,
+			HackathonId:         arg.HackathonId,
+			ParticipantId:       arg.ParticipantId,
+			PreviousProjects:    arg.TeamLeadInfo.PreviousProjects,
+			EmploymentStatus:    arg.TeamLeadInfo.EmploymentStatus,
+			LinkedInAddress:     arg.LinkedInAddress,
+			TeamRole:            "TEAM_LEAD",
 			ExperienceLevel:     arg.TeamLeadInfo.ExperienceLevel,
 			HackathonExperience: arg.TeamLeadInfo.HackathonExperience,
 			YearsOfExperience:   arg.TeamLeadInfo.YearsOfExperience,

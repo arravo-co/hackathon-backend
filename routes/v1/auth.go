@@ -438,7 +438,8 @@ func GetAuthUserInfo(c echo.Context) error {
 	})
 }
 
-// @Title Update Auth User Info
+/*
+// @Title Admin-only Auth User Info
 // @Summary		Update auth user information
 // @Description	Update auth user information
 // @Tags			Auth
@@ -451,20 +452,17 @@ func GetAuthUserInfo(c echo.Context) error {
 // @Failure		404	{object}	AuthUserInfoFetchFailureResponse
 // @Failure		500	{object}	AuthUserInfoFetchFailureResponse
 // @Router			/api/v1/auth/me [put]
-func UpdateAuthUserInfo(c echo.Context) error {
+func UpdateAuthParticipantInfo(c echo.Context) error {
 	tokenData := c.Get("user").(exports.Payload)
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
-		updateData := dtos.AuthParticipantInfoUpdateDTO{}
-		_ = repository.ParticipantRecordRepository{
-			Email: tokenData.Email,
-		}
+		updateData := dtos.AdminParticipantInfoUpdateDTO{}
 		serv := services.GetServiceWithDefaultRepositories()
-		_, err = serv.UpdateParticipantInfo(&services.AuthParticipantInfoUpdateDTO{
-			FirstName: updateData.FirstName,
-			LastName:  updateData.LastName,
-			Email:     updateData.Email,
-			Gender:    updateData.Gender,
+		_, err = serv.AdminUpdateParticipantInfo(&services.UpdateSingleParticipantRecordFilter {
+
+		}, &services.AdminParticipantInfoUpdateDTO{
+			ReviewRanking: updateData.ReviewRanking,
+			Status:        updateData.Status,
 			//GithubAddress:   updateData.GithubAddress,
 			//LinkedInAddress: updateData.LinkedInAddress,
 		})
@@ -484,7 +482,7 @@ func UpdateAuthUserInfo(c echo.Context) error {
 			Message: "Password change completed successfully",
 		}, &PasswordChangeSuccessResponseData{},
 	})
-}
+}*/
 
 // @Title Initiate Password Recovery
 // @Summary			Initiate Password Recovery
@@ -671,11 +669,12 @@ func InviteMemberToTeam(c echo.Context) error {
 		})
 	}
 	responseData, err := serv.InviteToTeam(&services.AddToTeamInviteListData{
-		HackathonId:   hackathonId,
-		ParticipantId: participant.ParticipantId,
-		Email:         data.Email,
-		Role:          data.Role,
-		InviterEmail:  participant.TeamLeadInfo.Email,
+		HackathonId:      hackathonId,
+		ParticipantId:    participant.ParticipantId,
+		Email:            data.Email,
+		Role:             data.Role,
+		InviterEmail:     participant.TeamLeadInfo.Email,
+		InviterFirstName: participant.TeamLeadInfo.FirstName,
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, &InviteTeamMemberFailResponse{

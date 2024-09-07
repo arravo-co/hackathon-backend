@@ -66,7 +66,7 @@ func (q *Query) GetParticipantsRecords() ([]exports.ParticipantDocument, error) 
 }
 
 func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipantsWithAccountsAggregateFilterOpts) ([]exports.ParticipantTeamMembersWithAccountsAggregateDocument, error) {
-	//fmt.Printf("\n\n%s\n\n", *opts.ParticipantId)
+	fmt.Printf("\n\n%+v\n\n", opts)
 	participantCol, err := q.Datasource.GetParticipantCollection()
 	if err != nil {
 		return nil, err
@@ -81,19 +81,19 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipant
 	var review_ranking_eq *int
 	var sort_review_ranking int = 1
 	var participant_type *string
-	if opts.ParticipantId != nil {
+	if opts.ParticipantId != nil && *opts.ParticipantId != "" {
 		participant_id = opts.ParticipantId
 	}
-	if opts.ParticipantStatus != nil {
+	if opts.ParticipantStatus != nil && *opts.ParticipantStatus != "" {
 		participant_status = opts.ParticipantStatus
 	}
-	if opts.Limit != nil {
+	if opts.Limit != nil && *opts.Limit > 0 {
 		limit = *opts.Limit
 	}
 	if opts.Solution_Like != nil {
 		solution_like = *opts.Solution_Like
 	}
-	if opts.ReviewRanking_Top != nil {
+	if opts.ReviewRanking_Top != nil && *opts.ReviewRanking_Top > 0 {
 		review_ranking_top = opts.ReviewRanking_Top
 	}
 	if opts.SortByReviewRanking_Desc != nil && *opts.SortByReviewRanking_Desc {
@@ -101,10 +101,10 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipant
 	} else if opts.SortByReviewRanking_Asc != nil && *opts.SortByReviewRanking_Asc {
 		sort_review_ranking = 1
 	}
-	if opts.ParticipantType != nil {
+	if opts.ParticipantType != nil && *opts.ParticipantType != "" {
 		participant_type = opts.ParticipantType
 	}
-	if opts.ReviewRanking_Eq != nil {
+	if opts.ReviewRanking_Eq != nil && *opts.ReviewRanking_Eq > 0 {
 		review_ranking_eq = opts.ReviewRanking_Eq
 	}
 	fmt.Println(sort_review_ranking)
@@ -431,6 +431,7 @@ func (q *Query) GetParticipantsWithAccountsAggregate(opts exports.GetParticipant
 			andFilters = append(andFilters, filter_by_status)
 		}
 		if participant_type != nil {
+			fmt.Println(participant_type)
 			andFilters = append(andFilters, filter_by_participant_type)
 		}
 
@@ -711,4 +712,45 @@ func (q *Query) SelectSolutionForTeam(dataToSave *exports.SelectTeamSolutionData
 	}
 	partDoc.Solution = exports.ParticipantDocumentParticipantSelectedSolution{}
 	return &partDoc, err
+}
+
+func (q *Query) UpdateSingleParticipantRecord(filterOpts *exports.UpdateSingleParticipantRecordFilter, dataToSave *exports.UpdateParticipantRecordData) (*exports.ParticipantDocument, error) {
+	participantCol, err := q.Datasource.GetParticipantCollection()
+	ctx := context.Context(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.M{
+		"$expr": bson.M{
+			"$eq": bson.A{
+				"$participant_id", bson.M{"$ifNull": bson.A{filterOpts.ParticipantId, "$participant_id"}},
+			},
+		},
+	}
+	up := bson.M{}
+	if dataToSave.Status != "" {
+		up["status"] = dataToSave.Status
+	}
+	len_of_map := 0
+	for range up {
+		len_of_map += 0
+	}
+	if len_of_map > 0 {
+		up["updated_at"] = time.Now()
+	}
+	upd := bson.M{
+		"$set": up,
+	}
+	fmt.Println(upd)
+	docPart := &exports.ParticipantDocument{}
+	after := options.After
+	result := participantCol.FindOneAndUpdate(ctx, filter, upd, &options.FindOneAndUpdateOptions{
+		ReturnDocument: &after,
+	})
+	if err := result.Decode(docPart); err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return nil, err
+	}
+	fmt.Println("Updated successfully")
+	return docPart, err
 }

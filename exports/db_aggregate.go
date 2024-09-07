@@ -53,7 +53,7 @@ type TeamLeadAndAccountAggregateData struct {
 	PhoneNumber         string    `bson:"phone_number"`
 	Skillset            []string  `bson:"skillset"`
 	AccountStatus       string    `bson:"status"`
-	AccountRole         string    `bson:"account_role"`
+	AccountRole         string    `bson:"role"`
 	TeamRole            string    `bson:"team_role"`
 	PasswordHash        string    `bson:"password_hash"`
 	State               string    `bson:"state"`
@@ -105,7 +105,7 @@ type CoParticipantsAndAccountsAggregateData struct {
 }
 type GetParticipantsWithAccountsAggregateFilterOpts struct {
 	ParticipantId            *string
-	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED REVIEW_DISQUALIFIED TEAM_ONBOARDING SOLUTION_SELECTION SOLUTION_IMPLEMENTATION SHORTLISTED COMPETITION_WON"`
 	ParticipantType          *string `validate:"omitempty, oneof TEAM "`
 	ReviewRanking_Eq         *int
 	ReviewRanking_Top        *int

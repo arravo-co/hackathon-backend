@@ -99,7 +99,7 @@ func (c *RMQConsumer) DeclareAllQueues() {
 		}
 		for v := range chWelcomeEmailToJudgeDelivery {
 			fmt.Println("responsekkkkkkkkkkkkkkkkkkkkkkkkkkkffffffffffffffkkkkkkkkkkkkk")
-			consumerhandlers.HandleSendWelcomeAndEmailVerificationEmailToJudgeConsumption(v.Body)
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudgeRegisteredByAdmin(v.Body)
 			v.Ack(false)
 		}
 	}

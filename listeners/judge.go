@@ -33,12 +33,12 @@ func HandleJudgeCreatedEvent(eventDTOData *exports.JudgeAccountCreatedByAdminEve
 		return
 	}
 	email.SendJudgeWelcomeEmail(&email.SendJudgeWelcomeEmailData{
-		Email:       eventDTOData.JudgeEmail,
-		InviterName: eventDTOData.InviterName,
-		Subject:     " Welcome to Arravo's Hackathon - Confirm Your Email Address",
-		Token:       dataToken.Token,
-		TTL:         dataToken.TTL.Minute(),
-		Link:        link,
+		Email: eventDTOData.JudgeEmail,
+		//InviterName: eventDTOData.InviterName,
+		Subject: " Welcome to Arravo's Hackathon - Confirm Your Email Address",
+		Token:   dataToken.Token,
+		TTL:     dataToken.TTL.Minute(),
+		Link:    link,
 	})
 
 }

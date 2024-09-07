@@ -264,7 +264,6 @@ type ParticipantAccountRepositoryInterface interface {
 	GetParticipantAccounts() ([]*ParticipantAccountRepository, error)
 	DeleteParticipantAccount(identifier string) (*ParticipantAccountRepository, error)
 	MarkParticipantAccountAsDeleted(identifier string) (*ParticipantAccountRepository, error)
-	//GetJudgeAccountByEmail(email string) (*JudgeAccountRepository, error)
 	//UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
 	FindAccountIdentifier(identifier string) (*ParticipantAccountRepository, error)
 	UpdateParticipantPassword(filter *UpdateAccountDocumentFilter, newPasswordHash string) (*ParticipantAccountRepository, error)
@@ -277,6 +276,7 @@ type ParticipantRepositoryInterface interface {
 	CreateParticipantRecord(dataInput *CreateParticipantRecordData) (*ParticipantRecordRepository, error)
 	GetParticipantRecord(participantId string) (*ParticipantRecordRepository, error)
 	GetParticipantsRecords() ([]ParticipantRecordRepository, error)
+	AdminUpdateParticipantRecord(filterOpts *UpdateSingleParticipantRecordFilter, dataInput *AdminParticipantInfoUpdateDTO) (*ParticipantRecordRepository, error)
 	//RegisterIndividual(input RegisterNewParticipantAccountDTO) (*ParticipantRecordRepository, error)
 	//RegisterTeamLead(input RegisterNewParticipantAccountDTO) (*ParticipantRecordRepository, error)
 	RemoveCoparticipantFromParticipantRecord(dataInput *RemoveMemberFromTeamData) (*ParticipantRecordRepository, error)
@@ -303,7 +303,7 @@ type TokenRepositoryInterface interface {
 
 type AdminRepositoryInterface interface {
 	CreateAdminAccount(dataToSave *CreateAdminAccountRepositoryDTO) (*AdminAccountRepository, error)
-	DeleteAdminAccount(identifier string) (*AdminAccountRepository, error)
+	//DeleteAdminAccount(identifier string) (*AdminAccountRepository, error)
 	GetAdminAccountByEmail(email string) (*AdminAccountRepository, error)
 	GetAdminAccounts(FilterGetManyAccountRepositories) ([]AdminAccountRepository, error)
 	UpdateAdminAccount(filter *UpdateAccountRepositoryFilter, dataInput *UpdateAdminAccountRepository) (*AdminAccountRepository, error)

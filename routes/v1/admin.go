@@ -4,12 +4,19 @@ import (
 	"fmt"
 
 	"github.com/aidarkhanov/nanoid"
+	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/dtos"
+	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/services"
 	"github.com/labstack/echo/v4"
 )
 
+type RegisterAdminResponseData struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    entity.Admin
+}
 type RegisterAnotherAdminResponseData struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -31,12 +38,13 @@ func RegisterAdmin(c echo.Context) error {
 		})
 	}
 	serv := services.GetServiceWithDefaultRepositories()
-	_, err = serv.RegisterAdmin(&services.CreateNewAdminDTO{
+	admin, err := serv.RegisterAdmin(&services.CreateNewAdminDTO{
 		Email:       dataInput.Email,
 		LastName:    dataInput.LastName,
 		FirstName:   dataInput.FirstName,
 		PhoneNumber: dataInput.PhoneNumber,
 		Password:    dataInput.Password,
+		HackathonId: config.GetHackathonId(),
 	})
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{
@@ -44,9 +52,10 @@ func RegisterAdmin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	return c.JSON(200, &RegisterAnotherAdminResponseData{
+	return c.JSON(200, &RegisterAdminResponseData{
 		Code:    200,
-		Message: "Invite sent!!!",
+		Message: "Admin created successfully",
+		Data:    *admin,
 	})
 }
 
@@ -78,6 +87,7 @@ func RegisterAnotherAdmin(c echo.Context) error {
 		PhoneNumber:  dataInput.PhoneNumber,
 		InviterEmail: authPayload.Email,
 		InviterName:  authPayload.FirstName,
+		HackathonId:  config.GetHackathonId(),
 	})
 	if err != nil {
 		return c.JSON(400, &RegisterAnotherAdminResponseData{

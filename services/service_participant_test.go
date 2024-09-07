@@ -18,7 +18,7 @@ import (
 
 func TestRegisterTeamLead(t *testing.T) {
 
-	dbInstance, service := Setup()
+	dbInstance, _, _, service := Setup()
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
 	})
@@ -53,7 +53,7 @@ func TestRegisterTeamLead(t *testing.T) {
 
 func TestInviteToTeam(t *testing.T) {
 
-	dbInstance, service := Setup()
+	dbInstance, _, _, service := Setup()
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
 	})
@@ -154,7 +154,7 @@ func TestInviteToTeam(t *testing.T) {
 
 func TestCompleteNewTeamMemberRegistration(t *testing.T) {
 
-	dbInstance, service := Setup()
+	dbInstance, _, _, service := Setup()
 
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
@@ -251,7 +251,7 @@ func TestCompleteNewTeamMemberRegistration(t *testing.T) {
 
 func TestGetTeamMembersInfo(t *testing.T) {
 
-	dbInstance, service := Setup()
+	dbInstance, _, _, service := Setup()
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
 	})
@@ -323,7 +323,7 @@ func TestGetTeamMembersInfo(t *testing.T) {
 }
 
 func TestGetParticipantInfo(t *testing.T) {
-	dbInstance, service := Setup()
+	dbInstance, _, _, service := Setup()
 
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
@@ -384,12 +384,27 @@ func TestGetParticipantInfo(t *testing.T) {
 }
 
 func TestGetMultipleParticipantsWithAccounts(t *testing.T) {
-	//dbInstance, service := Setup()
+	dbInstance, _, parts, service := Setup()
+	t.Cleanup(func() {
+		testsetup.CleanupDB(dbInstance)
+	})
+	participant_id := parts[0].ParticipantId
+	partAccDocs, err := service.GetMultipleParticipantsWithAccounts(&GetParticipantsWithAccountsAggregateFilterOpts{
+		ParticipantId: &participant_id,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	for _, v := range partAccDocs {
+		if participant_id != v.ParticipantId {
+			t.Fatalf("expected participant id %s, got %s", participant_id, v.ParticipantId)
+		}
+	}
 }
 
 func TestSelectTeamSolution(t *testing.T) {
-	dbInstance, service := Setup()
+	dbInstance, _, _, service := Setup()
 
 	defer t.Cleanup(func() {
 		testsetup.CleanupDB(dbInstance)
@@ -443,7 +458,7 @@ func TestSelectTeamSolution(t *testing.T) {
 	}
 }
 
-func Setup() (*mongo.Database, *Service) {
+func Setup() (*mongo.Database, []exports.AccountDocument, []exports.ParticipantDocument, *Service) {
 	testsetup.SetupDefaultTestEnv()
 	db_url := os.Getenv("MONGODB_URL")
 	cfg := &exports.MongoDBConnConfig{
@@ -467,11 +482,14 @@ func Setup() (*mongo.Database, *Service) {
 	}
 	publisher := publishers.NewRMQPublisherWithChannel(ch)
 	*/
+	accDocs, partDocs := seeders.SeedMultipleAccountsAndParticipants(dbInstance, seeders.SeedMultipleAccountsAndParticipantsOpts{
+		NumberOfAccounts: 3,
+	})
 	service := NewService(&ServiceConfig{
 		JudgeAccountRepository:       judgeAccountRepository,
 		ParticipantAccountRepository: partAccRepo,
 		//Publisher:                    publisher,
 		ParticipantRepository: partRepo,
 	})
-	return dbInstance, service
+	return dbInstance, accDocs, partDocs, service
 }

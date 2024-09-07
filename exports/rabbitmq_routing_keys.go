@@ -54,6 +54,9 @@ var ParticipantRegisteredRoutingKeyName = "participant.registered"
 */
 var ParticipantTeamLeadSendWelcomeEmailRoutingKeyName = "participant.team_lead.send.welcome_email"
 
+// participant.send.welcome_email
+var ParticipantTeamMemberWelcomeEmailQueueRoutingingKeyName = "participant.team_member.send.welcome_email"
+
 /**
   - the exchange should be topic
   - name: participant.team_member.send.welcome_email

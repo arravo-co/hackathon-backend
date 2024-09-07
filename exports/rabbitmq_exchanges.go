@@ -25,7 +25,7 @@ var AdminsExchange = "topic.admins"
 var InvitationsExchange = "topic.invitations"
 
 /**
-  - exchange should be direct
+  - exchange should be topic
   - name: topic.upload_jobs
 */
-var UploadJobsExchange = "direct.upload_jobs"
+var UploadJobsExchange = "topic.upload_jobs"

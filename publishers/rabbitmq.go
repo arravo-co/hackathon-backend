@@ -74,6 +74,13 @@ func DeclareAllExchanges(channel *amqp.Channel) {
 		fmt.Printf("Exchange '%s' declaration successful\n", exports.InvitationsExchange)
 	}
 
+	err = channel.ExchangeDeclare(exports.AdminsExchange, amqp.ExchangeTopic, true, false, false, false, nil)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	} else {
+		fmt.Printf("Exchange '%s' declaration successful\n", exports.AdminsExchange)
+	}
+
 	err = channel.ExchangeDeclare(exports.JudgesExchange, amqp.ExchangeTopic, true, false, false, false, nil)
 	if err != nil {
 		fmt.Println("Error: ", err)

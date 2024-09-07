@@ -1,7 +1,5 @@
 package services
 
-import "time"
-
 type RegisterNewJudgeDTO struct {
 	FirstName       string `validate:"min=2,required" json:"first_name"`
 	LastName        string `validate:"min=2,required" json:"last_name"`
@@ -63,6 +61,16 @@ type AuthParticipantInfoUpdateDTO struct {
 	Gender    string `validate:"oneof=MALE FEMALE,omitempty" json:"gender"`
 	State     string `json:"state,omitempty"`
 }
+type UpdateSingleParticipantRecordFilter struct {
+	HackathonId   string `bson:"hackathon_id"`
+	ParticipantId string `bson:"participant_id"`
+	AdminEmailId  string `json:"admin_email_id"`
+}
+
+type AdminParticipantInfoUpdateDTO struct {
+	Status        string `json:"status,omitempty"`
+	ReviewRanking int    `json:"review_rank,omitempty"`
+}
 
 type RegisterNewParticipantDTO struct {
 	FirstName           string   `validate:"min=2" json:"first_name"`
@@ -103,7 +111,7 @@ type SelectTeamSolutionData struct {
 
 type GetParticipantsWithAccountsAggregateFilterOpts struct {
 	ParticipantId            *string
-	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED "`
+	ParticipantStatus        *string `validate:"omitempty, oneof UNREVIEWED REVIEWED AI_RANKED  REVIEW_DISQUALIFIED TEAM_ONBOARDING SOLUTION_SELECTION SOLUTION_IMPLEMENTATION SHORTLISTED COMPETITION_WON"`
 	ParticipantType          *string `validate:"omitempty, oneof TEAM "`
 	ReviewRanking_Eq         *int
 	ReviewRanking_Top        *int
@@ -111,56 +119,6 @@ type GetParticipantsWithAccountsAggregateFilterOpts struct {
 	Limit                    *int
 	SortByReviewRanking_Asc  *bool
 	SortByReviewRanking_Desc *bool
-}
-
-type JudgeRegisteredPublishPayload struct {
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-
-type JudgeRegisteredByAdminPublishPayload struct {
-	Email       string `json:"email"`
-	Name        string `json:"name"`
-	Password    string `json:"password"`
-	InviterName string `json:"inviter_name"`
-}
-
-type AdminRegisteredPublishPayload struct {
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-
-type AdminRegisteredByAdminPublishPayload struct {
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	Password     string `json:"password"`
-	InviterName  string `json:"inviter_name"`
-	InviterEmail string `json:"inviter_email"`
-}
-type ParticipantRegisteredPayload struct {
-	Email            string
-	Password         string
-	FirstName        string
-	LastName         string
-	ParticipantEmail string
-	ParticipantId    string
-	//TeamParticipants []TeamParticipantInfo
-	TeamLeadEmail   string
-	TeamName        string
-	TeamRole        string
-	ParticipantType string
-}
-
-type AddedToInviteListPayload struct {
-	ParticipantId      string    `json:"participant_id"`
-	HackathonId        string    `json:"hackathon_id"`
-	TeamLeadEmailEmail string    `json:"teamlead_email"`
-	InviterEmail       string    `json:"inviter_email"`
-	InviteeEmail       string    `json:"invitee_email"`
-	InviterName        string    `json:"inviter_name"`
-	TimeSent           time.Time `json:"time_sent"`
 }
 
 type CreateNewAdminByAuthAdminDTO struct {

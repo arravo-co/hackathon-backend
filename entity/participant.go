@@ -23,7 +23,6 @@ type Participant struct {
 	CoParticipants      []ParticipantEntityCoParticipantInfo `json:"co_participants"`
 	ParticipantEmail    string                               `json:"participant_email"`
 	InviteList          []InviteInfo                         `json:"invite_list"`
-	AccountStatus       string                               `json:"account_status"`
 	ParticipationStatus string                               `json:"participation_status"`
 	ReviewRanking       int                                  `json:"review_ranking"`
 	TeamLeadInfo        ParticipantEntityTeamLeadInfo        `json:"team_leader_info"`

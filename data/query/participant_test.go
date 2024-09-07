@@ -136,3 +136,47 @@ func TestGetParticipantsWithAccountsAggregate(t *testing.T) {
 	})
 
 }
+
+func TestUpdateParticipantRecord(t *testing.T) {
+
+	SetupDefaultTestEnv()
+	db_url := os.Getenv("MONGODB_URL")
+	cfg := &exports.MongoDBConnConfig{
+		Url:    db_url,
+		DBName: "hackathon_db",
+	}
+	dbInstance := GetMongoInstance(cfg)
+	defer t.Cleanup(func() {
+		CleanupDB(dbInstance)
+	})
+	q := GetQueryInstance(dbInstance)
+	status := "UNREVIEWED"
+	//var accsInDB []exports.AccountDocument
+	//var partsInDB exports.ParticipantDocument
+	accInDB, err := seeders.CreateAccountLinkedTeamParticipantDocument(dbInstance, &seeders.OptsToCreateParticipantRecord{
+		Status: status,
+		TeamleadInfo: seeders.TeamLeadInfoToCreateTeamParticipant{
+			Email: "trinitietp@gmail.com",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	t.Run("It should update the  status.", func(t *testing.T) {
+		rec, err := q.UpdateSingleParticipantRecord(&exports.UpdateSingleParticipantRecordFilter{
+			HackathonId:   accInDB.HackathonId,
+			ParticipantId: accInDB.ParticipantId,
+		}, &exports.UpdateParticipantRecordData{
+			Status: "REVIEWED",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if rec.Status == status {
+			t.Fatal("failed to update")
+		}
+
+	})
+
+}

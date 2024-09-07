@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -82,7 +81,7 @@ func (s *Service) RegisterNewJudge(dataInput *RegisterNewJudgeDTO) (*entity.Judg
 		return nil, err
 	}
 
-	pubData := &JudgeRegisteredPublishPayload{
+	pubData := &exports.JudgeRegisteredPublishPayload{
 		Email:     dataInput.Email,
 		FirstName: dataInput.FirstName,
 		LastName:  dataInput.LastName,
@@ -154,7 +153,7 @@ func (s *Service) RegisterNewJudgeByAdmin(dataInput *RegisterNewJudgeDTO) (*enti
 		return nil, err
 	}
 
-	pubData := &JudgeRegisteredByAdminPublishPayload{
+	pubData := &exports.JudgeRegisteredByAdminPublishPayload{
 		Email:       dataInput.Email,
 		Name:        dataInput.FirstName,
 		Password:    dataInput.Password,
@@ -301,36 +300,4 @@ func (s *Service) GetJudges() ([]*entity.Judge, error) {
 		})
 	}
 	return ents, nil
-}
-
-// JudgeCreatedByAdminWelcomeEmailQueuePayload
-func PublishJudgeCreated(tokenRepo exports.TokenRepositoryInterface, rmqConn *amqp091.Connection, data *JudgeRegisteredByAdminPublishPayload) error {
-	by, err := json.Marshal(data)
-	if err != nil {
-		fmt.Print(err.Error())
-		return err
-	}
-	ch, err := rmqConn.Channel()
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	exchange_name := "judge.registered"
-	key_name := "judge.send.welcome_email"
-	err = ch.ExchangeDeclare(exchange_name, amqp091.ExchangeDirect, true, false, false, false, nil)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	err = ch.PublishWithContext(context.Background(),
-		exchange_name, key_name, false, false, amqp091.Publishing{
-			Body:        by,
-			ContentType: "application/json",
-		})
-	if err != nil {
-		fmt.Print(err.Error())
-		return err
-	}
-	fmt.Printf("Published details: exchange: %s key: %s\n", exchange_name, key_name)
-	return nil
 }

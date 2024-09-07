@@ -30,3 +30,7 @@ func SetupParticipantAccount() (*mongo.Database, exports.ParticipantAccountRepos
 
 	return dbInstance, partAccRepo
 }
+
+/**
+AdminUpdateParticipantRecord(filterOpts *exports.UpdateSingleParticipantRecordFilter, dataInput *exports.AdminParticipantInfoUpdateDTO)
+*/

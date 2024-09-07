@@ -246,12 +246,14 @@ func (q *Query) CreateAdminAccount(dataToSave *exports.CreateAdminAccountData) (
 	}
 	fmt.Printf("%#v", result.InsertedID)
 	acc := &exports.AccountDocument{
+		Id:              result.InsertedID.(primitive.ObjectID),
 		Email:           dataToSave.Email,
 		FirstName:       dataToSave.FirstName,
 		LastName:        dataToSave.LastName,
 		PhoneNumber:     dataToSave.PhoneNumber,
 		Gender:          dataToSave.Gender,
 		Role:            dataToSave.Role,
+		Status:          dataToSave.Status,
 		IsEmailVerified: false,
 		HackathonId:     dataToSave.HackathonId,
 	}

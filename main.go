@@ -79,28 +79,67 @@ func main() {
 		Logger:        res.Logger,
 		RMQConnection: res.RabbitMQConn,
 	})
-	//judge.registered queues
+
 	go func() {
-		rmqConsumer.DeclareAllQueuesParameterized(
-			consumerhandlers.HandleSendWelcomeAndEmailVerificationEmailToJudgeConsumption,
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToAdmin,
+			exports.AdminsExchange,
+			exports.SendAdminWelcomeEmailQueueName,
+			exports.AdminSendWelcomeEmailBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToAdminRegisteredByAdmin,
+			exports.AdminsExchange,
+			exports.SendAdminRegisteredByAdminWelcomeEmailQueueName,
+			exports.AdminRegisteredByAdminSendWelcomeEmailBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudgeRegisteredByAdmin,
 			exports.JudgesExchange,
 			exports.SendJudgeWelcomeEmailQueueName,
 			exports.SendJudgeWelcomeEmailQueueBindingKeyName)
+		fmt.Println(err)
 	}()
 
-	//participant.registered queues
 	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
-			consumerhandlers.HandleSendWelcomeAndEmailVerificationEmailToJudgeConsumption,
+			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudge,
+			exports.JudgesExchange,
+			exports.SendJudgeRegisteredByAdminWelcomeEmailQueueName,
+			exports.JudgeRegisteredByAdminSendWelcomeEmailBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendTeamLeadWelcomeAndVerificationEmail,
 			exports.ParticipantsExchange,
-			exports.SendParticipantWelcomeEmailQueueName,
-			exports.SendParticipantWelcomeEmailQueueBindingKeyName)
+			exports.SendTeamLeadWelcomeEmailQueueName,
+			exports.SendTeamLeadWelcomeEmailQueueBindingKeyName)
+		fmt.Println(err)
+	}()
+
+	//ParticipantTeamMemberSendWelcomeEmailRoutingKeyName
+
+	go func() {
+		err = rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.SendTeamMemberWelcomeAndVerificationEmail,
+			exports.ParticipantsExchange,
+			exports.SendTeamMemberWelcomeEmailQueueName,
+			exports.ParticipantTeamMemberSendWelcomeEmailRoutingKeyName)
+		fmt.Println(err)
 	}()
 
 	//invite list jobs
 	go func() {
 		rmqConsumer.DeclareAllQueuesParameterized(
-			consumerhandlers.HandleSendInviteEmailConsumption,
+			consumerhandlers.SendInviteEmailQueueHandler,
 			exports.InvitationsExchange,
 			exports.SendParticipantTeammateInvitationEmailQueueName,
 			exports.ParticipantTeammateSendInvitationEmailBindingKeyName)

@@ -40,8 +40,11 @@ var JudgeRegisteredByAdminSendWelcomeEmailBindingKeyName = "judge_registered_by_
 // judge.send.welcome_email
 var SendJudgeWelcomeEmailQueueBindingKeyName = "judge.send.welcome_email"
 
-// participant.send.welcome_email
-var SendParticipantWelcomeEmailQueueBindingKeyName = "participant.send.welcome_email"
+// participant.team_lead.send.welcome_email
+var SendTeamLeadWelcomeEmailQueueBindingKeyName = "participant.team_lead.send.welcome_email"
+
+// participant.team_member.send.welcome_email
+var SendParticipantTeamMemberWelcomeEmailQueueBindingKeyName = "participant.team_member.send.welcome_email"
 
 // participant.send.invitation_email
 var ParticipantTeammateSendInvitationEmailBindingKeyName = "participant.send.invitation_email"

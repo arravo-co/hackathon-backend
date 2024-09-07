@@ -37,19 +37,25 @@ type SendWelcomeEmailData struct {
 
 type SendTeamLeadWelcomeEmailData struct {
 	SendWelcomeEmailData
+	TeamName string
+}
+
+type SendTeamMemberWelcomeEmailData struct {
+	SendWelcomeEmailData
+	TeamName     string
+	TeamLeadName string
 }
 type SendIndividualWelcomeEmailData struct {
 	SendWelcomeEmailData
 }
 
 type SendJudgeWelcomeEmailData struct {
-	JudgeName   string
-	Email       string
-	Subject     string
-	TTL         int
-	Token       string
-	Link        string
-	InviterName string
+	JudgeName string
+	Email     string
+	Subject   string
+	TTL       int
+	Token     string
+	Link      string
 }
 
 type SendJudgeCreatedByAdminWelcomeEmailData struct {
@@ -175,7 +181,28 @@ func SendEmail(data *SendEmailData) error {
 }
 
 func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) error {
-	tmpl := template.Must(template.ParseFiles("templates/welcome_and_verify_email.go.tmpl"))
+	tmpl := template.Must(template.ParseFiles("templates/team_lead_welcome_and_verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, data)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
+		Email:   data.Email,
+		Message: body,
+		Subject: data.Subject,
+	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
+}
+
+func SendTeamMemberWelcomeEmail(data *SendTeamMemberWelcomeEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/team_member_welcome_email.go.tmpl"))
 	var buf bytes.Buffer
 	err := tmpl.Execute(&buf, data)
 	if err != nil {
@@ -213,12 +240,13 @@ func SendIndividualParticipantWelcomeEmail(data *SendIndividualWelcomeEmailData)
 	}
 }
 
-func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) {
+func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) error {
 	tmpl := template.Must(template.ParseFiles("templates/judge_welcome_and_verify_email.go.tmpl"))
 	var buf bytes.Buffer
 	err := tmpl.Execute(&buf, data)
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
 	body := buf.String()
 	err = SendEmailHtml(&SendEmailHtmlData{
@@ -228,7 +256,9 @@ func SendJudgeWelcomeEmail(data *SendJudgeWelcomeEmailData) {
 	})
 	if err != nil {
 		exports.MySugarLogger.Error(err)
+		return err
 	}
+	return nil
 }
 
 func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {
@@ -285,7 +315,7 @@ func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationComplete
 			"Your email has been successfully verified.",
 		},
 		Outros: []string{
-			"If you have any questions, feel free to contact us at support@arravo.co",
+			"If you have any questions, feel free to contact us at appdev@arravo.co",
 			"Thank you for joining Arravo Hackathon!",
 		},
 	}

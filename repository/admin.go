@@ -1,22 +1,24 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
-type AdminRepository struct {
+type AdminAccountRepository struct {
 	DB exports.AdminDatasourceQueryMethods
 }
 
-func NewAdminAccountRepository(datasource exports.AdminDatasourceQueryMethods) *AdminRepository {
-	return &AdminRepository{
+func NewAdminAccountRepository(datasource exports.AdminDatasourceQueryMethods) *AdminAccountRepository {
+	return &AdminAccountRepository{
 		DB: datasource,
 	}
 }
 
 //exports.AdminRepositoryInterface
 
-func (ad *AdminRepository) CreateAdminAccount(dataInput *exports.CreateAdminAccountRepositoryDTO) (*exports.AdminAccountRepository, error) {
+func (ad *AdminAccountRepository) CreateAdminAccount(dataInput *exports.CreateAdminAccountRepositoryDTO) (*exports.AdminAccountRepository, error) {
 
 	acc, err := ad.DB.CreateAdminAccount(&exports.CreateAdminAccountData{
 		FirstName:    dataInput.FirstName,
@@ -28,6 +30,7 @@ func (ad *AdminRepository) CreateAdminAccount(dataInput *exports.CreateAdminAcco
 		HackathonId:  dataInput.HackathonId,
 		Status:       dataInput.Status,
 		Role:         "ADMIN",
+		CreatedAt:    time.Now(),
 	})
 	if err != nil {
 		return nil, err
@@ -54,7 +57,7 @@ func (ad *AdminRepository) CreateAdminAccount(dataInput *exports.CreateAdminAcco
 	}, nil
 }
 
-func (ad *AdminRepository) GetAdminAccountByEmail(email string) (*exports.AdminAccountRepository, error) {
+func (ad *AdminAccountRepository) GetAdminAccountByEmail(email string) (*exports.AdminAccountRepository, error) {
 	acc, err := ad.DB.GetAccountByEmail(email)
 	if err != nil {
 		return nil, err
@@ -74,7 +77,7 @@ func (ad *AdminRepository) GetAdminAccountByEmail(email string) (*exports.AdminA
 	}, nil
 }
 
-func (ad *AdminRepository) GetAdminAccounts(opts exports.FilterGetManyAccountRepositories) ([]exports.AdminAccountRepository, error) {
+func (ad *AdminAccountRepository) GetAdminAccounts(opts exports.FilterGetManyAccountRepositories) ([]exports.AdminAccountRepository, error) {
 	accs, err := ad.DB.GetAccounts(exports.FilterGetManyAccountDocuments{})
 	if err != nil {
 		return nil, err
@@ -97,7 +100,7 @@ func (ad *AdminRepository) GetAdminAccounts(opts exports.FilterGetManyAccountRep
 	return accRepos, nil
 }
 
-func (ad *AdminRepository) UpdateAdminAccount(filter *exports.UpdateAccountRepositoryFilter, dataInput *exports.UpdateAdminAccountRepository) (*exports.AdminAccountRepository, error) {
+func (ad *AdminAccountRepository) UpdateAdminAccount(filter *exports.UpdateAccountRepositoryFilter, dataInput *exports.UpdateAdminAccountRepository) (*exports.AdminAccountRepository, error) {
 	acc, err := ad.DB.UpdateAccountInfoByEmail(&exports.UpdateAccountDocumentFilter{
 		Email:       filter.Email,
 		PhoneNumber: filter.PhoneNumber,

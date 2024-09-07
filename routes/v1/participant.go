@@ -3,12 +3,26 @@ package routes_v1
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/services"
+	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/labstack/echo/v4"
 )
+
+type GetParticipantsFilterOpts struct {
+	ParticipantId            string `json:"participant_id"`
+	ParticipantStatus        string `validate:"omitempty,oneof=UNREVIEWED REVIEWED AI_RANKED REVIEW_DISQUALIFIED TEAM_ONBOARDING SOLUTION_SELECTION SOLUTION_IMPLEMENTATION SHORTLISTED COMPETITION_WON" json:"participant_status"`
+	ParticipantType          string `validate:"omitempty,oneof=TEAM" json:"participant_type"`
+	ReviewRanking_Eq         int    `json:"review_ranking_eq"`
+	ReviewRanking_Top        int    `json:"review_ranking_top"`
+	Solution_Like            string `json:"solution_like"`
+	Limit                    int    `json:"limit"`
+	SortByReviewRanking_Asc  bool   `json:"sort_by_review_ranking_asc"`
+	SortByReviewRanking_Desc bool   `json:"sort_by_review_ranking_desc"`
+}
 
 type RegisterParticipantSuccessResponse struct {
 	Code    int                 `json:"code"`
@@ -19,17 +33,6 @@ type RegisterParticipantSuccessResponse struct {
 type RegisterParticipantFailResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-}
-type GetParticipantsWithAccountsAggregateFilterOpts struct {
-	ParticipantId            *string
-	ParticipantStatus        *string `validate:"omitempty,oneof=UNREVIEWED REVIEWED AI_RANKED"`
-	ParticipantType          *string `validate:"omitempty,oneof=TEAM"`
-	ReviewRanking_Eq         *int
-	ReviewRanking_Top        *int
-	Solution_Like            *string
-	Limit                    *int
-	SortByReviewRanking_Asc  *bool
-	SortByReviewRanking_Desc *bool
 }
 
 type GetParticipantsResponseData struct {
@@ -240,8 +243,41 @@ func GetTeamMembersInfo(ctx echo.Context) error {
 // @Router /api/v1/participants [get]
 func GetParticipants(c echo.Context) error {
 	fmt.Println("GetParticipants called")
-	queryFilterObj := &GetParticipantsWithAccountsAggregateFilterOpts{}
-	err := c.Bind(queryFilterObj)
+	queryFilterObj := &GetParticipantsFilterOpts{}
+	var limit int
+	var review_ranking_top int
+	limit_str := c.QueryParam("limit")
+	if limit_str != "" {
+		var err error
+		limit, err = strconv.Atoi(limit_str)
+		if err != nil {
+			return c.JSON(400, &FailResponse{
+				Code:    400,
+				Message: fmt.Sprint("Ensure limit is an integer ", err.Error()),
+			})
+		}
+	}
+
+	review_ranking_top_str := c.QueryParam("review_ranking_top_str")
+	if review_ranking_top_str != "" {
+		var err error
+		review_ranking_top, err = strconv.Atoi(review_ranking_top_str)
+		if err != nil {
+			return c.JSON(400, &FailResponse{
+				Code:    400,
+				Message: fmt.Sprint("Ensure 'review_ranking_top' is an integer ", err.Error()),
+			})
+		}
+	}
+	queryFilterObj.Limit = limit
+	queryFilterObj.ReviewRanking_Top = review_ranking_top
+	queryFilterObj.ParticipantId = c.QueryParam("participant_id")
+	queryFilterObj.ParticipantStatus = c.QueryParam("participant_status")
+	queryFilterObj.ParticipantType = c.QueryParam("participant_type")
+	if queryFilterObj.Limit == 0 {
+		queryFilterObj.Limit = 1000
+	}
+	err := validate.Struct(queryFilterObj)
 	if err != nil {
 		return c.JSON(400, &FailResponse{
 			Code:    400,
@@ -249,24 +285,17 @@ func GetParticipants(c echo.Context) error {
 		})
 	}
 
-	err = validate.Struct(queryFilterObj)
-	if err != nil {
-		return c.JSON(400, &FailResponse{
-			Code:    400,
-			Message: err.Error(),
-		})
-	}
-
+	fmt.Println(queryFilterObj.Limit)
 	filterObj := &services.GetParticipantsWithAccountsAggregateFilterOpts{
-		ParticipantId:            queryFilterObj.ParticipantId,
-		ParticipantStatus:        queryFilterObj.ParticipantStatus,
-		ParticipantType:          queryFilterObj.ParticipantType,
-		ReviewRanking_Eq:         queryFilterObj.ReviewRanking_Eq,
-		ReviewRanking_Top:        queryFilterObj.ReviewRanking_Top,
-		Solution_Like:            queryFilterObj.Solution_Like,
-		Limit:                    queryFilterObj.Limit,
-		SortByReviewRanking_Asc:  queryFilterObj.SortByReviewRanking_Asc,
-		SortByReviewRanking_Desc: queryFilterObj.SortByReviewRanking_Desc,
+		ParticipantId:     &queryFilterObj.ParticipantId,
+		ParticipantStatus: &queryFilterObj.ParticipantStatus,
+		ParticipantType:   &queryFilterObj.ParticipantType,
+		/*ReviewRanking_Eq:  &queryFilterObj.ReviewRanking_Eq,
+		ReviewRanking_Top: &queryFilterObj.ReviewRanking_Top,
+		Solution_Like:     &queryFilterObj.Solution_Like,
+		Limit:                    &queryFilterObj.Limit,
+		SortByReviewRanking_Asc:  &queryFilterObj.SortByReviewRanking_Asc,
+		SortByReviewRanking_Desc: &queryFilterObj.SortByReviewRanking_Desc,*/
 	}
 	serv := services.GetServiceWithDefaultRepositories()
 	participants, err := serv.GetMultipleParticipantsWithAccounts(filterObj)
@@ -305,5 +334,89 @@ func GetParticipant(c echo.Context) error {
 		Code:    200,
 		Message: "Participant",
 		Data:    participant,
+	})
+}
+
+// @Title Admin-only Auth User Info
+// @Summary		Update admin-auth participant information
+// @Description	Update admin-auth participant information
+// @Tags			Auth
+// @Param			updateMyInfoJSON	body		dtos.AuthParticipantInfoUpdateDTO	true	"the required info"
+// @Produce		json
+// @Security AuthorizationHeader read write
+// @SecurityScheme AuthorizationHeader http bearer Input your token
+// @Success		200	{object}	AuthUserInfoFetchSuccessResponse
+// @Failure		400	{object}	AuthUserInfoFetchFailureResponse
+// @Failure		404	{object}	AuthUserInfoFetchFailureResponse
+// @Failure		500	{object}	AuthUserInfoFetchFailureResponse
+// @Router			/api/v1/admin/updates/participants [post]
+func UpdateAuthParticipantInfo(c echo.Context) error {
+	tokenData := authutils.GetAuthPayload(c)
+	hackathon_id := c.QueryParam("hackathon_id")
+	participant_id := c.QueryParam("participant_id")
+	if hackathon_id == "" {
+		return c.JSON(http.StatusBadRequest, &PasswordChangeFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: "hackathon_id is required",
+			},
+		})
+	}
+
+	if participant_id == "" {
+		return c.JSON(http.StatusBadRequest, &PasswordChangeFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: "participant_id is required",
+			},
+		})
+	}
+	var err error
+	updateData := &dtos.AdminParticipantInfoUpdateDTO{}
+	err = c.Bind(updateData)
+	if err != nil {
+
+		return c.JSON(http.StatusBadRequest, &PasswordChangeFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	err = validate.Struct(updateData)
+	if err != nil {
+
+		return c.JSON(http.StatusBadRequest, &PasswordChangeFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	serv := services.GetServiceWithDefaultRepositories()
+	_, err = serv.AdminUpdateParticipantInfo(&services.UpdateSingleParticipantRecordFilter{
+		ParticipantId: participant_id,
+		HackathonId:   hackathon_id,
+		AdminEmailId:  tokenData.Email,
+	}, &services.AdminParticipantInfoUpdateDTO{
+		ReviewRanking: updateData.ReviewRanking,
+		Status:        updateData.Status,
+		//GithubAddress:   updateData.GithubAddress,
+		//LinkedInAddress: updateData.LinkedInAddress,
+	})
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &PasswordChangeFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
+	return c.JSON(200, &PasswordChangeSuccessResponse{
+		ResponseData: ResponseData{
+			Code:    200,
+			Message: "Participant record change completed successfully",
+		}, Data: nil,
 	})
 }

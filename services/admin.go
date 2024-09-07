@@ -23,12 +23,13 @@ func (s *Service) RegisterAdmin(dataInput *CreateNewAdminDTO) (*entity.Admin, er
 		Role:         "ADMIN",
 		PasswordHash: passwordHash,
 		PhoneNumber:  dataInput.PhoneNumber,
+		Status:       "EMAIL_UNVERIFIED",
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	pubData := &AdminRegisteredPublishPayload{
+	pubData := &exports.AdminRegisteredPublishPayload{
 		Email:     dataInput.Email,
 		FirstName: dataInput.FirstName,
 		LastName:  dataInput.LastName,
@@ -90,16 +91,18 @@ func (s *Service) AdminCreateNewAdminProfile(dataInput *CreateNewAdminByAuthAdmi
 		Role:         "ADMIN",
 		PasswordHash: passwordHash,
 		PhoneNumber:  dataInput.PhoneNumber,
+		Status:       "EMAIL_UNVERIFIED",
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	pubData := &AdminRegisteredByAdminPublishPayload{
+	pubData := &exports.AdminRegisteredByAdminPublishPayload{
 		Email:        dataInput.Email,
 		Name:         dataInput.FirstName,
 		InviterName:  dataInput.InviterName,
 		InviterEmail: dataInput.Email,
+		Password:     password,
 	}
 	by, err := json.Marshal(pubData)
 	if err != nil {
