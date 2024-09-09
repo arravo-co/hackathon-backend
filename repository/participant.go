@@ -483,6 +483,7 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 			IsEmailVerified:     arg.TeamLeadInfo.IsEmailVerified,
 			IsEmailVerifiedAt:   arg.TeamLeadInfo.IsEmailVerifiedAt,
 			Motivation:          arg.TeamLeadInfo.Motivation,
+			FieldOfStudy:        arg.TeamLeadInfo.FieldOfStudy,
 		}
 		var co_participants []exports.CoParticipantAggregateData
 		for _, co := range arg.CoParticipants {
@@ -510,6 +511,7 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 				CreatedAt:           co.CreatedAt,
 				UpdateAt:            co.UpdateAt,
 				Motivation:          co.Motivation,
+				FieldOfStudy:        co.FieldOfStudy,
 			})
 		}
 		var sol exports.ParticipantDocumentParticipantSelectedSolution
