@@ -73,6 +73,12 @@ type FailResponse struct {
 	Message string `json:"message"`
 }
 
+type GetTeamIntoSuccessResponse struct {
+	Code    int                `json:"code"`
+	Message string             `json:"message"`
+	Data    entity.Participant `json:"data"`
+}
+
 type GetTeamMembersSuccessResponse struct {
 	Code    int                                      `json:"code"`
 	Message string                                   `json:"message"`

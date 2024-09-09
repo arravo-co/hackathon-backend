@@ -759,17 +759,16 @@ func ValidatePasswordRecoveryLink(c echo.Context) error {
 func GetMyTeamMembersInfo(ctx echo.Context) error {
 	payload := authutils.GetAuthPayload(ctx)
 	serv := services.GetServiceWithDefaultRepositories()
-	participants, err := serv.GetTeamMembersInfo(payload.ParticipantId)
-	fmt.Println(participants)
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(payload.ParticipantId)
+	fmt.Println(participant)
 	if err != nil {
-		return ctx.JSON(400, GetTeamMembersSuccessResponse{
+		return ctx.JSON(400, GetTeamIntoSuccessResponse{
 			Message: "",
-			Data:    participants,
 		})
 	}
-	return ctx.JSON(200, GetTeamMembersSuccessResponse{
+	return ctx.JSON(200, GetTeamIntoSuccessResponse{
 		Message: "",
-		Data:    participants,
+		Data:    *participant,
 		Code:    200,
 	})
 }
