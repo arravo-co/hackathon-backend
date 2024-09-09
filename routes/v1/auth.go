@@ -397,12 +397,12 @@ func GetAuthUserInfo(c echo.Context) error {
 	var err error
 	if tokenData.Role == "PARTICIPANT" {
 		serv := services.GetServiceWithDefaultRepositories()
-		participant, err := serv.GetSingleParticipantWithAccountsInfo(tokenData.Email)
+		participant, err := serv.GetTeamParticipantInfo(tokenData.Email)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, &AuthUserInfoFetchFailureResponse{
 				ResponseData{
 					Code:    http.StatusBadRequest,
-					Message: "Error getting user info",
+					Message: "Error getting user info    " + err.Error(),
 				},
 			})
 		}

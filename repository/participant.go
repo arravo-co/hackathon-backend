@@ -415,27 +415,6 @@ func (s *ParticipantRecordRepository) AddSolutionIdToParticipantRecord(dataInput
 	}, nil
 }
 
-func FillTeamMemberInfo(account *exports.AccountDocument) *entity.TeamMemberWithParticipantRecord {
-	info := &entity.TeamMemberWithParticipantRecord{}
-	info.Email = account.Email
-	info.Status = account.Status
-	info.FirstName = account.FirstName
-	info.LastName = account.LastName
-	info.Gender = account.Gender
-	info.State = account.State
-	info.TeamRole = account.Role
-	info.HackathonId = account.HackathonId
-	info.DOB = account.DOB
-	info.Motivation = account.Motivation
-	info.HackathonExperience = account.HackathonExperience
-	info.YearsOfExperience = account.YearsOfExperience
-	info.FieldOfStudy = account.FieldOfStudy
-	info.PreviousProjects = account.PreviousProjects
-	// emit created event
-
-	return info
-}
-
 func (s *ParticipantRecordRepository) GetSingleParticipantRecordAndMemberAccountsInfo(participant_id string) (*exports.ParticipantTeamMembersWithAccountsAggregate, error) {
 	fmt.Println(participant_id)
 	arggs, err := s.GetMultipleParticipantRecordAndMemberAccountsInfo(exports.GetParticipantsWithAccountsAggregateFilterOpts{
