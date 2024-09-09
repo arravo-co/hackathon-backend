@@ -13,6 +13,136 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
+func (s *Service) GetTeamParticipantInfo(email string) (*entity.TeamMemberWithParticipantRecord, error) {
+
+	fmt.Printf("\n\n \n\n %+v \n\n\n", email)
+	partAcc, err := s.ParticipantAccountRepository.GetParticipantAccountByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	if partAcc == nil {
+		return nil, fmt.Errorf("unable to get participant info")
+	}
+	//fmt.PrintF("\n\n \n\n%es %+v \n\n\n"),email, partAcc))
+	if s.ParticipantRecordRepository == nil {
+		return nil, fmt.Errorf("no participant record repository")
+	}
+	fmt.Printf("\n\n  %+v \n\n\n", partAcc)
+	part, err := s.ParticipantRecordRepository.GetSingleParticipantRecordAndMemberAccountsInfo(partAcc.ParticipantId)
+	if err != nil {
+		return nil, err
+	}
+	if part == nil {
+		return nil, fmt.Errorf("participant with id %v not found", partAcc.ParticipantId)
+	}
+	var co_parts []entity.ParticipantEntityCoParticipantInfo
+	if part.CoParticipants != nil {
+
+		for _, v := range part.CoParticipants {
+			co_parts = append(co_parts, entity.ParticipantEntityCoParticipantInfo{
+				AccountStatus:       v.AccountStatus,
+				Email:               v.Email,
+				FirstName:           v.FirstName,
+				LastName:            v.LastName,
+				Gender:              v.Gender,
+				PhoneNumber:         v.PhoneNumber,
+				State:               v.State,
+				EmploymentStatus:    v.EmploymentStatus,
+				ExperienceLevel:     v.ExperienceLevel,
+				HackathonExperience: v.HackathonExperience,
+				YearsOfExperience:   v.YearsOfExperience,
+				FieldOfStudy:        v.FieldOfStudy,
+				Skillset:            v.Skillset,
+				Motivation:          v.Motivation,
+				TeamRole:            v.TeamRole,
+				AccountRole:         v.AccountRole,
+				AccountId:           v.AccountId,
+				HackathonId:         v.HackathonId,
+				DOB:                 v.DOB,
+				PreviousProjects:    v.PreviousProjects,
+				ParticipantId:       v.ParticipantId,
+				CreatedAt:           v.CreatedAt,
+				UpdatedAt:           v.UpdateAt,
+			})
+		}
+	}
+	team_lead := entity.ParticipantEntityTeamLeadInfo{
+		HackathonId:         part.TeamLeadInfo.HackathonId,
+		FirstName:           part.TeamLeadInfo.FirstName,
+		LastName:            part.TeamLeadInfo.LastName,
+		Email:               part.TeamLeadInfo.Email,
+		Skillset:            part.TeamLeadInfo.Skillset,
+		Gender:              part.TeamLeadInfo.Gender,
+		AccountId:           part.TeamLeadInfo.AccountId,
+		State:               part.TeamLeadInfo.State,
+		TeamRole:            part.TeamLeadInfo.TeamRole,
+		PhoneNumber:         part.TeamLeadInfo.PhoneNumber,
+		AccountStatus:       part.TeamLeadInfo.AccountStatus,
+		AccountRole:         part.TeamLeadInfo.AccountRole,
+		EmploymentStatus:    part.TeamLeadInfo.EmploymentStatus,
+		ExperienceLevel:     part.TeamLeadInfo.ExperienceLevel,
+		HackathonExperience: part.TeamLeadInfo.HackathonExperience,
+		YearsOfExperience:   part.TeamLeadInfo.YearsOfExperience,
+		IsEmailVerified:     part.TeamLeadInfo.IsEmailVerified,
+		IsEmailVerifiedAt:   part.TeamLeadInfo.IsEmailVerifiedAt,
+		LinkedInAddress:     part.TeamLeadInfo.LinkedInAddress,
+		ParticipantId:       part.TeamLeadInfo.ParticipantId,
+		PreviousProjects:    part.TeamLeadInfo.PreviousProjects,
+		FieldOfStudy:        part.TeamLeadInfo.FieldOfStudy,
+		UpdateAt:            part.TeamLeadInfo.UpdateAt,
+	}
+	sol := &entity.ParticipantEntitySelectedSolution{
+		Title:            part.Solution.Title,
+		HackathonId:      part.Solution.HackathonId,
+		Id:               part.SolutionId,
+		Description:      part.Solution.Description,
+		SolutionImageUrl: part.Solution.SolutionImageUrl,
+		Objective:        part.Solution.Objective,
+	}
+	_ = &entity.Participant{
+		ParticipantId:       part.ParticipantId,
+		ParticipantEmail:    part.ParticipantEmail,
+		ParticipantType:     part.Type,
+		ParticipatantStatus: part.Status,
+		CoParticipants:      co_parts,
+		TeamLeadEmail:       part.TeamLeadEmail,
+		TeamName:            part.TeamName,
+		TeamLeadInfo:        team_lead,
+		Solution:            sol,
+	}
+	var team_role string = "TEAM_MEMBER"
+	if team_lead.Email == partAcc.Email {
+		team_role = team_lead.TeamRole
+	}
+	return &entity.TeamMemberWithParticipantRecord{
+		Email:               partAcc.Email,
+		FirstName:           partAcc.FirstName,
+		LastName:            partAcc.LastName,
+		AccountId:           partAcc.Id,
+		PhoneNumber:         partAcc.PhoneNumber,
+		HackathonExperience: partAcc.HackathonExperience,
+		Skillset:            partAcc.Skillset,
+		PreviousProjects:    partAcc.PreviousProjects,
+		ParticipantStatus:   part.Status,
+		YearsOfExperience:   partAcc.YearsOfExperience,
+		ReviewRanking:       part.ReviewRanking,
+		IsEmailVerified:     partAcc.IsEmailVerified,
+		IsEmailVerifiedAt:   partAcc.IsEmailVerifiedAt,
+		DOB:                 partAcc.DOB,
+		ParticipantId:       part.ParticipantId,
+		CoParticipants:      co_parts,
+		TeamLeadInfo:        team_lead,
+		EmploymentStatus:    partAcc.EmploymentStatus,
+		ExperienceLevel:     partAcc.ExperienceLevel,
+		FieldOfStudy:        partAcc.FieldOfStudy,
+		LinkedInAddress:     partAcc.LinkedInAddress,
+		HackathonId:         partAcc.HackathonId,
+		State:               partAcc.State,
+		AccountStatus:       partAcc.Status,
+		TeamRole:            team_role,
+	}, err
+}
+
 func (s *Service) CompleteNewTeamMemberRegistration(input *CompleteNewTeamMemberRegistrationDTO) (*entity.Participant, error) {
 	err := validate.Struct(input)
 	if err != nil {
@@ -332,7 +462,7 @@ func (s *Service) SelectTeamSolution(dataInput *SelectTeamSolutionData) error {
 func (s *Service) FillTeamMemberInfo(account *exports.ParticipantAccountRepository) *entity.TeamMemberWithParticipantRecord {
 	info := &entity.TeamMemberWithParticipantRecord{}
 	info.Email = account.Email
-	info.Status = account.Status
+	info.AccountStatus = account.Status
 	info.FirstName = account.FirstName
 	info.LastName = account.LastName
 	info.Gender = account.Gender

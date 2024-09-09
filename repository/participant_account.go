@@ -103,7 +103,34 @@ func MarkParticipantAccountAsDeleted(identifier string) (*exports.ParticipantAcc
 }
 
 func (p *ParticipantAccountRepository) GetParticipantAccountByEmail(email string) (*exports.ParticipantAccountRepository, error) {
-	return nil, nil
+	partAcc, err := p.DB.GetAccountByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return &exports.ParticipantAccountRepository{
+		FirstName:           partAcc.FirstName,
+		LastName:            partAcc.LastName,
+		ParticipantId:       partAcc.ParticipantId,
+		HackathonId:         partAcc.HackathonId,
+		Email:               partAcc.Email,
+		ExperienceLevel:     partAcc.ExperienceLevel,
+		EmploymentStatus:    partAcc.EmploymentStatus,
+		IsEmailVerified:     partAcc.IsEmailVerified,
+		HackathonExperience: partAcc.HackathonExperience,
+		YearsOfExperience:   partAcc.YearsOfExperience,
+		IsEmailVerifiedAt:   partAcc.IsEmailVerifiedAt,
+		LinkedInAddress:     partAcc.LinkedInAddress,
+		FieldOfStudy:        partAcc.FieldOfStudy,
+		Id:                  partAcc.Id.Hex(),
+		Role:                partAcc.Role,
+		Status:              partAcc.Status,
+		State:               partAcc.State,
+		Skillset:            partAcc.Skillset,
+		PasswordHash:        partAcc.PasswordHash,
+		PhoneNumber:         partAcc.PhoneNumber,
+		PreviousProjects:    partAcc.PreviousProjects,
+		ProfilePictureUrl:   partAcc.ProfilePictureUrl,
+	}, nil
 }
 func (p *ParticipantAccountRepository) GetParticipantAccountsByEmail(emails []string) ([]*exports.ParticipantAccountRepository, error) {
 	return nil, nil
@@ -125,4 +152,8 @@ func (p *ParticipantAccountRepository) MarkParticipantAccountAsDeleted(identifie
 // UpdateJudgeAccount(filter *UpdateAccountFilter, dataInput *UpdateAccountDocument) (*JudgeAccountRepository, error)
 func (p *ParticipantAccountRepository) UpdateParticipantPassword(filter *exports.UpdateAccountDocumentFilter, newPasswordHash string) (*exports.ParticipantAccountRepository, error) {
 	return nil, nil
+}
+
+func (c *ParticipantAccountRepository) GetParticipantAccountWithParticipantRecord() {
+
 }
