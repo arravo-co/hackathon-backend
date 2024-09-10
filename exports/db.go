@@ -164,3 +164,15 @@ type CoParticipantAggregateDocument struct {
 	CreatedAt           time.Time `bson:"created_at,omitempty"`
 	UpdatedAt           time.Time `bson:"updated_at,omitempty"`
 }
+
+type TokenDocument struct {
+	Id             primitive.ObjectID `bson:"_id,omitempty"`
+	Token          string             `bson:"token"`
+	TokenType      string             `bson:"token_type"`
+	TokenTypeValue string             `bson:"token_type_value"`
+	Scope          string             `bson:"scope"`
+	TTL            time.Time          `bson:"ttl"`
+	Status         string             `bson:"status"`
+	CreatedAt      time.Time          `bson:"created_at"`
+	UpdatedAt      time.Time          `bson:"updated_at,omitempty"`
+}

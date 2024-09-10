@@ -404,7 +404,7 @@ func (auth *AuthUtils) InitiatePasswordRecovery(dataInput *exports.AuthUtilsConf
 	}
 	tokenFunc, _ := nanoid.Custom("1234567890", 6)
 	token := tokenFunc()
-	tokenData, err := data.UpsertToken(&exports.UpsertTokenData{
+	tokenData, err := auth.TokenRepository.UpsertToken(&exports.UpsertTokenData{
 		Token:          token,
 		TokenType:      "EMAIL",
 		TokenTypeValue: dataInput.Email,
@@ -412,7 +412,20 @@ func (auth *AuthUtils) InitiatePasswordRecovery(dataInput *exports.AuthUtilsConf
 		Status:         "PENDING",
 		Scope:          "PASSWORD_RECOVERY",
 	})
-	return tokenData, err
+
+	fmt.Printf("\n\n%#v\n\n", tokenData)
+
+	return &exports.TokenData{
+		Id:             tokenData.Id,
+		Token:          tokenData.Token,
+		TokenType:      tokenData.TokenType,
+		TokenTypeValue: tokenData.TokenTypeValue,
+		Scope:          tokenData.Scope,
+		Status:         tokenData.Status,
+		TTL:            tokenData.TTL,
+		CreatedAt:      tokenData.CreatedAt,
+		UpdatedAt:      tokenData.UpdatedAt,
+	}, err
 }
 
 func (auth *AuthUtils) CompletePasswordRecovery(dataInput *exports.AuthUtilsCompletePasswordRecoveryData) (interface{}, error) {
@@ -431,7 +444,7 @@ func (auth *AuthUtils) CompletePasswordRecovery(dataInput *exports.AuthUtilsComp
 		exports.MySugarLogger.Error(err)
 		return nil, err
 	}
-	_, err = data.UpdatePasswordByEmail(&exports.UpdateAccountDocumentFilter{Email: dataInput.Email}, newPasswordHash)
+	_, err = auth.AccountRepository.UpdatePasswordByEmail(&exports.UpdateAccountDocumentFilter{Email: dataInput.Email}, newPasswordHash)
 
 	if err != nil {
 		exports.MySugarLogger.Error(err)

@@ -526,6 +526,7 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 			ReviewRanking:     arg.ReviewRanking,
 			Type:              arg.Type,
 			Solution:          sol,
+			SolutionId:        arg.SolutionId,
 		})
 	}
 	return arr, nil

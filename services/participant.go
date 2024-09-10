@@ -553,6 +553,7 @@ func (s *Service) GetSingleParticipantWithAccountsInfo(participantId string) (*e
 		CoParticipants:      co_parts,
 		TeamLeadEmail:       part.TeamLeadEmail,
 		TeamName:            part.TeamName,
+		SolutionId:          part.SolutionId,
 		TeamLeadInfo: entity.ParticipantEntityTeamLeadInfo{
 			HackathonId:         part.TeamLeadInfo.HackathonId,
 			FirstName:           part.TeamLeadInfo.FirstName,
@@ -655,6 +656,7 @@ func (s *Service) GetMultipleParticipantsWithAccounts(opts *GetParticipantsWithA
 			TeamName:      v.TeamName,
 			HackathonId:   v.HackathonId,
 			InviteList:    invite_list,
+			SolutionId:    v.SolutionId,
 			TeamLeadInfo: entity.ParticipantEntityTeamLeadInfo{
 				HackathonId:         v.HackathonId,
 				TeamRole:            "TEAM_LEAD",
