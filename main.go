@@ -22,6 +22,8 @@ import (
 	routes_v1 "github.com/arravoco/hackathon_backend/routes/v1"
 	"github.com/arravoco/hackathon_backend/security"
 	"github.com/labstack/echo/v4"
+
+	//_ "github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -41,6 +43,9 @@ func main() {
 	prometheus.MustRegister(exports.MyFirstCounter)
 	security.GenerateKeys()
 
+	//txn := app.StartTransaction("")
+	//txn.
+	// http.HandleFunc(newrelic.WrapHandleFunc(app, "/users", usersHandler))
 	/*rmqUtils.SetupDefaultQueue()
 	data.SetupDefaultDataSource()
 	rabbitutils.SetupDefaultRMQ()
@@ -48,6 +53,7 @@ func main() {
 	publish.SetPublisher(&rabbitutils.RMQPublisher{})*/
 	//panic("Intentionally crashed")
 	e := echo.New()
+
 	port := config.GetPort()
 	routes_v1.StartAllRoutes(e)
 	e.GET("/metrics", func(c echo.Context) error {

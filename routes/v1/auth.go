@@ -708,7 +708,7 @@ func ValidateTeamInviteLink(c echo.Context) error {
 	}
 	data, err := utils.ProcessTeamInviteLink(tokenStr)
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Println(err.Error())
 		c.HTML(400, err.Error())
 	}
 	return c.Redirect(301,
@@ -789,7 +789,7 @@ func RemoveMemberFromMyTeam(ctx echo.Context) error {
 	memberId := ctx.Param("team_member_email")
 
 	serv := services.GetServiceWithDefaultRepositories()
-	participant, err := serv.GetSingleParticipantWithAccountsInfo(payload.Email)
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(payload.ParticipantId)
 
 	if err != nil {
 		return err
@@ -849,7 +849,7 @@ func ChooseSolutionForMyTeam(ctx echo.Context) error {
 		})
 	}
 	serv := services.GetServiceWithDefaultRepositories()
-	participant, err := serv.GetSingleParticipantWithAccountsInfo(authPayload.Email)
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(authPayload.ParticipantId)
 
 	if err != nil {
 		return ctx.JSON(400, &ResponseData{

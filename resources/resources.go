@@ -8,6 +8,7 @@ import (
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/rabbitmq"
 	"github.com/labstack/echo/v4"
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,6 +27,7 @@ type AppResources struct {
 	Logger       *zap.Logger
 	RabbitMQConn *amqp091.Connection
 	Mongo        *mongo.Database
+	RelicApp     *newrelic.Application
 }
 
 var defaultRMQConn *amqp091.Connection
@@ -61,12 +63,23 @@ func InitializeDefaultResources() {
 	}
 	dbInstance = defaultMongoInstance.Database("hackathons_db")
 
+	NEW_RELIC_LICENSE_KEY := os.Getenv("NEW_RELIC_LICENSE_KEY")
+	//rabbitMQURL := os.Getenv("NEW_RELIC_USER_KEY")
+	app, err := newrelic.NewApplication(
+		newrelic.ConfigAppName("Hackathon Backend"),
+		newrelic.ConfigLicense(NEW_RELIC_LICENSE_KEY),
+		newrelic.ConfigAppLogForwardingEnabled(true),
+	)
+	if err != nil {
+		panic(err)
+	}
 	redisClient := db.NewRedisDefaultClient()
 	defaultResources = &AppResources{
 		RedisClient:  redisClient,
 		Logger:       logger,
 		RabbitMQConn: defaultRMQConn,
 		Mongo:        dbInstance,
+		RelicApp:     app,
 	}
 }
 
