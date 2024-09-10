@@ -849,7 +849,7 @@ func ChooseSolutionForMyTeam(ctx echo.Context) error {
 		})
 	}
 	serv := services.GetServiceWithDefaultRepositories()
-	participant, err := serv.GetSingleParticipantWithAccountsInfo(authPayload.Email)
+	participant, err := serv.GetSingleParticipantWithAccountsInfo(authPayload.ParticipantId)
 
 	if err != nil {
 		return ctx.JSON(400, &ResponseData{
