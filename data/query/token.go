@@ -11,13 +11,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (q *Query) UpsertToken(dataInput *exports.UpsertTokenData) (*exports.TokenData, error) {
+func (q *Query) UpsertToken(dataInput *exports.UpsertTokenData) (*exports.TokenDocument, error) {
 	fmt.Printf("\nuuuuuuuuuuuuuuuuuuuuuuuuuu\n%+v\npppppppppppppppppppppppppp\n", dataInput)
 	tokenCol, err := q.Datasource.GetTokenCollection()
 	if err != nil {
 		return nil, err
 	}
-	tokenInfo := &exports.TokenData{}
+	tokenInfo := &exports.TokenDocument{}
 	filter := bson.M{
 		"token_type":       dataInput.TokenType,
 		"token_type_value": dataInput.TokenTypeValue,
@@ -29,6 +29,7 @@ func (q *Query) UpsertToken(dataInput *exports.UpsertTokenData) (*exports.TokenD
 	err = tokenCol.FindOneAndUpdate(context.TODO(), filter, updateDoc, &options.FindOneAndUpdateOptions{
 		Upsert:         &upsert,
 		ReturnDocument: &returnDoc,
+		Projection:     nil,
 	}).Decode(tokenInfo)
 	return tokenInfo, err
 }

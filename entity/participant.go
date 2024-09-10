@@ -27,6 +27,7 @@ type Participant struct {
 	ReviewRanking       int                                  `json:"review_ranking"`
 	TeamLeadInfo        ParticipantEntityTeamLeadInfo        `json:"team_leader_info"`
 	Solution            *ParticipantEntitySelectedSolution   `json:"solution"`
+	SolutionId          string                               `json:"solution_id"`
 	CreatedAt           time.Time                            `json:"created_at"`
 	UpdatedAt           time.Time                            `json:"updated_at"`
 }

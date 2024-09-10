@@ -57,6 +57,6 @@ type AdminDatasourceQueryMethods interface {
 }
 
 type TokenDatasourceQueryMethods interface {
-	UpsertToken(dataInput *UpsertTokenData) (*TokenData, error)
+	UpsertToken(dataInput *UpsertTokenData) (*TokenDocument, error)
 	VerifyToken(dataInput *VerifyTokenData) error
 }

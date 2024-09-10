@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/arravoco/hackathon_backend/exports"
 )
 
@@ -19,6 +21,9 @@ func (t *TokenDataRepository) UpsertToken(dataInput *exports.UpsertTokenData) (*
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("\n\n\n%#v\n\n\n", tokenDoc)
+
 	return &exports.TokenDataRepository{
 		Id:             tokenDoc.Id.Hex(),
 		Token:          tokenDoc.Token,

@@ -2,20 +2,18 @@ package exports
 
 import (
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TokenData struct {
-	Id             primitive.ObjectID `bson:"_id,omitempty"`
-	Token          string             `bson:"token"`
-	TokenType      string             `bson:"token_type"`
-	TokenTypeValue string             `bson:"token_type_value"`
-	Scope          string             `bson:"scope"`
-	TTL            time.Time          `bson:"ttl"`
-	Status         string             `bson:"status"`
-	CreatedAt      time.Time          `bson:"created_at"`
-	UpdatedAt      time.Time          `bson:"updated_at,omitempty"`
+	Id             string    `json:"_id,omitempty"`
+	Token          string    `json:"token"`
+	TokenType      string    `json:"token_type"`
+	TokenTypeValue string    `json:"token_type_value"`
+	Scope          string    `json:"scope"`
+	TTL            time.Time `json:"ttl"`
+	Status         string    `json:"status"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at,omitempty"`
 }
 
 type UpsertTokenData struct {

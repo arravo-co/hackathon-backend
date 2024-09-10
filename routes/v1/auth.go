@@ -531,6 +531,7 @@ func InitiatePasswordRecovery(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+	fmt.Printf("\n\n%#v\n\n", dataResult)
 	err = email.SendPasswordRecoveryEmail(&email.SendPasswordRecoveryEmailData{
 		Email: dataResult.TokenTypeValue,
 		Token: dataResult.Token,
