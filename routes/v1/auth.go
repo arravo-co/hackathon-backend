@@ -243,23 +243,17 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 			strings.Join([]string{"verify_fail", strings.Join([]string{"err", err.Error()}, "=")}, "?")}, "/"))
 	}
 	if payload.TTL.Before(time.Now()) {
-		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: "Link has expired",
-			},
-		})
+
+		return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(),
+			strings.Join([]string{"verify_fail", strings.Join([]string{"err", "link expired"}, "=")}, "?")}, "/"))
 	}
 
 	auth := authutils.GetAuthUtilsWithDefaultRepositories()
 	acc, err := auth.AccountRepository.GetAccountByEmail(payload.Email)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
-			ResponseData{
-				Code:    http.StatusBadRequest,
-				Message: "Link has expired",
-			},
-		})
+
+		return c.Redirect(302, strings.Join([]string{config.GetFrontendURL(),
+			strings.Join([]string{"verify_fail", strings.Join([]string{"err", "user record not found"}, "=")}, "?")}, "/"))
 	}
 	err = auth.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
 		Token: payload.Token,
@@ -277,7 +271,7 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 	redirectUrl := payload.RedirectUrl
 	fmt.Println(payload)
 	if redirectUrl == "" {
-		redirectUrl = strings.Join([]string{config.GetFrontendURL(), "verify"}, "/")
+		redirectUrl = strings.Join([]string{config.GetFrontendURL(), "verify_success"}, "/")
 	}
 	return c.Redirect(302, redirectUrl)
 }
