@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
-	"time"
 
 	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
@@ -100,20 +99,21 @@ type SendAdminCreatedByAdminWelcomeEmailData struct {
 }
 
 type SendEmailVerificationEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
-	Token     string
-	TokenTTL  time.Time
-	Link      string
+	Name    string
+	Email   string
+	Subject string
+	TTL     int
+	Token   string
+	Link    string
 }
 
 type SendEmailVerificationCompleteEmailData struct {
-	LastName  string
-	FirstName string
-	Email     string
-	Subject   string
+	Name    string
+	Email   string
+	Subject string
+	TTL     int
+	Token   string
+	Link    string
 }
 
 type SendPasswordRecoveryEmailData struct {
@@ -272,59 +272,46 @@ func SendWelcomeEmail(data *SendIndividualWelcomeEmailData) {
 	})
 }
 
-func SendEmailVerificationEmail(dataInput *SendEmailVerificationEmailData) {
-
-	body := hermes.Body{
-		Name: strings.Join([]string{dataInput.FirstName, dataInput.LastName}, " "),
-		Intros: []string{
-			"Welcome to Arravo Hackathon!",
-			"Please verify your email to complete the registration process.",
-		},
-		Actions: []hermes.Action{
-			{
-				Instructions: "To verify your email, click the button below:",
-				Button: hermes.Button{
-					Color: "#22BC66",
-					Text:  "Verify Email",
-					Link:  "https://arravo.com/verify-email",
-				},
-			},
-			{
-				Instructions: "Alternatively, you can use the following token to verify your email:",
-				InviteCode:   fmt.Sprintf("Token: %s", dataInput.Token),
-			},
-		},
-		Outros: []string{
-			"If you have any questions, feel free to contact us at support@arravo.co",
-			"Thank you for joining Arravo Hackathon!",
-		},
+func SendEmailVerificationEmail(dataInput *SendEmailVerificationEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/verify_email.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, dataInput)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
 	}
-
-	SendEmail(&SendEmailData{
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
 		Email:   dataInput.Email,
-		Message: &body,
+		Message: body,
 		Subject: dataInput.Subject,
 	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
 }
 
-func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationCompleteEmailData) {
-	body := hermes.Body{
-		Name: strings.Join([]string{}, " "),
-		Intros: []string{
-			"Welcome to Arravo Hackathon!",
-			"Your email has been successfully verified.",
-		},
-		Outros: []string{
-			"If you have any questions, feel free to contact us at appdev@arravo.co",
-			"Thank you for joining Arravo Hackathon!",
-		},
+func SendEmailVerificationCompleteEmail(dataInput *SendEmailVerificationCompleteEmailData) error {
+	tmpl := template.Must(template.ParseFiles("templates/verify_email_success.go.tmpl"))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, dataInput)
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
 	}
-
-	SendEmail(&SendEmailData{
+	body := buf.String()
+	err = SendEmailHtml(&SendEmailHtmlData{
 		Email:   dataInput.Email,
-		Message: &body,
+		Message: body,
 		Subject: dataInput.Subject,
 	})
+	if err != nil {
+		exports.MySugarLogger.Error(err)
+		return err
+	}
+	return nil
 }
 
 func SendPasswordRecoveryEmail(data *SendPasswordRecoveryEmailData) error {

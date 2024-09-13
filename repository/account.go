@@ -127,6 +127,7 @@ func (p *AccountRepository) UpdateAccount(filter *exports.UpdateAccountDocumentF
 		LastName:          input.LastName,
 		Bio:               input.Bio,
 		State:             input.State,
+		Status:            input.Status,
 		Gender:            input.Gender,
 	})
 	return nil

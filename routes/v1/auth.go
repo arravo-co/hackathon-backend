@@ -180,6 +180,13 @@ func InitiateEmailVerification(c echo.Context) error {
 
 	ttl := time.Now().Add(time.Minute * 15)
 	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	acc, err := auth.AccountRepository.GetAccountByEmail(emailToVerify)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &InitiateEmailVerificationFailureResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
 	tokenData, err := auth.InitiateEmailVerification(&exports.AuthUtilsConfigTokenData{
 		TTL:   ttl,
 		Email: emailToVerify,
@@ -190,20 +197,24 @@ func InitiateEmailVerification(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+	server_url := config.GetServerURL()
+
 	link, err := utils.GenerateEmailVerificationLink(&exports.EmailVerificationLinkPayload{
-		Token: tokenData.Token,
-		TTL:   tokenData.TTL,
-		Email: tokenData.TokenTypeValue,
+		Token:     tokenData.Token,
+		TTL:       tokenData.TTL,
+		Email:     tokenData.TokenTypeValue,
+		ServerUrl: server_url,
 	})
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {
 		email.SendEmailVerificationEmail(&email.SendEmailVerificationEmailData{
-			Email:    tokenData.TokenTypeValue,
-			Token:    tokenData.Token,
-			TokenTTL: tokenData.TTL,
-			Subject:  "Email Verification",
-			Link:     link,
+			Email:   tokenData.TokenTypeValue,
+			Token:   tokenData.Token,
+			TTL:     15,
+			Subject: "Email Verification",
+			Link:    link,
+			Name:    acc.FirstName,
 		})
 	}
 	return c.JSON(200, &InitiateEmailVerificationSuccessResponse{
@@ -241,6 +252,15 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 	}
 
 	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	acc, err := auth.AccountRepository.GetAccountByEmail(payload.Email)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: "Link has expired",
+			},
+		})
+	}
 	err = auth.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
 		Token: payload.Token,
 		Email: payload.Email,
@@ -252,6 +272,7 @@ func CompleteEmailVerificationViaGet(c echo.Context) error {
 	email.SendEmailVerificationCompleteEmail(&email.SendEmailVerificationCompleteEmailData{
 		Email:   payload.Email,
 		Subject: "Email Verification Success",
+		Name:    acc.FirstName,
 	})
 	redirectUrl := payload.RedirectUrl
 	fmt.Println(payload)
@@ -295,6 +316,16 @@ func CompleteEmailVerification(c echo.Context) error {
 	}
 
 	auth := authutils.GetAuthUtilsWithDefaultRepositories()
+	acc, err := auth.AccountRepository.GetAccountByEmail(dataDto.Email)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &CompleteEmailVerificationFailureResponse{
+			ResponseData{
+				Code:    http.StatusBadRequest,
+				Message: err.Error(),
+			},
+		})
+	}
 	err = auth.CompleteEmailVerification(&exports.AuthUtilsCompleteEmailVerificationData{
 		Token: dataDto.Token,
 		Email: dataDto.Email,
@@ -310,6 +341,7 @@ func CompleteEmailVerification(c echo.Context) error {
 	email.SendEmailVerificationCompleteEmail(&email.SendEmailVerificationCompleteEmailData{
 		Email:   dataDto.Email,
 		Subject: "Email Verification Success",
+		Name:    acc.FirstName,
 	})
 	return c.JSON(200, &CompleteEmailVerificationSuccessResponse{
 		ResponseData{
