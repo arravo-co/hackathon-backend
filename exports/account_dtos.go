@@ -35,6 +35,7 @@ type UpdateAccountDTO struct {
 	Gender            string `validate:"omitempty, oneof=MALE FEMALE"`
 	State             string
 	Bio               string
+	Status            string
 	ProfilePictureUrl string
 	IsEmailVerified   bool
 	IsEmailVerifiedAt time.Time

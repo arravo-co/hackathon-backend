@@ -369,6 +369,7 @@ func (auth *AuthUtils) CompleteEmailVerification(dataInput *exports.AuthUtilsCom
 	}, &exports.UpdateAccountDTO{
 		IsEmailVerified:   is_email_verified,
 		IsEmailVerifiedAt: time.Now(),
+		Status:            "EMAIL_VERIFIED",
 	})
 	if err != nil {
 		exports.MySugarLogger.Error(err)
