@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/aidarkhanov/nanoid"
-	"github.com/arravoco/hackathon_backend/di"
 	"github.com/arravoco/hackathon_backend/dtos"
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
@@ -134,11 +133,7 @@ func UpdateJudge(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	var judge exports.JudgeRepositoryInterface = di.GetDefaultJudgeRepository()
-	var cfg *services.ServiceConfig = &services.ServiceConfig{
-		JudgeAccountRepository: judge,
-	}
-	serv := services.NewService(cfg)
+	serv := services.GetServiceWithDefaultRepositories()
 	judgeEnt, err := serv.UpdateJudgeInfo(email, &services.UpdateJudgeDTO{
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
