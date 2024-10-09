@@ -565,37 +565,104 @@ func (q *Query) GetParticipantRecord(participantId string) (*exports.Participant
 
 func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData) (interface{}, error) {
 	participantCol, err := q.Datasource.GetParticipantCollection()
-	ctx := context.Context(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.M{
-		"participant_id":    dataToSave.ParticipantId,
-		"hackathon_id":      dataToSave.HackathonId,
-		"invite_list.email": bson.M{"$nin": bson.A{dataToSave.Email}},
-	}
-	upd := bson.M{
-		"$addToSet": bson.M{"invite_list": exports.ParticipantDocumentTeamInviteInfo{Email: dataToSave.Email,
-			InviterId: dataToSave.InviterEmail, Time: time.Now()}},
-		"$set": bson.M{"updated_at": time.Now()},
-	}
-	fmt.Println(upd)
+	ctx := context.Context(context.Background())
 
-	result, err := participantCol.UpdateOne(ctx, filter, upd)
+	session, err := participantCol.Database().Client().StartSession()
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
-		return nil, err
-	}
-	fmt.Printf("%#v", result)
-	if result.MatchedCount == 0 {
-		fmt.Printf("failed to add to invite list")
 		return nil, errors.New("failed to add to invite list: failed to match")
 	}
-	if result.ModifiedCount == 0 && result.UpsertedCount == 0 {
-		fmt.Printf("No changes made")
-		return nil, errors.New("failed to add to invite list: failed to save")
-	}
-	fmt.Println("Added to invite list")
+
+	defer session.EndSession(ctx)
+
+	result, err := session.WithTransaction(ctx, func(ctx mongo.SessionContext) (interface{}, error) {
+
+		if err != nil {
+			return nil, err
+		}
+		filter := bson.M{
+			"team_lead_email": dataToSave.Email,
+			"hackathon_id":    dataToSave.HackathonId,
+			"$or": bson.A{
+				bson.M{"co_participants.email": bson.M{"$in": bson.A{dataToSave.Email}}},
+				bson.M{"invite_list.email": bson.M{"$in": bson.A{dataToSave.Email}}},
+			},
+		}
+
+		partAnyRecord := &exports.ParticipantDocument{}
+		resultAnyRecord := participantCol.FindOne(ctx, filter)
+
+		err = resultAnyRecord.Decode(partAnyRecord)
+		if err == nil {
+			return nil, errors.New("email belongs to a participant or has been invited to another team")
+		}
+		if err != mongo.ErrNoDocuments {
+			fmt.Println(err)
+			return nil, errors.New("unable to add user to list.")
+		}
+		filter = bson.M{
+			"participant_id": dataToSave.ParticipantId,
+			"hackathon_id":   dataToSave.HackathonId,
+			//"invite_list.email": bson.M{"$nin": bson.A{dataToSave.Email}},
+		}
+
+		part := &exports.ParticipantDocument{}
+		result := participantCol.FindOne(ctx, filter)
+
+		err = result.Decode(part)
+		if err != nil {
+			return nil, fmt.Errorf("unable to add user to list.")
+
+		}
+		if len(part.CoParticipants) > 0 {
+			for _, v := range part.CoParticipants {
+				if v.Email == dataToSave.Email {
+					return nil, errors.New(fmt.Sprintf("email %s is already a co-participant.", dataToSave.Email))
+				}
+			}
+			if len(part.CoParticipants) == 3 {
+				return nil, errors.New("Maximum number of co-participants reached.")
+			}
+
+			if len(part.CoParticipants)+len(part.InviteList) >= 3 {
+				return nil, errors.New("Cannot invite more co-participants reached. ")
+			}
+		}
+		if len(part.InviteList) > 0 {
+			for _, v := range part.InviteList {
+				if v.Email == dataToSave.Email {
+					return nil, fmt.Errorf("email %s is already invited", dataToSave.Email)
+				}
+			}
+		}
+		upd := bson.M{
+			"$addToSet": bson.M{"invite_list": exports.ParticipantDocumentTeamInviteInfo{
+				Email:     dataToSave.Email,
+				InviterId: dataToSave.InviterEmail, Time: time.Now()}},
+			"$set": bson.M{"updated_at": time.Now()},
+		}
+		updateResult, err := participantCol.UpdateOne(ctx, filter, upd)
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())
+			return nil, errors.New("failed to add to invite list: failed to match")
+		}
+		fmt.Printf("%#v", result)
+		if updateResult.MatchedCount == 0 {
+			fmt.Printf("failed to add to invite list")
+			return nil, errors.New("failed to add to invite list: failed to match")
+		}
+		if updateResult.ModifiedCount == 0 && updateResult.UpsertedCount == 0 {
+			fmt.Printf("No changes made")
+			return nil, errors.New("failed to add to invite list: failed to save")
+		}
+		fmt.Println("Added to invite list")
+
+		return updateResult, nil
+	})
+
 	return result, err
 }
 

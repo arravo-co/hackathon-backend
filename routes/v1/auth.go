@@ -11,13 +11,11 @@ import (
 	"github.com/arravoco/hackathon_backend/entity"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/arravoco/hackathon_backend/repository"
-	"github.com/arravoco/hackathon_backend/resources"
 	"github.com/arravoco/hackathon_backend/services"
 	"github.com/arravoco/hackathon_backend/utils"
 	"github.com/arravoco/hackathon_backend/utils/authutils"
 	"github.com/arravoco/hackathon_backend/utils/email"
 	"github.com/labstack/echo/v4"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 type BasicLoginFailureResponse struct {
@@ -130,10 +128,12 @@ type AddSolutionSuccessResponse struct {
 // @Failure		400	object	BasicLoginFailureResponse "Login failed"
 // @Router			/api/v1/auth/login             [post]
 func BasicLogin(c echo.Context) error {
-	res := resources.GetDefaultResources()
-	tracer := res.TraceProvider.Tracer("")
-	_, span := tracer.Start(c.Request().Context(), "basic.login")
-	defer span.End()
+	/*
+		res := resources.GetDefaultResources()
+		tracer := res.TraceProvider.Tracer("")
+		_, span := tracer.Start(c.Request().Context(), "basic.login")
+		defer span.End()
+	*/
 	//otelLogger:=res.LoggerProvider.Logger("basic.login")
 	//otelLogger.Emit(trcrCtx,)
 	data := dtos.BasicLoginDTO{}
@@ -147,8 +147,9 @@ func BasicLogin(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
-	atr := attribute.String("identitier", data.Identifier)
-	span.SetAttributes(atr)
+	/*
+		atr := attribute.String("identitier", data.Identifier)span.SetAttributes(atr)
+	*/
 
 	auth := authutils.GetAuthUtilsWithDefaultRepositories()
 	dataResponse, err := auth.BasicLogin(&exports.AuthUtilsBasicLoginData{
