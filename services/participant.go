@@ -578,6 +578,7 @@ func (s *Service) GetSingleParticipantWithAccountsInfo(participantId string) (*e
 			PreviousProjects:    part.TeamLeadInfo.PreviousProjects,
 			FieldOfStudy:        part.TeamLeadInfo.FieldOfStudy,
 			UpdateAt:            part.TeamLeadInfo.UpdateAt,
+			DOB:                 part.TeamLeadInfo.DOB,
 		},
 		Solution: &entity.ParticipantEntitySelectedSolution{
 			Title:            part.Solution.Title,

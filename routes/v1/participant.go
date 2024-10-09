@@ -96,6 +96,7 @@ type GetTeamMembersSuccessResponse struct {
 // @Failure		400	{object}	RegisterParticipantFailResponse
 // @Router			/api/v1/participants               [post]
 func RegisterParticipant(c echo.Context) error {
+
 	appResources := resources.GetDefaultResources()
 	txn := appResources.RelicApp.StartTransaction("Get many /api/v1/participants [post]")
 	txn.SetWebRequestHTTP(c.Request())

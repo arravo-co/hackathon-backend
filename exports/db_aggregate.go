@@ -69,6 +69,7 @@ type TeamLeadAndAccountAggregateData struct {
 	//Status              string    `bson:"status,omitempty"`
 	ProfilePictureUrl string    `bson:"profile_picture_url,omitempty"`
 	LinkedInAddress   string    `bson:"linkedIn_address,omitempty"`
+	DOB               time.Time `bson:"dob,omitempty"`
 	CreatedAt         time.Time `bson:"created_at"`
 	UpdateAt          time.Time `bson:"update_at"`
 }
@@ -100,6 +101,7 @@ type CoParticipantsAndAccountsAggregateData struct {
 	ProfilePictureUrl string    `bson:"profile_picture_url,omitempty"`
 	LinkedInAddress   string    `bson:"linkedIn_address,omitempty"`
 	State             string    `bson:"state"`
+	DOB               time.Time `bson:"dob,omitempty"`
 	CreatedAt         time.Time `bson:"created_at"`
 	UpdateAt          time.Time `bson:"update_at"`
 }

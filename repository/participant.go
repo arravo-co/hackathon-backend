@@ -436,7 +436,7 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 	if err != nil {
 		return nil, err
 	}
-	var arr []*exports.ParticipantTeamMembersWithAccountsAggregate
+	var arr []*exports.ParticipantTeamMembersWithAccountsAggregate = make([]*exports.ParticipantTeamMembersWithAccountsAggregate, 0, len(arggs))
 	for _, arg := range arggs {
 		team_lead_info := exports.TeamLeadInfoParticipantRecordRepositoryAggregate{
 			Email:               arg.TeamLeadInfo.Email,
@@ -463,8 +463,9 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 			IsEmailVerifiedAt:   arg.TeamLeadInfo.IsEmailVerifiedAt,
 			Motivation:          arg.TeamLeadInfo.Motivation,
 			FieldOfStudy:        arg.TeamLeadInfo.FieldOfStudy,
+			DOB:                 arg.TeamLeadInfo.DOB,
 		}
-		var co_participants []exports.CoParticipantAggregateData
+		var co_participants []exports.CoParticipantAggregateData = make([]exports.CoParticipantAggregateData, 0, len(arg.CoParticipants))
 		for _, co := range arg.CoParticipants {
 			co_participants = append(co_participants, exports.CoParticipantAggregateData{
 				AccountId:   co.AccountId,
@@ -491,6 +492,7 @@ func (s *ParticipantRecordRepository) GetMultipleParticipantRecordAndMemberAccou
 				UpdateAt:            co.UpdateAt,
 				Motivation:          co.Motivation,
 				FieldOfStudy:        co.FieldOfStudy,
+				DOB:                 co.DOB,
 			})
 		}
 		var sol exports.ParticipantDocumentParticipantSelectedSolution

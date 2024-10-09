@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/arravoco/hackathon_backend/consumers"
 	_ "github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/exports"
+	"github.com/arravoco/hackathon_backend/instru"
 	"github.com/arravoco/hackathon_backend/publishers"
 	"github.com/arravoco/hackathon_backend/resources"
 
@@ -25,7 +27,6 @@ import (
 
 	//_ "github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // @Version 1.0.0
@@ -53,24 +54,40 @@ func main() {
 	publish.SetPublisher(&rabbitutils.RMQPublisher{})*/
 	//panic("Intentionally crashed")
 	e := echo.New()
-
 	port := config.GetPort()
 	routes_v1.StartAllRoutes(e)
-	e.GET("/metrics", func(c echo.Context) error {
-		handler := promhttp.Handler()
-		handler.ServeHTTP(c.Response().Writer, c.Request())
-		return nil
-	})
-	fmt.Println("Starting metrics")
-	e.Logger.Info(port)
+	/*
+		e.GET("/metrics", func(c echo.Context) error {
+			handler := promhttp.Handler()
+			handler.ServeHTTP(c.Response().Writer, c.Request())
+			return nil
+		})
+		fmt.Println("Starting metrics")
+	*/
 	res := resources.GetDefaultResources()
+
+	fn, err := instru.Setup(context.Background(), &instru.SetupOtel{
+		LoggerProvider: res.LoggerProvider,
+		MeterProvider:  res.MeterProvider,
+		TracerProvider: res.TraceProvider,
+	})
+
+	if err != nil {
+		e.Logger.Error(err)
+	}
+	defer func() {
+		fn(context.Background())
+	}()
+
 	publishChannel, err := res.RabbitMQConn.Channel()
 	if err != nil {
 		res.Logger.Fatal(err.Error())
 	}
-	/*rmqPushlisher := publishers.NewRMQPublisherWithChannel(publishChannel)
-	rmqPushlisher.DeclareAllExchanges()
-	res.Logger.Sugar().Infoln(rmqPushlisher)*/
+	/*
+		rmqPushlisher := publishers.NewRMQPublisherWithChannel(publishChannel)
+		rmqPushlisher.DeclareAllExchanges()
+		res.Logger.Sugar().Infoln(rmqPushlisher)
+	*/
 
 	publishers.DeclareAllExchanges(publishChannel)
 
@@ -93,73 +110,49 @@ func main() {
 			exports.SendAdminWelcomeEmailQueueName,
 			exports.AdminSendWelcomeEmailBindingKeyName)
 		fmt.Println(err)
-	}()
-
-	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendWelcomeAndEmailVerificationEmailToAdminRegisteredByAdmin,
 			exports.AdminsExchange,
 			exports.SendAdminRegisteredByAdminWelcomeEmailQueueName,
 			exports.AdminRegisteredByAdminSendWelcomeEmailBindingKeyName)
 		fmt.Println(err)
-	}()
-
-	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudgeRegisteredByAdmin,
 			exports.JudgesExchange,
 			exports.SendJudgeWelcomeEmailQueueName,
 			exports.SendJudgeWelcomeEmailQueueBindingKeyName)
 		fmt.Println(err)
-	}()
-
-	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudge,
 			exports.JudgesExchange,
 			exports.SendJudgeRegisteredByAdminWelcomeEmailQueueName,
 			exports.JudgeRegisteredByAdminSendWelcomeEmailBindingKeyName)
 		fmt.Println(err)
-	}()
-
-	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendTeamLeadWelcomeAndVerificationEmail,
 			exports.ParticipantsExchange,
 			exports.SendTeamLeadWelcomeEmailQueueName,
 			exports.SendTeamLeadWelcomeEmailQueueBindingKeyName)
 		fmt.Println(err)
-	}()
-
-	//ParticipantTeamMemberSendWelcomeEmailRoutingKeyName
-
-	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendTeamMemberWelcomeAndVerificationEmail,
 			exports.ParticipantsExchange,
 			exports.SendTeamMemberWelcomeEmailQueueName,
 			exports.ParticipantTeamMemberSendWelcomeEmailRoutingKeyName)
 		fmt.Println(err)
-	}()
-
-	//invite list jobs
-	go func() {
 		rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendInviteEmailQueueHandler,
 			exports.InvitationsExchange,
 			exports.SendParticipantTeammateInvitationEmailQueueName,
 			exports.ParticipantTeammateSendInvitationEmailBindingKeyName)
-	}()
-
-	//uploads jobs
-	go func() {
+		fmt.Println(err)
 		rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.HandleUploadJudgeProfilePicConsumption,
 			exports.UploadJobsExchange,
 			exports.UploadJudgeProfilePicQueueName,
 			exports.UploadJudgeProfilePicBindingKeyName)
+		fmt.Println(err)
 	}()
-	//HandleUploadJudgeProfilePicConsumption
 
 	e.Logger.Fatal(e.Start(getURL(port)))
 }

@@ -13,6 +13,9 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/zap"
 )
 
@@ -21,18 +24,22 @@ type SetupOpts struct {
 }
 
 type AppResources struct {
-	RedisClient *redis.Client
-	//Publisher   *publishers.RMQPublisher
-	//Consumer    *consumers.RMQConsumer
-	Logger       *zap.Logger
-	RabbitMQConn *amqp091.Connection
-	Mongo        *mongo.Database
-	RelicApp     *newrelic.Application
+	RedisClient    *redis.Client
+	TraceProvider  *trace.TracerProvider
+	MeterProvider  *metric.MeterProvider
+	LoggerProvider *log.LoggerProvider
+	Logger         *zap.Logger
+	RabbitMQConn   *amqp091.Connection
+	Mongo          *mongo.Database
+	RelicApp       *newrelic.Application
 }
 
 var defaultRMQConn *amqp091.Connection
 var defaultMongoInstance *mongo.Client
 var defaultResources *AppResources
+var defaultTraceProvider *trace.TracerProvider
+var defaultMeterProvider *metric.MeterProvider
+var defaultLoggerProvider *log.LoggerProvider
 
 func InitializeDefaultResources() {
 	var err error
@@ -74,17 +81,41 @@ func InitializeDefaultResources() {
 		panic(err)
 	}
 	redisClient := db.NewRedisDefaultClient()
+
+	//instru.Setup(context.Background(), &instru.SetupOtel{})
+	/*
+		defaultTraceProvider, err = instru.NewTraceProvider()
+		if err != nil {
+			panic(err)
+		}
+
+		defaultMeterProvider, err = instru.NewMeterProvider()
+		if err != nil {
+			panic(err)
+		}
+		defaultLoggerProvider, err = instru.NewLoggerProvider()
+		if err != nil {
+			panic(err)
+		}
+	*/
+	fmt.Println("\n\nHello\n\n")
 	defaultResources = &AppResources{
 		RedisClient:  redisClient,
 		Logger:       logger,
 		RabbitMQConn: defaultRMQConn,
 		Mongo:        dbInstance,
 		RelicApp:     app,
+		/*
+			TraceProvider:  defaultTraceProvider,
+			MeterProvider:  defaultMeterProvider,
+			LoggerProvider: defaultLoggerProvider,
+		*/
 	}
 }
 
 func GetDefaultResources() *AppResources {
 	if defaultResources != nil {
+		fmt.Println("\nResources default\n")
 		return defaultResources
 	}
 	InitializeDefaultResources()
