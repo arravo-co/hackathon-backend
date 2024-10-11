@@ -601,7 +601,7 @@ func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData)
 		}
 		if err != mongo.ErrNoDocuments {
 			fmt.Println(err)
-			return nil, errors.New("unable to add user to list.")
+			return nil, errors.New("unable to add user to list")
 		}
 		filter = bson.M{
 			"participant_id": dataToSave.ParticipantId,
@@ -620,15 +620,15 @@ func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData)
 		if len(part.CoParticipants) > 0 {
 			for _, v := range part.CoParticipants {
 				if v.Email == dataToSave.Email {
-					return nil, errors.New(fmt.Sprintf("email %s is already a co-participant.", dataToSave.Email))
+					return nil, errors.New(fmt.Sprintf("email %s is already a co-participant", dataToSave.Email))
 				}
 			}
-			if len(part.CoParticipants) == 3 {
-				return nil, errors.New("Maximum number of co-participants reached.")
+			if len(part.CoParticipants) >= 3 {
+				return nil, errors.New("maximum number of co-participants reached")
 			}
 
 			if len(part.CoParticipants)+len(part.InviteList) >= 3 {
-				return nil, errors.New("Cannot invite more co-participants reached. ")
+				return nil, errors.New("cannot invite more co-participants reached ")
 			}
 		}
 		if len(part.InviteList) > 0 {
@@ -636,6 +636,10 @@ func (q *Query) AddToTeamInviteList(dataToSave *exports.AddToTeamInviteListData)
 				if v.Email == dataToSave.Email {
 					return nil, fmt.Errorf("email %s is already invited", dataToSave.Email)
 				}
+			}
+
+			if len(part.InviteList) >= 3 {
+				return nil, errors.New("maximum number of invitees reached")
 			}
 		}
 		upd := bson.M{

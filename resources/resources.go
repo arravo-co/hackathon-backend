@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/arravoco/hackathon_backend/db"
 	"github.com/arravoco/hackathon_backend/rabbitmq"
@@ -41,6 +42,33 @@ var defaultTraceProvider *trace.TracerProvider
 var defaultMeterProvider *metric.MeterProvider
 var defaultLoggerProvider *log.LoggerProvider
 
+type RabbitMQResource struct {
+	Url     string
+	Conn    *amqp091.Connection
+	ErrChan chan *amqp091.Error
+}
+
+var defaultRabbitMQStruct *RabbitMQResource //= GetDefaultRabbitMQResource()
+
+func GetDefaultRabbitMQResource() *RabbitMQResource {
+	var errChan chan *amqp091.Error = make(chan *amqp091.Error)
+	var url = os.Getenv("RABBITMQ_URL")
+	conn, err := rabbitmq.GetRMQConnWithURL(rabbitmq.SetupRMQConfig{
+		Url: url,
+	})
+	if err != nil {
+		panic(err)
+	}
+	s := &RabbitMQResource{
+		Url:     url,
+		ErrChan: errChan,
+		Conn:    conn,
+	}
+	go s.RestartDefaultRabbit()
+	s.Conn.NotifyClose(errChan)
+	return s
+}
+
 func InitializeDefaultResources() {
 	var err error
 	logger := GetDefaultLogger()
@@ -49,13 +77,12 @@ func InitializeDefaultResources() {
 		logger.Fatal("Please specify rabbitMQ URL")
 	}
 	fmt.Println("Check if RabbitMQ connection exists")
-	if defaultRMQConn == nil || defaultRMQConn.IsClosed() {
-		fmt.Println("New RabbitMQ connection to be established")
-		defaultRMQConn, err = rabbitmq.GetRMQConnWithURL(rabbitmq.SetupRMQConfig{
-			Url: rabbitMQURL,
-		})
-		if err != nil {
-			logger.Fatal(err.Error())
+	if defaultRabbitMQStruct == nil {
+		defaultRabbitMQStruct = GetDefaultRabbitMQResource()
+	} else {
+		if defaultRabbitMQStruct.Conn.IsClosed() {
+			fmt.Println("New RabbitMQ connection to be established")
+			defaultRabbitMQStruct = GetDefaultRabbitMQResource()
 		}
 	}
 	var dbInstance *mongo.Database
@@ -98,11 +125,10 @@ func InitializeDefaultResources() {
 			panic(err)
 		}
 	*/
-	fmt.Println("\n\nHello\n\n")
 	defaultResources = &AppResources{
 		RedisClient:  redisClient,
 		Logger:       logger,
-		RabbitMQConn: defaultRMQConn,
+		RabbitMQConn: defaultRabbitMQStruct.Conn,
 		Mongo:        dbInstance,
 		RelicApp:     app,
 		/*
@@ -115,7 +141,7 @@ func InitializeDefaultResources() {
 
 func GetDefaultResources() *AppResources {
 	if defaultResources != nil {
-		fmt.Println("\nResources default\n")
+		fmt.Println("Resources default")
 		return defaultResources
 	}
 	InitializeDefaultResources()
@@ -127,4 +153,42 @@ func GetDefaultLogger() *zap.Logger {
 
 	logger, _ := zap.NewProduction()
 	return logger
+}
+
+func (appRes *AppResources) CheckHealth() {
+	//err:=appRes.Mongo.Client().Ping(context.Background(),&readpref.ReadPref{})
+}
+
+func (s *RabbitMQResource) RestartDefaultRabbit() {
+	for {
+		select {
+		case err := <-s.ErrChan:
+			fmt.Printf("RabbitMQ reason: %v\n", err.Reason)
+			fmt.Printf("RabbitMQ error: %v\n", err.Error())
+			fmt.Printf("can recover: %v\n", err.Recover)
+			if s.Url != "" {
+				for {
+					conn, err := rabbitmq.GetRMQConnWithURL(rabbitmq.SetupRMQConfig{
+						Url: s.Url,
+					})
+					if err != nil {
+						fmt.Print("failed to get RMQ connection")
+						time.Sleep(time.Second * 5)
+
+						continue
+					}
+					var errChan chan *amqp091.Error = make(chan *amqp091.Error)
+					s.Conn = conn
+					s.Conn.NotifyClose(errChan)
+					return
+				}
+			}
+		}
+	}
+}
+
+func (appRes *AppResources) Shutdown() {
+	defaultRMQConn.Close()
+	defaultMongoInstance.Disconnect(context.Background())
+	defaultResources.RelicApp.Shutdown(time.Minute)
 }

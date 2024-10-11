@@ -280,7 +280,7 @@ func (s *Service) GetJudges() ([]*entity.Judge, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ents []*entity.Judge
+	var ents []*entity.Judge = make([]*entity.Judge, len(repoAccounts))
 	for _, re := range repoAccounts {
 		ents = append(ents, &entity.Judge{
 			Id:                re.Id,
