@@ -109,50 +109,100 @@ func main() {
 			exports.AdminsExchange,
 			exports.SendAdminWelcomeEmailQueueName,
 			exports.AdminSendWelcomeEmailBindingKeyName)
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendWelcomeAndEmailVerificationEmailToAdminRegisteredByAdmin,
 			exports.AdminsExchange,
 			exports.SendAdminRegisteredByAdminWelcomeEmailQueueName,
 			exports.AdminRegisteredByAdminSendWelcomeEmailBindingKeyName)
-		fmt.Println(err)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudgeRegisteredByAdmin,
 			exports.JudgesExchange,
 			exports.SendJudgeWelcomeEmailQueueName,
 			exports.SendJudgeWelcomeEmailQueueBindingKeyName)
-		fmt.Println(err)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendWelcomeAndEmailVerificationEmailToJudge,
 			exports.JudgesExchange,
 			exports.SendJudgeRegisteredByAdminWelcomeEmailQueueName,
 			exports.JudgeRegisteredByAdminSendWelcomeEmailBindingKeyName)
-		fmt.Println(err)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendTeamLeadWelcomeAndVerificationEmail,
 			exports.ParticipantsExchange,
 			exports.SendTeamLeadWelcomeEmailQueueName,
 			exports.SendTeamLeadWelcomeEmailQueueBindingKeyName)
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	go func() {
 		err = rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendTeamMemberWelcomeAndVerificationEmail,
 			exports.ParticipantsExchange,
 			exports.SendTeamMemberWelcomeEmailQueueName,
 			exports.ParticipantTeamMemberSendWelcomeEmailRoutingKeyName)
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+	go func() {
 		rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.SendInviteEmailQueueHandler,
 			exports.InvitationsExchange,
 			exports.SendParticipantTeammateInvitationEmailQueueName,
 			exports.ParticipantTeammateSendInvitationEmailBindingKeyName)
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+	go func() {
 		rmqConsumer.DeclareAllQueuesParameterized(
 			consumerhandlers.HandleUploadJudgeProfilePicConsumption,
 			exports.UploadJobsExchange,
 			exports.UploadJudgeProfilePicQueueName,
 			exports.UploadJudgeProfilePicBindingKeyName)
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}()
+
+	go func() {
+		rmqConsumer.DeclareAllQueuesParameterized(
+			consumerhandlers.HandleUploadJudgeProfilePicConsumption,
+			exports.UploadJobsExchange,
+			exports.UploadJudgeProfilePicQueueName,
+			exports.UploadJudgeProfilePicBindingKeyName)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+	//AdminRegisteredByAdminSendWelcomeEmailRoutingKeyName
 
 	e.Logger.Fatal(e.Start(getURL(port)))
 }

@@ -122,7 +122,7 @@ func Publish(opts *PublishOpts) error {
 		fmt.Print(err.Error())
 		return err
 	}
-	fmt.Printf("Published details: %s\n", exchange_name)
+	fmt.Printf("\nPublished details: exchange name: %s; key_name: %s\n", exchange_name, key_name)
 
 	return nil
 }

@@ -118,7 +118,8 @@ func (s *Service) AdminCreateNewAdminProfile(dataInput *CreateNewAdminByAuthAdmi
 		if err != nil {
 			fmt.Println(err)
 		}
-
+		/*
+		 */
 		err = Publish(&PublishOpts{
 			Data:         by,
 			RMQConn:      s.AppResources.RabbitMQConn,
@@ -129,7 +130,6 @@ func (s *Service) AdminCreateNewAdminProfile(dataInput *CreateNewAdminByAuthAdmi
 		if err != nil {
 			fmt.Println(err)
 		}
-
 	}
 
 	return &entity.Admin{

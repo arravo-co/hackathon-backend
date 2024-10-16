@@ -14,7 +14,7 @@ var ParticipantsExchange = "topic.participants"
 
 /**
   - exchange should be topic
-  - name: topic.participants
+  - name: topic.admins
 */
 var AdminsExchange = "topic.admins"
 
