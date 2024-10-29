@@ -39,6 +39,31 @@ func GetResendFromEmail() string {
 	return os.Getenv("RESEND_FROM_EMAIL")
 }
 
+func GetSMTPUsername() string {
+	return os.Getenv("SMTP_USERNAME")
+}
+
+func GetSMTPPassword() string {
+	return os.Getenv("SMTP_PASSWORD")
+}
+
+func GetSMTPHost() string {
+	return os.Getenv("SMTP_HOST")
+}
+
+func MustGetSMTPPort() int {
+	port, err := GetSMTPPort()
+	if err != nil {
+		panic(err)
+	}
+	return port
+}
+
+func GetSMTPPort() (int, error) {
+	port_str := os.Getenv("SMTP_PORT")
+	return strconv.Atoi(port_str)
+}
+
 func GetSecretKey() string {
 	return os.Getenv("SECRET_KEY")
 }

@@ -2,15 +2,43 @@ package email
 
 import (
 	"bytes"
+	"crypto/tls"
+	"errors"
 	"fmt"
 	"html/template"
+	"log"
+	"net/smtp"
 	"strings"
 
 	"github.com/arravoco/hackathon_backend/config"
 	"github.com/arravoco/hackathon_backend/exports"
 	"github.com/matcornic/hermes/v2"
-	"github.com/resend/resend-go/v2"
 )
+
+type loginAuth struct {
+	username, password string
+}
+
+func LoginAuth(username, password string) smtp.Auth {
+	return &loginAuth{username, password}
+}
+
+func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
+	return "LOGIN", []byte(a.username), nil
+}
+func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
+	if more {
+		switch string(fromServer) {
+		case "Username:":
+			return []byte(a.username), nil
+		case "Password:":
+			return []byte(a.password), nil
+		default:
+			return nil, errors.New("Unknown from server")
+		}
+	}
+	return nil, nil
+}
 
 type SendEmailData struct {
 	Email   string
@@ -134,50 +162,180 @@ type SendPasswordRecoveryCompleteEmailData struct {
 }
 
 func SendEmailHtml(data *SendEmailHtmlData) error {
-	apiKey := config.GetResendAPIKey()
+	port := config.MustGetSMTPPort()
+	host := config.GetSMTPHost()
+	user_name := config.GetSMTPUsername()
+	password := config.GetSMTPPassword()
+	fmt.Println(port, host, user_name, password)
 
-	client := resend.NewClient(apiKey)
-
-	params := &resend.SendEmailRequest{
-		From:    config.GetResendFromEmail(),
-		To:      []string{data.Email},
-		Subject: data.Subject,
-		Html:    data.Message,
-	}
-
-	sent, err := client.Emails.Send(params)
+	//smtpAuth := smtp.PlainAuth("", user_name, password, host)
+	client, err := smtp.Dial(fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		fmt.Printf("%s", err.Error())
-		return err
+		return fmt.Errorf("failed to dial SMTP server: %w", err)
 	}
-	fmt.Printf("%#v", sent)
-	return nil
+	defer func() {
+		if cerr := client.Close(); cerr != nil {
+			log.Printf("Error closing client: %v", cerr)
+		}
+	}()
+
+	// Start TLS (upgrade the connection to TLS)
+	if err = client.StartTLS(&tls.Config{
+		ServerName: host,
+	}); err != nil {
+		return fmt.Errorf("failed to start TLS: %w", err)
+	}
+
+	// Authenticate
+	if err = client.Auth(LoginAuth(user_name, password)); err != nil {
+		return fmt.Errorf("failed to authenticate: %w", err)
+	}
+
+	fmt.Println("Here")
+	if err = client.Mail(user_name); err != nil {
+		return fmt.Errorf("failed to set sender: %w", err)
+	}
+
+	if err = client.Rcpt(data.Email); err != nil {
+		return fmt.Errorf("failed to set recipient: %w", err)
+	}
+
+	writer, err := client.Data()
+	if err != nil {
+		return fmt.Errorf("failed to get data writer: %w", err)
+	}
+
+	// Construct the email content with headers
+	emailContent := fmt.Sprintf(
+		"From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s",
+		user_name, data.Email, data.Subject, data.Message,
+	)
+	_, err = writer.Write([]byte(emailContent))
+	if err != nil {
+		return fmt.Errorf("failed to write message: %w", err)
+	}
+
+	if err = writer.Close(); err != nil {
+		return fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	return client.Quit()
+
+	/*
+		apiKey := config.GetResendAPIKey()
+
+		client := resend.NewClient(apiKey)
+
+		params := &resend.SendEmailRequest{
+			From:    config.GetResendFromEmail(),
+			To:      []string{data.Email},
+			Subject: data.Subject,
+			Html:    data.Message,
+		}
+
+		sent, err := client.Emails.Send(params)
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+			return err
+		}
+		fmt.Printf("%#v", sent)
+		return nil
+	*/
 }
 
 func SendEmail(data *SendEmailData) error {
-	h := hermes.Hermes{}
-	email := hermes.Email{
-		Body: *data.Message,
-	}
-	em, _ := h.GenerateHTML(email)
-	apiKey := config.GetResendAPIKey()
-
-	client := resend.NewClient(apiKey)
-
-	params := &resend.SendEmailRequest{
-		From:    config.GetResendFromEmail(),
-		To:      []string{data.Email},
-		Subject: data.Subject,
-		Html:    em,
-	}
-
-	sent, err := client.Emails.Send(params)
+	/*
+		h := hermes.Hermes{}
+		email := hermes.Email{
+			Body: *data.Message,
+		}
+	*/
+	port := config.MustGetSMTPPort()
+	host := config.GetSMTPHost()
+	user_name := config.GetSMTPUsername()
+	password := config.GetSMTPPassword()
+	fmt.Println(port, host, user_name, password)
+	/*
+	 */
+	client, err := smtp.Dial(fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		fmt.Printf("%s", err.Error())
+		fmt.Println(err.Error())
 		return err
 	}
-	fmt.Printf("%#v", sent)
+	/*err = client.Hello("my_localhost")
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}*/
+	fmt.Println("Again Again")
+	err = client.StartTLS(&tls.Config{
+		//InsecureSkipVerify: true,
+		ServerName: host,
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	smtpAuth := smtp.PlainAuth("", user_name, password, host)
+	fmt.Println("Again Hereoooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+	err = client.Auth(smtpAuth)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	fmt.Println("Here")
+	err = client.Mail(user_name)
+
+	if err != nil {
+		return err
+	}
+
+	err = client.Rcpt(data.Email)
+	if err != nil {
+		return err
+	}
+
+	writer, err := client.Data()
+	if err != nil {
+		return err
+	}
+
+	str := fmt.Sprintf("%s\r\n%s\r\n", data.Subject, "hello world")
+	by := bytes.NewBufferString(str).Bytes()
+	_, err = writer.Write(by)
+	if err != nil {
+		return err
+	}
 	return nil
+
+	/*
+		str := fmt.Sprintf("%s\r\n%s\r\n", data.Subject, "hello world")
+		by := bytes.NewBufferString(str).Bytes()
+		smtpAuth := smtp.PlainAuth("", user_name, password, host)
+		err = smtp.SendMail(fmt.Sprintf("%s:%d", host, port), smtpAuth, user_name, []string{data.Email}, by)
+		return err
+	*/
+	/*
+		em, _ := h.GenerateHTML(email)
+		apiKey := config.GetResendAPIKey()
+
+		client := resend.NewClient(apiKey)
+
+		params := &resend.SendEmailRequest{
+			From:    config.GetResendFromEmail(),
+			To:      []string{data.Email},
+			Subject: data.Subject,
+			Html:    em,
+		}
+
+		sent, err := client.Emails.Send(params)
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+			return err
+		}
+		fmt.Printf("%#v", sent)
+		return nil
+	*/
 }
 
 func SendTeamLeadWelcomeEmail(data *SendTeamLeadWelcomeEmailData) error {
