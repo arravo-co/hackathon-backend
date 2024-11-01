@@ -205,10 +205,11 @@ func SendEmailHtml(data *SendEmailHtmlData) error {
 		return fmt.Errorf("failed to get data writer: %w", err)
 	}
 
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	// Construct the email content with headers
 	emailContent := fmt.Sprintf(
-		"From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s",
-		user_name, data.Email, data.Subject, data.Message,
+		"From: %s\r\nTo: %s\r\nSubject: %s\n%s\n%s",
+		user_name, data.Email, data.Subject, mime, data.Message,
 	)
 	_, err = writer.Write([]byte(emailContent))
 	if err != nil {

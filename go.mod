@@ -24,8 +24,7 @@ require (
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/prometheus/client_golang v1.19.0
 	github.com/rabbitmq/amqp091-go v1.10.0
-	github.com/redis/go-redis/v9 v9.5.1
-	github.com/resend/resend-go/v2 v2.6.0
+	github.com/redis/go-redis/v9 v9.6.1
 	github.com/sethvargo/go-password v0.2.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vansante/go-event-emitter v1.0.2
@@ -80,7 +79,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.3 // indirect
-	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
+	github.com/montanaflynn/stats v0.7.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
